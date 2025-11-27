@@ -116,21 +116,6 @@ export function App() {
         };
     }, []);
 
-    const handleMenuClick = (index: number, label: string) => {
-        console.log('Menu clicked:', index, label);
-        // 메뉴에 따라 뷰 변경
-        const normalizedLabel = label.toLowerCase();
-        if (normalizedLabel === 'chat') {
-            setCurrentView('chat');
-        } else if (normalizedLabel === 'notification') {
-            setCurrentView('notification');
-        } else {
-            setCurrentView(normalizedLabel);
-        }
-    };
-
-    const menuButtons = ['Chat', 'Notification', 'Room', 'Settings', 'Help', 'About', 'Contact'];
-
     const getHeaderTitle = () => {
         if (currentView === 'chat') {
             return 'Chat';
