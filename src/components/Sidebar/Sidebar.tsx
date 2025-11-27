@@ -18,6 +18,12 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
                 >
                     <span className="sidebar__item-label">Notification</span>
                 </button>
+                <button
+                    className={`sidebar__item ${currentView === 'reverse-auction' ? 'sidebar__item--active' : ''}`}
+                    onClick={() => onViewChange('reverse-auction')}
+                >
+                    <span className="sidebar__item-label">Reverse Auction</span>
+                </button>
             </nav>
         </aside>
     );

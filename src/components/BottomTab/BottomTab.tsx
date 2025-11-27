@@ -17,6 +17,12 @@ export function BottomTab({ currentView, onTabClick }: BottomTabProps) {
             >
                 <span className="bottom-tab__label">Notification</span>
             </button>
+            <button
+                className={`bottom-tab__item ${currentView === 'reverse-auction' ? 'bottom-tab__item--active' : ''}`}
+                onClick={() => onTabClick('reverse-auction')}
+            >
+                <span className="bottom-tab__label">Reverse Auction</span>
+            </button>
         </nav>
     );
 }

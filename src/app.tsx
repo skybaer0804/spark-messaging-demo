@@ -6,6 +6,7 @@ import { Header } from './layouts/Header/Header';
 import { Content } from './layouts/Content/Content';
 import { ChatApp } from './components/ChatApp/ChatApp';
 import { NotificationApp } from './components/NotificationApp/NotificationApp';
+import { ReverseAuction } from './components/ReverseAuction/ReverseAuction';
 import { BottomTab } from './components/BottomTab/BottomTab';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import './app.scss';
@@ -123,6 +124,9 @@ export function App() {
         if (currentView === 'notification') {
             return 'Notification';
         }
+        if (currentView === 'reverse-auction') {
+            return 'Reverse Auction';
+        }
         return 'Spark Messaging Demo';
     };
 
@@ -142,6 +146,7 @@ export function App() {
                 <Content>
                     {currentView === 'chat' && <ChatApp />}
                     {currentView === 'notification' && <NotificationApp />}
+                    {currentView === 'reverse-auction' && <ReverseAuction />}
                 </Content>
             </div>
             <BottomTab currentView={currentView} onTabClick={handleTabClick} />
