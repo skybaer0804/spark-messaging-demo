@@ -7,7 +7,7 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "start": "vite preview"
+        "start": "vite preview --host"
     },
     "dependencies": {
         "@skybaer0804/spark-messaging-client": "^1.0.1",
