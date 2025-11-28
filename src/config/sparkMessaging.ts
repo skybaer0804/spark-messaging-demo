@@ -1,4 +1,4 @@
-import SparkMessaging, { SparkMessagingError } from '@skybaer0804/spark-messaging-client';
+import SparkMessaging from '@skybaer0804/spark-messaging-client';
 
 const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
 const projectKey = import.meta.env.VITE_PROJECT_KEY || 'default-project-key-12345';

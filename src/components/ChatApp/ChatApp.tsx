@@ -19,7 +19,6 @@ export function ChatApp() {
     const [roomIdInput, setRoomIdInput] = useState('chat');
     const [currentRoom, setCurrentRoom] = useState<string | null>(null);
     const [joinedRooms, setJoinedRooms] = useState<string[]>([]);
-    const [socketId, setSocketId] = useState<string | null>(null);
     const socketIdRef = useRef<string | null>(null);
     const currentRoomRef = useRef<string | null>(null);
 
@@ -32,7 +31,6 @@ export function ChatApp() {
         const handleConnected = (data: ConnectedData) => {
             console.log('✅ Connected event received:', data);
             setIsConnected(true);
-            setSocketId(data.socketId);
             socketIdRef.current = data.socketId;
         };
 
@@ -42,10 +40,8 @@ export function ChatApp() {
             setIsConnected(connected);
             if (connected) {
                 const status = sparkMessagingClient.getConnectionStatus();
-                setSocketId(status.socketId);
                 socketIdRef.current = status.socketId;
             } else {
-                setSocketId(null);
                 socketIdRef.current = null;
             }
         };
@@ -118,9 +114,12 @@ export function ChatApp() {
         };
 
         // 에러 핸들러
-        const handleError = (error: Error | SparkMessagingError) => {
+        const handleError = (error: SparkMessagingError | Error | any) => {
             console.error('❌ Error:', error);
             if (error instanceof SparkMessagingError) {
+                console.error('Error code:', error.code);
+            } else if (error && typeof error === 'object' && 'code' in error) {
+                // ErrorData 타입 처리
                 console.error('Error code:', error.code);
             }
             setIsConnected(false);
@@ -142,7 +141,6 @@ export function ChatApp() {
         if (status.isConnected) {
             console.log('✅ Already connected:', status);
             setIsConnected(true);
-            setSocketId(status.socketId);
             socketIdRef.current = status.socketId;
         }
 
@@ -159,31 +157,6 @@ export function ChatApp() {
             // 연결은 app.tsx에서 관리하므로 여기서 disconnect 하지 않음
         };
     }, []); // 의존성 배열 비움 - 컴포넌트 마운트/언마운트 시에만 실행
-
-    const joinRoom = async () => {
-        if (!roomIdInput.trim() || !isConnected) return;
-
-        const roomName = roomIdInput.trim();
-        if (joinedRooms.includes(roomName)) {
-            // 이미 참여 중인 Room이면 현재 Room로 설정
-            setCurrentRoom(roomName);
-            currentRoomRef.current = roomName;
-            setMessages([]);
-            return;
-        }
-
-        try {
-            await sparkMessagingClient.joinRoom(roomName);
-            // handleRoomJoined에서 처리됨
-        } catch (error) {
-            console.error('Failed to join room:', error);
-            if (error instanceof SparkMessagingError) {
-                alert(`Room 입장 실패: ${error.message} (코드: ${error.code})`);
-            } else {
-                alert('Room 입장 실패');
-            }
-        }
-    };
 
     const leaveRoom = async () => {
         if (!currentRoom || !isConnected) return;

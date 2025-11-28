@@ -160,6 +160,7 @@ export function App() {
                 pauseOnFocusLoss
                 draggable
                 pauseOnHover
+                aria-label="알림"
             />
         </div>
     );

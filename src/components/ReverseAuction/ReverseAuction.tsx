@@ -32,15 +32,8 @@ interface Participant {
     peerConnection?: RTCPeerConnection;
 }
 
-interface WebRTCConnection {
-    socketId: string;
-    peerConnection: RTCPeerConnection;
-    stream?: MediaStream;
-}
-
 export function ReverseAuction() {
     const [isConnected, setIsConnected] = useState(false);
-    const [socketId, setSocketId] = useState<string | null>(null);
     const [userRole, setUserRole] = useState<UserRole | null>(null);
     const [currentRoom, setCurrentRoom] = useState<Room | null>(null);
     const [roomList, setRoomList] = useState<Room[]>([]);
@@ -76,7 +69,6 @@ export function ReverseAuction() {
         const handleConnected = (data: ConnectedData) => {
             console.log('✅ Connected event received:', data);
             setIsConnected(true);
-            setSocketId(data.socketId);
             socketIdRef.current = data.socketId;
 
             // 기본 사용자 정보 설정
@@ -94,10 +86,8 @@ export function ReverseAuction() {
             setIsConnected(connected);
             if (connected) {
                 const status = sparkMessagingClient.getConnectionStatus();
-                setSocketId(status.socketId);
                 socketIdRef.current = status.socketId;
             } else {
-                setSocketId(null);
                 socketIdRef.current = null;
             }
         };
@@ -106,11 +96,8 @@ export function ReverseAuction() {
         const handleMessage = (msg: MessageData) => {
             console.log('📨 Message received (broadcast):', msg);
 
-            const currentSocketId = socketIdRef.current;
-            const isOwnMessage = msg.senderId === currentSocketId || (msg as any).from === currentSocketId;
-
             // room-created 타입 메시지 처리
-            if (msg.type === 'room-created' || msg.type === 'room-list-update') {
+            if ((msg.type as any) === 'room-created' || (msg.type as any) === 'room-list-update') {
                 try {
                     const roomData = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
                     if (roomData.roomId) {
@@ -235,6 +222,7 @@ export function ReverseAuction() {
                                                     };
                                                     setParticipants((prev) => {
                                                         const filtered = prev.filter((p) => p.socketId !== socketIdRef.current);
+                                                        if (!socketIdRef.current) return prev;
                                                         const updated = [...filtered, { socketId: socketIdRef.current, ...myInfo }];
                                                         console.log('[DEBUG] 승인 후 입장 - 참가자 목록 업데이트:', {
                                                             before: prev.length,
@@ -482,6 +470,7 @@ export function ReverseAuction() {
                     };
                     setParticipants((prev) => {
                         // 중복 체크 강화 - 같은 socketId가 이미 있으면 제거 후 다시 추가
+                        if (!socketIdRef.current) return prev;
                         const filtered = prev.filter((p) => p.socketId !== socketIdRef.current);
                         const updated = [...filtered, { socketId: socketIdRef.current, ...myInfo }];
                         console.log('[DEBUG] handleRoomJoined - 참가자 목록 업데이트:', {
@@ -498,7 +487,7 @@ export function ReverseAuction() {
                         try {
                             await sparkMessagingClient.sendRoomMessage(
                                 roomId,
-                                'user-joined',
+                                'user-joined' as any,
                                 JSON.stringify({
                                     socketId: socketIdRef.current,
                                     total: 1,
@@ -528,8 +517,14 @@ export function ReverseAuction() {
         };
 
         // 에러 핸들러
-        const handleError = (error: Error | SparkMessagingError) => {
+        const handleError = (error: SparkMessagingError | Error | any) => {
             console.error('❌ Error:', error);
+            if (error instanceof SparkMessagingError) {
+                console.error('Error code:', error.code);
+            } else if (error && typeof error === 'object' && 'code' in error) {
+                // ErrorData 타입 처리
+                console.error('Error code:', error.code);
+            }
             setIsConnected(false);
         };
 
@@ -546,7 +541,6 @@ export function ReverseAuction() {
         const status = sparkMessagingClient.getConnectionStatus();
         if (status.isConnected) {
             setIsConnected(true);
-            setSocketId(status.socketId);
             socketIdRef.current = status.socketId;
         }
 
@@ -586,7 +580,7 @@ export function ReverseAuction() {
 
             // 룸 생성 메시지 브로드캐스트
             await sparkMessagingClient.sendMessage(
-                'room-created',
+                'room-created' as any,
                 JSON.stringify({
                     type: 'room-created',
                     ...roomData,
@@ -657,7 +651,7 @@ export function ReverseAuction() {
                     setJoinRequestStatus('pending');
                     await sparkMessagingClient.sendRoomMessage(
                         room.roomId,
-                        'join-request',
+                        'join-request' as any,
                         JSON.stringify({
                             from: socketIdRef.current,
                             category: room.category,
@@ -706,7 +700,7 @@ export function ReverseAuction() {
             // 승인 메시지 전송
             await sparkMessagingClient.sendRoomMessage(
                 currentRoom.roomId,
-                'join-approved',
+                'join-approved' as any,
                 JSON.stringify({
                     to: requesterSocketId,
                     approved: true,
@@ -720,7 +714,7 @@ export function ReverseAuction() {
             // 승인된 공급자에게 user-joined 전송
             await sparkMessagingClient.sendRoomMessage(
                 currentRoom.roomId,
-                'user-joined',
+                'user-joined' as any,
                 JSON.stringify({
                     socketId: requesterSocketId,
                     total: total,
@@ -732,7 +726,7 @@ export function ReverseAuction() {
                 console.log('[DEBUG] 수요자 정보 전송:', socketIdRef.current);
                 await sparkMessagingClient.sendRoomMessage(
                     currentRoom.roomId,
-                    'user-joined',
+                    'user-joined' as any,
                     JSON.stringify({
                         socketId: socketIdRef.current,
                         total: total,
@@ -765,7 +759,7 @@ export function ReverseAuction() {
         try {
             await sparkMessagingClient.sendRoomMessage(
                 currentRoom.roomId,
-                'join-rejected',
+                'join-rejected' as any,
                 JSON.stringify({
                     to: requesterSocketId,
                     rejected: true,
@@ -791,7 +785,7 @@ export function ReverseAuction() {
             const currentParticipants = participants.length;
             await sparkMessagingClient.sendRoomMessage(
                 roomId,
-                'user-left',
+                'user-left' as any,
                 JSON.stringify({
                     socketId: socketIdRef.current,
                     total: Math.max(0, currentParticipants - 1),
@@ -885,7 +879,7 @@ export function ReverseAuction() {
         }
 
         // 모든 PeerConnection 종료
-        peerConnectionsRef.current.forEach((pc, socketId) => {
+        peerConnectionsRef.current.forEach((pc) => {
             pc.close();
         });
         peerConnectionsRef.current.clear();
@@ -981,7 +975,7 @@ export function ReverseAuction() {
                     sparkMessagingClient
                         .sendRoomMessage(
                             roomId,
-                            'ice-candidate',
+                            'ice-candidate' as any,
                             JSON.stringify({
                                 candidate: event.candidate,
                                 to: targetSocketId,
@@ -1011,7 +1005,7 @@ export function ReverseAuction() {
                 console.log('[DEBUG] Offer 전송:', targetSocketId);
                 await sparkMessagingClient.sendRoomMessage(
                     roomId,
-                    'webrtc-offer',
+                    'webrtc-offer' as any,
                     JSON.stringify({
                         sdp: offer,
                         to: targetSocketId,
@@ -1064,7 +1058,7 @@ export function ReverseAuction() {
             console.log('[DEBUG] Answer 전송:', fromSocketId);
             await sparkMessagingClient.sendRoomMessage(
                 roomId,
-                'webrtc-answer',
+                'webrtc-answer' as any,
                 JSON.stringify({
                     sdp: answer,
                     to: fromSocketId,
