@@ -1,68 +1,8 @@
-import { useState, useEffect } from 'preact/hooks';
-import sparkMessagingClient from '../../config/sparkMessaging';
+import { useNotificationApp } from './hooks/useNotificationApp';
 import './NotificationApp.scss';
 
 export function NotificationApp() {
-    const [message, setMessage] = useState('');
-    const [scheduleOption, setScheduleOption] = useState<string>('immediate');
-    const [isConnected, setIsConnected] = useState(false);
-
-    useEffect(() => {
-        const status = sparkMessagingClient.getConnectionStatus();
-        setIsConnected(status.isConnected);
-
-        const handleConnectionStateChange = (connected: boolean) => {
-            setIsConnected(connected);
-        };
-
-        const unsubscribe = sparkMessagingClient.onConnectionStateChange(handleConnectionStateChange);
-
-        return () => {
-            unsubscribe();
-        };
-    }, []);
-
-    const getScheduledTime = (): string => {
-        const now = new Date();
-        switch (scheduleOption) {
-            case '1min':
-                return new Date(now.getTime() + 60 * 1000).toISOString();
-            case '5min':
-                return new Date(now.getTime() + 5 * 60 * 1000).toISOString();
-            default:
-                return new Date().toISOString();
-        }
-    };
-
-    const handleSend = async () => {
-        if (!message.trim()) {
-            alert('알림 메시지를 입력해주세요.');
-            return;
-        }
-
-        if (!isConnected) {
-            alert('서버에 연결되어 있지 않습니다. 연결을 확인해주세요.');
-            return;
-        }
-
-        try {
-            // 알림 데이터를 JSON 문자열로 만들어 content에 포함
-            const notificationData = {
-                content: message,
-                scheduledTime: getScheduledTime(),
-                timestamp: Date.now(),
-            };
-
-            await sparkMessagingClient.sendMessage('notification', JSON.stringify(notificationData));
-
-            setMessage('');
-            setScheduleOption('immediate');
-            alert('알림이 전송되었습니다.');
-        } catch (error) {
-            console.error('알림 전송 실패:', error);
-            alert(`알림 전송에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
-        }
-    };
+    const { message, setMessage, scheduleOption, setScheduleOption, isConnected, handleSend } = useNotificationApp();
 
     return (
         <div className="notification-app">
@@ -87,7 +27,7 @@ export function NotificationApp() {
                         id="notification-time"
                         className="notification-app__select"
                         value={scheduleOption}
-                        onInput={(e) => setScheduleOption((e.target as HTMLSelectElement).value)}
+                        onInput={(e) => setScheduleOption((e.target as HTMLSelectElement).value as any)}
                     >
                         <option value="immediate">즉시</option>
                         <option value="1min">1분 후</option>
