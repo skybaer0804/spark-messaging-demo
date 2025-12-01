@@ -6,7 +6,6 @@ import { RoomService } from '../services/RoomService';
 import { ParticipantService } from '../services/ParticipantService';
 import { WebRTCService } from '../services/WebRTCService';
 import type { Room, ChatMessage, Participant, UserRole, Category } from '../types';
-import { SparkMessagingError } from '@skybaer0804/spark-messaging-client';
 import type { RoomMessageData } from '@skybaer0804/spark-messaging-client';
 
 export function useReverseAuction() {
@@ -22,6 +21,7 @@ export function useReverseAuction() {
     const [roomTitle, setRoomTitle] = useState('');
     const [pendingRequests, setPendingRequests] = useState<Array<{ socketId: string; name: string }>>([]);
     const [joinRequestStatus, setJoinRequestStatus] = useState<'idle' | 'pending' | 'approved' | 'rejected'>('idle');
+    const [requestedRoomId, setRequestedRoomId] = useState<string | null>(null);
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const [isVideoEnabled, setIsVideoEnabled] = useState(false);
 
@@ -75,16 +75,40 @@ export function useReverseAuction() {
                 setChatMessages([]);
 
                 const status = connectionService.getConnectionStatus();
+                const isMyRoom = roomService.getMyRooms().has(roomId);
+
+                // 룸 소유자(수요자)인 경우 userRole 설정
+                if (isMyRoom) {
+                    participantService.setUserRole('demander');
+                    setUserRole('demander');
+                }
+
                 const currentUserRole = participantService.getUserRole();
                 if (status.socketId) {
                     const myInfo =
                         currentUserRole === 'demander' ? { name: '수요자', role: 'demander' as UserRole } : { name: '공급자', role: 'supplier' as UserRole };
-                    participantService.addParticipant({ socketId: status.socketId, ...myInfo });
-                    setParticipants([...participantService.getParticipants()]);
 
-                    // user-joined 메시지 전송
-                    if (currentUserRole === 'demander' || roomService.getMyRooms().has(roomId)) {
+                    // 공급자가 참가 요청 후 룸에 입장한 경우는 참가자 목록에 추가하지 않음 (승인 전까지)
+                    // 수요자이거나 승인된 공급자만 참가자 목록에 추가
+                    if (currentUserRole === 'demander' || isMyRoom) {
+                        participantService.addParticipant({ socketId: status.socketId, ...myInfo });
+                        setParticipants([...participantService.getParticipants()]);
+                        // user-joined 메시지 전송 (수요자만)
                         await participantService.sendUserJoined(roomId, status.socketId, 1);
+                    } else {
+                        // 공급자가 승인되어 룸에 입장한 경우
+                        // 이미 룸에 있는 참가자들(수요자 포함)과 WebRTC 연결 시작
+                        // 수요자가 이미 영상을 시작했을 수 있으므로, 공급자가 수요자에게 offer를 보내야 함
+                        const existingParticipants = participantService.getParticipants();
+                        if (existingParticipants.length > 0 && isVideoEnabled && webRTCService.getLocalStream()) {
+                            existingParticipants.forEach((participant) => {
+                                if (participant.socketId !== status.socketId) {
+                                    setTimeout(() => {
+                                        webRTCService.createPeerConnection(participant.socketId, true).catch(console.error);
+                                    }, 500);
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -103,16 +127,46 @@ export function useReverseAuction() {
 
         // Participant 관리
         participantService.onRoomMessage({
-            onJoinRequest: (requester) => {
-                setPendingRequests(participantService.getPendingRequests());
+            onJoinRequest: () => {
+                setPendingRequests([...participantService.getPendingRequests()]);
             },
-            onJoinApproved: async (socketId) => {
+            onJoinApproved: async (socketId, roomId) => {
                 const status = connectionService.getConnectionStatus();
                 if (socketId === status.socketId) {
+                    console.log('[DEBUG] 참가 승인됨 - 룸 입장 시작:', roomId);
                     setJoinRequestStatus('approved');
-                    const roomId = roomService.getCurrentRoomRef();
-                    if (roomId) {
-                        await roomService.joinRoom(roomId);
+                    alert('참가 요청이 승인되었습니다!');
+
+                    const targetRoomId = roomId || requestedRoomId;
+                    if (targetRoomId) {
+                        try {
+                            await roomService.joinRoom(targetRoomId);
+                            const approvedRoom = roomService.getRoomList().find((r) => r.roomId === targetRoomId);
+                            if (approvedRoom) {
+                                setCurrentRoom(approvedRoom);
+                                setChatMessages([]);
+                                setParticipants([]);
+                                setUserRole('supplier');
+                                setJoinRequestStatus('idle');
+                                setRequestedRoomId(null);
+
+                                // 룸에 입장한 후, 이미 룸에 있는 참가자들과 WebRTC 연결 시작
+                                // (수요자가 이미 영상을 시작했을 수 있음)
+                                const existingParticipants = participantService.getParticipants();
+                                if (existingParticipants.length > 0 && isVideoEnabled && webRTCService.getLocalStream()) {
+                                    existingParticipants.forEach((participant) => {
+                                        const mySocketId = connectionService.getConnectionStatus().socketId;
+                                        if (participant.socketId !== mySocketId) {
+                                            setTimeout(() => {
+                                                webRTCService.createPeerConnection(participant.socketId, true).catch(console.error);
+                                            }, 500);
+                                        }
+                                    });
+                                }
+                            }
+                        } catch (error) {
+                            console.error('[ERROR] 승인된 룸 입장 실패:', error);
+                        }
                     }
                 }
             },
@@ -120,6 +174,7 @@ export function useReverseAuction() {
                 const status = connectionService.getConnectionStatus();
                 if (socketId === status.socketId) {
                     setJoinRequestStatus('rejected');
+                    setRequestedRoomId(null);
                     alert('참가 요청이 거부되었습니다.');
                     if (currentRoom) {
                         roomService.leaveRoom(currentRoom.roomId);
@@ -127,14 +182,30 @@ export function useReverseAuction() {
                 }
             },
             onUserJoined: (participant) => {
-                setParticipants([...participantService.getParticipants()]);
-                if (isVideoEnabled && webRTCService.getLocalStream()) {
-                    setTimeout(() => {
-                        webRTCService.createPeerConnection(participant.socketId, true).catch(console.error);
-                    }, 500);
+                // 공급자가 참가 요청 후 룸에 입장한 경우는 참가자 목록에 추가하지 않음
+                // 승인된 경우에만 참가자 목록에 추가됨 (approveRequest에서 처리)
+                // user-joined 메시지는 승인 후에만 보내지므로 여기서 추가해도 됨
+                // 하지만 공급자가 참가 요청 후 룸에 입장하면 user-joined가 발생할 수 있으므로
+                // 승인된 공급자인지 확인 필요
+                const isApprovedSupplier = participantService.getPendingRequests().find((r) => r.socketId === participant.socketId) === undefined;
+                if (isApprovedSupplier || userRole === 'demander') {
+                    setParticipants([...participantService.getParticipants()]);
+
+                    // 양방향 WebRTC 연결 시작
+                    // 1. 내가 영상을 시작했고, 새로 참가한 사람이 있으면 내가 offer를 보냄
+                    if (isVideoEnabled && webRTCService.getLocalStream()) {
+                        setTimeout(() => {
+                            webRTCService.createPeerConnection(participant.socketId, true).catch(console.error);
+                        }, 500);
+                    }
+
+                    // 2. 새로 참가한 사람이 이미 영상을 시작했을 수 있으므로,
+                    // 나도 영상을 시작했다면 연결을 시작해야 함 (이미 위에서 처리됨)
+                    // 하지만 새로 참가한 사람이 영상을 시작하지 않았더라도,
+                    // 나중에 영상을 시작하면 연결이 시작될 수 있도록 해야 함
                 }
             },
-            onUserLeft: (socketId) => {
+            onUserLeft: () => {
                 setParticipants([...participantService.getParticipants()]);
             },
         });
@@ -169,7 +240,11 @@ export function useReverseAuction() {
         webRTCService.onRoomMessage({
             onStreamReceived: (socketId, stream) => {
                 participantService.updateParticipantStream(socketId, stream);
-                setParticipants(participantService.getParticipants());
+                setParticipants([...participantService.getParticipants()]);
+            },
+            onVideoStopped: (socketId) => {
+                participantService.updateParticipantVideoStatus(socketId, false);
+                setParticipants([...participantService.getParticipants()]);
             },
         });
 
@@ -201,6 +276,8 @@ export function useReverseAuction() {
 
         try {
             const room = await roomServiceRef.current.createRoom(selectedCategory, roomTitle, status.socketId);
+            // 수요자 역할 설정
+            participantServiceRef.current?.setUserRole('demander');
             setUserRole('demander');
             setShowCreateForm(false);
             setRoomTitle('');
@@ -221,6 +298,7 @@ export function useReverseAuction() {
             return;
         }
 
+        // 승인된 상태면 바로 입장
         if (joinRequestStatus === 'approved' && !isMyRoom) {
             try {
                 await roomServiceRef.current.joinRoom(room.roomId);
@@ -228,33 +306,45 @@ export function useReverseAuction() {
                 setChatMessages([]);
                 setParticipants([]);
                 setUserRole('supplier');
+                setJoinRequestStatus('idle');
                 return;
             } catch (error) {
                 console.error('[ERROR] 승인된 룸 입장 실패:', error);
             }
         }
 
-        try {
-            await roomServiceRef.current.joinRoom(room.roomId);
-
-            if (isMyRoom) {
+        // 내 룸이면 바로 입장
+        if (isMyRoom) {
+            try {
+                await roomServiceRef.current.joinRoom(room.roomId);
+                // 수요자 역할 설정
+                participantServiceRef.current.setUserRole('demander');
                 setUserRole('demander');
                 setCurrentRoom(room);
                 setChatMessages([]);
                 setParticipants([]);
                 setPendingRequests([]);
                 setJoinRequestStatus('idle');
-            } else {
-                if (joinRequestStatus === 'idle' || joinRequestStatus === 'rejected') {
-                    setJoinRequestStatus('pending');
-                    await participantServiceRef.current.sendJoinRequest(room.roomId, room.category);
-                }
-                setUserRole('supplier');
+            } catch (error) {
+                console.error('[ERROR] 룸 참가 실패:', error);
+                alert('룸 참가에 실패했습니다.');
             }
-        } catch (error) {
-            console.error('[ERROR] 룸 참가 실패:', error);
-            alert('룸 참가에 실패했습니다.');
-            setJoinRequestStatus('idle');
+        } else {
+            // 공급자는 참가 요청만 보내고 룸에 입장하지 않음
+            if (joinRequestStatus === 'idle' || joinRequestStatus === 'rejected') {
+                try {
+                    setJoinRequestStatus('pending');
+                    setRequestedRoomId(room.roomId);
+                    await participantServiceRef.current.sendJoinRequest(room.roomId, room.category);
+                    setUserRole('supplier');
+                    // 참가 요청만 보내고 룸에 입장하지 않음 (승인 대기)
+                } catch (error) {
+                    console.error('[ERROR] 참가 요청 실패:', error);
+                    alert('참가 요청에 실패했습니다.');
+                    setJoinRequestStatus('idle');
+                    setRequestedRoomId(null);
+                }
+            }
         }
     };
 
@@ -267,11 +357,15 @@ export function useReverseAuction() {
             setParticipants([...participantServiceRef.current.getParticipants()]);
             setPendingRequests([...participantServiceRef.current.getPendingRequests()]);
 
+            // 수요자가 영상을 시작했다면, 승인된 공급자와 WebRTC 연결 시작
             if (isVideoEnabled && webRTCServiceRef.current?.getLocalStream()) {
                 setTimeout(() => {
-                    webRTCServiceRef.current?.createPeerConnection(requesterSocketId, true);
+                    webRTCServiceRef.current?.createPeerConnection(requesterSocketId, true).catch(console.error);
                 }, 500);
             }
+            // 공급자가 나중에 영상을 시작하면, onUserJoined에서 연결이 시작될 수 있음
+            // 하지만 공급자가 이미 영상을 시작했다면, 공급자가 수요자에게 offer를 보내야 함
+            // 이는 공급자 측에서 처리됨 (startLocalStream에서)
         } catch (error) {
             console.error('[ERROR] 승인 실패:', error);
         }
@@ -307,6 +401,9 @@ export function useReverseAuction() {
             setChatMessages([]);
             setParticipants([]);
             setPendingRequests([]);
+            // 참가 요청 상태 초기화
+            setJoinRequestStatus('idle');
+            setRequestedRoomId(null);
         } catch (error) {
             console.error('[ERROR] 룸 나가기 실패:', error);
         }
@@ -334,13 +431,20 @@ export function useReverseAuction() {
             setIsVideoEnabled(true);
 
             const roomId = currentRoom?.roomId || roomServiceRef.current?.getCurrentRoomRef();
-            if (roomId && participants.length > 0) {
-                participants.forEach((participant) => {
-                    const status = connectionServiceRef.current?.getConnectionStatus();
-                    if (participant.socketId !== status?.socketId) {
-                        webRTCServiceRef.current?.createPeerConnection(participant.socketId, true).catch(console.error);
-                    }
-                });
+            if (roomId) {
+                // 현재 참가자 목록 가져오기 (최신 상태)
+                const currentParticipants = participantServiceRef.current?.getParticipants() || participants;
+                if (currentParticipants.length > 0) {
+                    currentParticipants.forEach((participant) => {
+                        const status = connectionServiceRef.current?.getConnectionStatus();
+                        if (participant.socketId !== status?.socketId) {
+                            // 각 참가자와 WebRTC 연결 시작
+                            setTimeout(() => {
+                                webRTCServiceRef.current?.createPeerConnection(participant.socketId, true).catch(console.error);
+                            }, 100);
+                        }
+                    });
+                }
             }
         } catch (error) {
             console.error('[ERROR] 로컬 스트림 획득 실패:', error);
@@ -349,7 +453,11 @@ export function useReverseAuction() {
     };
 
     // WebRTC: 로컬 스트림 중지
-    const stopLocalStream = () => {
+    const stopLocalStream = async () => {
+        const roomId = currentRoom?.roomId || roomServiceRef.current?.getCurrentRoomRef();
+        if (roomId && webRTCServiceRef.current) {
+            await webRTCServiceRef.current.sendVideoStopped(roomId);
+        }
         webRTCServiceRef.current?.stopLocalStream();
         setLocalStream(null);
         setIsVideoEnabled(false);

@@ -1,9 +1,9 @@
 import type SparkMessaging from '@skybaer0804/spark-messaging-client';
 import { ConnectionService } from '../../../services/ConnectionService';
-import type { Participant } from '../types';
 import { parseMessageContent } from '../../../utils/messageUtils';
 
 export type StreamReceivedCallback = (socketId: string, stream: MediaStream) => void;
+export type VideoStoppedCallback = (socketId: string) => void;
 
 export class WebRTCService {
     private client: SparkMessaging;
@@ -13,6 +13,8 @@ export class WebRTCService {
     private localStream: MediaStream | null = null;
     private videoRefs: Map<string, HTMLVideoElement> = new Map();
     private currentRoomRef: string | null = null;
+    private streamReceivedCallback: StreamReceivedCallback | null = null;
+    private videoStoppedCallback: VideoStoppedCallback | null = null;
 
     constructor(client: SparkMessaging, connectionService: ConnectionService) {
         this.client = client;
@@ -57,6 +59,21 @@ export class WebRTCService {
         this.peerConnections.clear();
     }
 
+    public async sendVideoStopped(roomId: string): Promise<void> {
+        if (!this.currentRoomRef && roomId) {
+            this.currentRoomRef = roomId;
+        }
+        if (this.currentRoomRef) {
+            await this.client.sendRoomMessage(
+                this.currentRoomRef,
+                'video-stopped' as any,
+                JSON.stringify({
+                    stopped: true,
+                })
+            );
+        }
+    }
+
     public async createPeerConnection(targetSocketId: string, isInitiator: boolean): Promise<void> {
         if (!this.currentRoomRef) {
             console.warn('[WARN] PeerConnection 생성 불가: roomId 없음');
@@ -90,6 +107,11 @@ export class WebRTCService {
         pc.ontrack = (event) => {
             const remoteStream = event.streams[0];
             if (remoteStream) {
+                // ParticipantService에 스트림 업데이트 알림
+                if (this.streamReceivedCallback) {
+                    this.streamReceivedCallback(targetSocketId, remoteStream);
+                }
+
                 setTimeout(() => {
                     const videoElement = this.videoRefs.get(targetSocketId);
                     if (videoElement) {
@@ -145,7 +167,14 @@ export class WebRTCService {
         }
     }
 
-    public onRoomMessage(callbacks: { onStreamReceived?: StreamReceivedCallback }): () => void {
+    public onRoomMessage(callbacks: { onStreamReceived?: StreamReceivedCallback; onVideoStopped?: VideoStoppedCallback }): () => void {
+        // 스트림 수신 콜백 저장
+        if (callbacks.onStreamReceived) {
+            this.streamReceivedCallback = callbacks.onStreamReceived;
+        }
+        if (callbacks.onVideoStopped) {
+            this.videoStoppedCallback = callbacks.onVideoStopped;
+        }
         const unsubscribe = this.client.onRoomMessage((msg: any) => {
             const msgType = msg.type || (msg as any).type;
             const parsedContent = parseMessageContent(msg.content);
@@ -154,8 +183,15 @@ export class WebRTCService {
             const mySocketId = status.socketId;
 
             const isWebRTCMessage = msgType === 'webrtc-offer' || msgType === 'webrtc-answer' || msgType === 'ice-candidate';
+            const isVideoStoppedMessage = msgType === 'video-stopped';
 
-            if (!isWebRTCMessage) {
+            if (!isWebRTCMessage && !isVideoStoppedMessage) {
+                return;
+            }
+
+            // video-stopped 메시지 처리
+            if (isVideoStoppedMessage && fromSocketId !== mySocketId && this.videoStoppedCallback) {
+                this.videoStoppedCallback(fromSocketId);
                 return;
             }
 

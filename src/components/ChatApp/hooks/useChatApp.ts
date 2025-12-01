@@ -12,7 +12,7 @@ export function useChatApp() {
     const [input, setInput] = useState('');
     const [roomIdInput, setRoomIdInput] = useState('chat');
     const [currentRoom, setCurrentRoom] = useState<string | null>(null);
-    const [joinedRooms, setJoinedRooms] = useState<string[]>([]);
+    const [roomList, setRoomList] = useState<string[]>([]);
 
     const connectionServiceRef = useRef<ConnectionService | null>(null);
     const chatServiceRef = useRef<ChatService | null>(null);
@@ -42,10 +42,15 @@ export function useChatApp() {
             setIsConnected(false);
         });
 
+        // Room 리스트 업데이트 (룸 생성 메시지 수신)
+        roomService.onMessage((_roomId) => {
+            setRoomList(roomService.getRoomList());
+        });
+
         // Room 관리
         roomService.onRoomJoined((roomId) => {
             setCurrentRoom(roomId);
-            setJoinedRooms(roomService.getJoinedRooms());
+            setRoomList(roomService.getRoomList());
             setMessages([]);
             chatService.setCurrentRoom(roomId);
         });
@@ -56,7 +61,7 @@ export function useChatApp() {
                 setMessages([]);
                 chatService.setCurrentRoom(null);
             }
-            setJoinedRooms(roomService.getJoinedRooms());
+            setRoomList(roomService.getRoomList());
         });
 
         // 메시지 수신
@@ -72,6 +77,17 @@ export function useChatApp() {
         const status = connectionService.getConnectionStatus();
         if (status.isConnected) {
             setIsConnected(true);
+            // 룸 목록 가져오기
+            const roomListData = roomService.getRoomList();
+            if (roomListData.length > 0) {
+                setRoomList(roomListData);
+            }
+            // 현재 룸이 있으면 설정
+            const currentRoomId = roomService.getCurrentRoom();
+            if (currentRoomId) {
+                setCurrentRoom(currentRoomId);
+                chatService.setCurrentRoom(currentRoomId);
+            }
         }
 
         return () => {
@@ -120,15 +136,34 @@ export function useChatApp() {
     };
 
     const handleCreateRoom = async () => {
-        if (!roomIdInput.trim() || !isConnected) return;
-        await handleRoomSelect(roomIdInput.trim());
+        if (!roomIdInput.trim() || !isConnected || !roomServiceRef.current) return;
+
+        const roomId = roomIdInput.trim();
+        try {
+            await roomServiceRef.current.createRoom(roomId);
+            setRoomIdInput('');
+        } catch (error) {
+            console.error('Failed to create room:', error);
+            if (error instanceof SparkMessagingError) {
+                alert(`Room 생성 실패: ${error.message} (코드: ${error.code})`);
+            } else {
+                alert('Room 생성 실패');
+            }
+        }
     };
 
     const leaveRoom = async () => {
         if (!currentRoom || !isConnected || !roomServiceRef.current) return;
 
+        const roomToLeave = currentRoom;
         try {
-            await roomServiceRef.current.leaveRoom(currentRoom);
+            await roomServiceRef.current.leaveRoom(roomToLeave);
+            // 명시적으로 currentRoom을 null로 설정하여 목록 화면으로 이동
+            setCurrentRoom(null);
+            setMessages([]);
+            if (chatServiceRef.current) {
+                chatServiceRef.current.setCurrentRoom(null);
+            }
         } catch (error) {
             console.error('Failed to leave room:', error);
             if (error instanceof SparkMessagingError) {
@@ -147,7 +182,7 @@ export function useChatApp() {
         roomIdInput,
         setRoomIdInput,
         currentRoom,
-        joinedRooms,
+        roomList,
         sendMessage,
         handleRoomSelect,
         handleCreateRoom,

@@ -304,8 +304,18 @@
         font-weight: 500;
     }
 
+    &__main-content {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1rem;
+        height: calc(100vh - 200px);
+        min-height: 0;
+    }
+
     &__video-section {
-        margin-bottom: 1rem;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
     }
 
     &__video-controls {
@@ -453,7 +463,7 @@
     &__chat-section {
         display: flex;
         flex-direction: column;
-        flex: 1;
+        height: 100%;
         min-height: 0;
     }
 
@@ -468,6 +478,15 @@
         display: flex;
         flex-direction: column;
         gap: 0.75rem;
+        scroll-behavior: smooth;
+
+        // 스크롤바 숨기기
+        scrollbar-width: none; // Firefox
+        -ms-overflow-style: none; // IE and Edge
+
+        &::-webkit-scrollbar {
+            display: none; // Chrome, Safari, Opera
+        }
     }
 
     &__chat-empty {
@@ -480,7 +499,7 @@
     &__chat-message {
         display: flex;
         flex-direction: column;
-        max-width: 70%;
+        max-width: 85%;
         animation: slideIn 0.3s ease-out;
 
         &--sent {
@@ -492,8 +511,8 @@
                 border-bottom-right-radius: 4px;
             }
 
-            .reverse-auction__chat-message-time {
-                text-align: right;
+            .reverse-auction__chat-message-header {
+                justify-content: flex-end;
             }
         }
 
@@ -507,10 +526,24 @@
                 border-bottom-left-radius: 4px;
             }
 
-            .reverse-auction__chat-message-time {
-                text-align: left;
+            .reverse-auction__chat-message-header {
+                justify-content: flex-start;
             }
         }
+    }
+
+    &__chat-message-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+        padding: 0 0.5rem;
+    }
+
+    &__chat-message-sender {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #667eea;
     }
 
     &__chat-message-content {
@@ -522,10 +555,8 @@
     }
 
     &__chat-message-time {
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: #9ca3af;
-        margin-top: 0.25rem;
-        padding: 0 0.5rem;
     }
 
     &__chat-input-container {
@@ -585,4 +616,5 @@
         transform: translateY(0);
     }
 }
+
 

@@ -1,6 +1,7 @@
 import { useReverseAuction } from './hooks/useReverseAuction';
 import { formatTimestamp } from '../../utils/messageUtils';
 import type { Category } from './types';
+import { useRef, useEffect, useMemo } from 'preact/hooks';
 import './ReverseAuction.scss';
 
 export function ReverseAuction() {
@@ -37,6 +38,99 @@ export function ReverseAuction() {
     } = useReverseAuction();
 
     const socketId = getSocketId();
+    const chatMessagesRef = useRef<HTMLDivElement>(null);
+
+    // 채팅 메시지가 추가될 때 스크롤 하단으로 이동
+    useEffect(() => {
+        if (chatMessagesRef.current) {
+            chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
+        }
+    }, [chatMessages.length]);
+
+    // 영상 영역 메모이제이션 (채팅 메시지 업데이트 시 리렌더링 방지)
+    const videoSection = useMemo(
+        () => (
+            <div className="reverse-auction__video-section">
+                <div className="reverse-auction__video-controls">
+                    {!isVideoEnabled ? (
+                        <button className="reverse-auction__video-toggle-button" onClick={startLocalStream}>
+                            📹 영상 시작
+                        </button>
+                    ) : (
+                        <button className="reverse-auction__video-toggle-button reverse-auction__video-toggle-button--stop" onClick={stopLocalStream}>
+                            🛑 영상 중지
+                        </button>
+                    )}
+                </div>
+                <div className="reverse-auction__video-grid">
+                    {/* 로컬 비디오 (자신) */}
+                    {isVideoEnabled && localStream && (
+                        <div className="reverse-auction__video-item reverse-auction__video-item--local">
+                            <video
+                                ref={(el) => {
+                                    if (el && socketId) {
+                                        setVideoRef('local', el);
+                                        el.srcObject = localStream;
+                                        el.autoplay = true;
+                                        el.playsInline = true;
+                                        el.muted = true;
+                                    }
+                                }}
+                                className="reverse-auction__video-element"
+                            />
+                            <div className="reverse-auction__video-label">나 ({socketId?.substring(0, 6)})</div>
+                        </div>
+                    )}
+
+                    {/* 원격 비디오 (다른 참가자들) */}
+                    {participants
+                        .filter((p) => p.socketId !== socketId)
+                        .slice(0, 4 - (isVideoEnabled ? 1 : 0))
+                        .map((participant) => (
+                            <div key={participant.socketId} className="reverse-auction__video-item">
+                                <video
+                                    ref={(el) => {
+                                        setVideoRef(participant.socketId, el);
+                                        if (el && participant.stream) {
+                                            el.srcObject = participant.stream;
+                                            el.autoplay = true;
+                                            el.playsInline = true;
+                                            el.muted = false;
+                                            el.play().catch((error) => {
+                                                console.error('[ERROR] 비디오 재생 실패:', error);
+                                            });
+                                        }
+                                    }}
+                                    className="reverse-auction__video-element"
+                                    style={{ display: participant.stream ? 'block' : 'none' }}
+                                />
+                                {participant.isVideoEnabled !== false && participant.stream ? (
+                                    <div className="reverse-auction__video-label">
+                                        {participant.name} ({participant.role === 'demander' ? '수요자' : '공급자'}) - 영상 중
+                                    </div>
+                                ) : (
+                                    <div className="reverse-auction__video-placeholder">
+                                        {participant.name}
+                                        <br />
+                                        <small>{participant.role === 'demander' ? '수요자' : '공급자'}</small>
+                                        <br />
+                                        <small className="reverse-auction__video-loading">
+                                            {participant.isVideoEnabled === false ? '영상 중지' : '연결 중...'}
+                                        </small>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+
+                    {/* 빈 슬롯 */}
+                    {participants.length === 0 && !isVideoEnabled && (
+                        <div className="reverse-auction__video-placeholder">영상 영역 (영상 시작 버튼을 눌러주세요)</div>
+                    )}
+                </div>
+            </div>
+        ),
+        [isVideoEnabled, localStream, participants, socketId, setVideoRef, startLocalStream, stopLocalStream]
+    );
 
     // 초기 화면 (랜딩)
     if (!currentRoom) {
@@ -157,84 +251,6 @@ export function ReverseAuction() {
                 </div>
             </div>
 
-            {/* 영상 영역 (4분할) */}
-            <div className="reverse-auction__video-section">
-                <div className="reverse-auction__video-controls">
-                    {!isVideoEnabled ? (
-                        <button className="reverse-auction__video-toggle-button" onClick={startLocalStream}>
-                            📹 영상 시작
-                        </button>
-                    ) : (
-                        <button className="reverse-auction__video-toggle-button reverse-auction__video-toggle-button--stop" onClick={stopLocalStream}>
-                            🛑 영상 중지
-                        </button>
-                    )}
-                </div>
-                <div className="reverse-auction__video-grid">
-                    {/* 로컬 비디오 (자신) */}
-                    {isVideoEnabled && localStream && (
-                        <div className="reverse-auction__video-item reverse-auction__video-item--local">
-                            <video
-                                ref={(el) => {
-                                    if (el && socketId) {
-                                        setVideoRef('local', el);
-                                        el.srcObject = localStream;
-                                        el.autoplay = true;
-                                        el.playsInline = true;
-                                        el.muted = true;
-                                    }
-                                }}
-                                className="reverse-auction__video-element"
-                            />
-                            <div className="reverse-auction__video-label">나 ({socketId?.substring(0, 6)})</div>
-                        </div>
-                    )}
-
-                    {/* 원격 비디오 (다른 참가자들) */}
-                    {participants
-                        .filter((p) => p.socketId !== socketId)
-                        .slice(0, 4 - (isVideoEnabled ? 1 : 0))
-                        .map((participant) => (
-                            <div key={participant.socketId} className="reverse-auction__video-item">
-                                <video
-                                    ref={(el) => {
-                                        setVideoRef(participant.socketId, el);
-                                        if (el && participant.stream) {
-                                            el.srcObject = participant.stream;
-                                            el.autoplay = true;
-                                            el.playsInline = true;
-                                            el.muted = false;
-                                            el.play().catch((error) => {
-                                                console.error('[ERROR] 비디오 재생 실패:', error);
-                                            });
-                                        }
-                                    }}
-                                    className="reverse-auction__video-element"
-                                    style={{ display: participant.stream ? 'block' : 'none' }}
-                                />
-                                {participant.stream ? (
-                                    <div className="reverse-auction__video-label">
-                                        {participant.name} ({participant.role === 'demander' ? '수요자' : '공급자'})
-                                    </div>
-                                ) : (
-                                    <div className="reverse-auction__video-placeholder">
-                                        {participant.name}
-                                        <br />
-                                        <small>{participant.role === 'demander' ? '수요자' : '공급자'}</small>
-                                        <br />
-                                        <small className="reverse-auction__video-loading">연결 중...</small>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-
-                    {/* 빈 슬롯 */}
-                    {participants.length === 0 && !isVideoEnabled && (
-                        <div className="reverse-auction__video-placeholder">영상 영역 (영상 시작 버튼을 눌러주세요)</div>
-                    )}
-                </div>
-            </div>
-
             {/* 참가 요청 알림 (수요자만) */}
             {userRole === 'demander' && pendingRequests.length > 0 && (
                 <div className="reverse-auction__pending-requests">
@@ -255,38 +271,49 @@ export function ReverseAuction() {
                 </div>
             )}
 
-            {/* 채팅 영역 */}
-            <div className="reverse-auction__chat-section">
-                <div className="reverse-auction__chat-messages">
-                    {chatMessages.length === 0 ? (
-                        <div className="reverse-auction__chat-empty">메시지가 없습니다.</div>
-                    ) : (
-                        chatMessages.map((msg) => (
-                            <div key={msg.id} className={`reverse-auction__chat-message reverse-auction__chat-message--${msg.type}`}>
-                                <div className="reverse-auction__chat-message-content">{msg.content}</div>
-                                <div className="reverse-auction__chat-message-time">{formatTimestamp(msg.timestamp)}</div>
-                            </div>
-                        ))
-                    )}
-                </div>
-                <div className="reverse-auction__chat-input-container">
-                    <input
-                        type="text"
-                        className="reverse-auction__chat-input"
-                        value={chatInput}
-                        onInput={(e) => setChatInput(e.currentTarget.value)}
-                        onKeyPress={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                handleSendChat();
-                            }
-                        }}
-                        placeholder="메시지를 입력하세요..."
-                        disabled={!isConnected}
-                    />
-                    <button className="reverse-auction__chat-send-button" onClick={handleSendChat} disabled={!isConnected || !chatInput.trim()}>
-                        전송
-                    </button>
+            {/* 영상과 채팅 영역 (Grid 레이아웃) */}
+            <div className="reverse-auction__main-content">
+                {/* 영상 영역 */}
+                {videoSection}
+
+                {/* 채팅 영역 */}
+                <div className="reverse-auction__chat-section">
+                    <div className="reverse-auction__chat-messages" ref={chatMessagesRef}>
+                        {chatMessages.length === 0 ? (
+                            <div className="reverse-auction__chat-empty">메시지가 없습니다.</div>
+                        ) : (
+                            chatMessages.map((msg) => (
+                                <div key={msg.id} className={`reverse-auction__chat-message reverse-auction__chat-message--${msg.type}`}>
+                                    <div className="reverse-auction__chat-message-header">
+                                        <span className="reverse-auction__chat-message-sender">
+                                            {msg.senderId ? msg.senderId.substring(0, 6) : '알 수 없음'}
+                                        </span>
+                                        <span className="reverse-auction__chat-message-time">{formatTimestamp(msg.timestamp)}</span>
+                                    </div>
+                                    <div className="reverse-auction__chat-message-content">{msg.content}</div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    <div className="reverse-auction__chat-input-container">
+                        <input
+                            type="text"
+                            className="reverse-auction__chat-input"
+                            value={chatInput}
+                            onInput={(e) => setChatInput(e.currentTarget.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSendChat();
+                                }
+                            }}
+                            placeholder="메시지를 입력하세요..."
+                            disabled={!isConnected}
+                        />
+                        <button className="reverse-auction__chat-send-button" onClick={handleSendChat} disabled={!isConnected || !chatInput.trim()}>
+                            전송
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -6,4 +6,5 @@ export interface Participant {
     role: UserRole;
     stream?: MediaStream;
     peerConnection?: RTCPeerConnection;
+    isVideoEnabled?: boolean;
 }

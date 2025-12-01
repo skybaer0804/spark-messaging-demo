@@ -4,4 +4,5 @@ export interface Message {
     timestamp: Date;
     type: 'sent' | 'received';
     room?: string;
+    senderId?: string;
 }
