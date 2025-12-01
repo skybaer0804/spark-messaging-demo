@@ -19,17 +19,10 @@ export class ChatService {
     private connectionService: ConnectionService;
     private unsubscribeCallbacks: Array<() => void> = [];
     private currentRoomRef: string | null = null;
-    private socketIdRef: string | null = null;
 
     constructor(client: SparkMessaging, connectionService: ConnectionService) {
         this.client = client;
         this.connectionService = connectionService;
-        this.updateSocketId();
-    }
-
-    private updateSocketId() {
-        const status = this.connectionService.getConnectionStatus();
-        this.socketIdRef = status.socketId;
     }
 
     public setCurrentRoom(roomId: string | null) {
@@ -84,11 +77,11 @@ export class ChatService {
     }
 
     public async sendMessage(type: string, content: string): Promise<void> {
-        await this.client.sendMessage(type, content);
+        await this.client.sendMessage(type as any, content);
     }
 
     public async sendRoomMessage(roomId: string, type: string, content: string): Promise<void> {
-        await this.client.sendRoomMessage(roomId, type, content);
+        await this.client.sendRoomMessage(roomId, type as any, content);
     }
 
     private isOwnMessage(msg: MessageData | RoomMessageData): boolean {
