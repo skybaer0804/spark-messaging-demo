@@ -2,6 +2,15 @@ import type SparkMessaging from '@skybaer0804/spark-messaging-client';
 import type { MessageData, RoomMessageData } from '@skybaer0804/spark-messaging-client';
 import { ConnectionService } from './ConnectionService';
 
+export interface FileData {
+    fileName: string;
+    fileType: 'image' | 'document' | 'video' | 'audio';
+    mimeType: string;
+    size: number;
+    data: string; // Base64
+    thumbnail?: string;
+}
+
 export interface ChatMessage {
     id: string;
     content: string;
@@ -9,6 +18,7 @@ export interface ChatMessage {
     type: 'sent' | 'received';
     room?: string;
     senderId?: string;
+    fileData?: FileData;
 }
 
 export type MessageCallback = (message: ChatMessage) => void;
@@ -48,6 +58,19 @@ export class ChatService {
                 type: isOwnMessage ? 'sent' : 'received',
                 senderId: (msg as any).from || msg.senderId,
             };
+
+            // 파일 전송 메시지 처리
+            if ((msg as any).type === 'file-transfer') {
+                try {
+                    const fileData = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
+                    if (fileData.fileData) {
+                        message.fileData = fileData.fileData;
+                    }
+                } catch (error) {
+                    console.error('Failed to parse file data:', error);
+                }
+            }
+
             callback(message);
         });
         this.unsubscribeCallbacks.push(unsubscribe);
@@ -70,6 +93,19 @@ export class ChatService {
                 room: msg.room,
                 senderId: (msg as any).from || msg.senderId,
             };
+
+            // 파일 전송 메시지 처리
+            if ((msg as any).type === 'file-transfer') {
+                try {
+                    const fileData = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
+                    if (fileData.fileData) {
+                        message.fileData = fileData.fileData;
+                    }
+                } catch (error) {
+                    console.error('Failed to parse file data:', error);
+                }
+            }
+
             callback(message);
         });
         this.unsubscribeCallbacks.push(unsubscribe);

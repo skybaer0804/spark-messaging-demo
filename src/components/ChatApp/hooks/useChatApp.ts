@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { ChatService } from '../../../services/ChatService';
+import { FileTransferService } from '../../../services/FileTransferService';
 import { RoomService } from '../services/RoomService';
 import type { Message } from '../types';
 import { SparkMessagingError } from '@skybaer0804/spark-messaging-client';
@@ -13,20 +14,25 @@ export function useChatApp() {
     const [roomIdInput, setRoomIdInput] = useState('chat');
     const [currentRoom, setCurrentRoom] = useState<string | null>(null);
     const [roomList, setRoomList] = useState<string[]>([]);
+    const [uploadingFile, setUploadingFile] = useState<File | null>(null);
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     const connectionServiceRef = useRef<ConnectionService | null>(null);
     const chatServiceRef = useRef<ChatService | null>(null);
     const roomServiceRef = useRef<RoomService | null>(null);
+    const fileTransferServiceRef = useRef<FileTransferService | null>(null);
 
     useEffect(() => {
         // 서비스 초기화
         const connectionService = new ConnectionService(sparkMessagingClient);
         const chatService = new ChatService(sparkMessagingClient, connectionService);
         const roomService = new RoomService(sparkMessagingClient, connectionService);
+        const fileTransferService = new FileTransferService(sparkMessagingClient, connectionService, chatService);
 
         connectionServiceRef.current = connectionService;
         chatServiceRef.current = chatService;
         roomServiceRef.current = roomService;
+        fileTransferServiceRef.current = fileTransferService;
 
         // 연결 상태 관리
         connectionService.onConnected(() => {
@@ -96,6 +102,38 @@ export function useChatApp() {
             roomService.cleanup();
         };
     }, []);
+
+    const sendFile = async (file: File) => {
+        if (!isConnected || !fileTransferServiceRef.current || !roomServiceRef.current) {
+            return;
+        }
+
+        const room = roomServiceRef.current.getCurrentRoom();
+        if (!room) {
+            alert('채팅방에 참여해주세요.');
+            return;
+        }
+
+        setUploadingFile(file);
+        setUploadProgress(0);
+
+        try {
+            await fileTransferServiceRef.current.sendFile(room, file, (progress) => {
+                setUploadProgress(progress);
+            });
+            setUploadingFile(null);
+            setUploadProgress(0);
+        } catch (error) {
+            console.error('Failed to send file:', error);
+            setUploadingFile(null);
+            setUploadProgress(0);
+            if (error instanceof Error) {
+                alert(`파일 전송 실패: ${error.message}`);
+            } else {
+                alert('파일 전송 실패');
+            }
+        }
+    };
 
     const sendMessage = async () => {
         if (!input.trim() || !isConnected || !chatServiceRef.current) return;
@@ -187,5 +225,8 @@ export function useChatApp() {
         handleRoomSelect,
         handleCreateRoom,
         leaveRoom,
+        sendFile,
+        uploadingFile,
+        uploadProgress,
     };
 }

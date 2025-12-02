@@ -281,6 +281,174 @@
         word-wrap: break-word;
     }
 
+    &__message-file {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__message-image-wrapper {
+        position: relative;
+        display: inline-block;
+        max-width: 100%;
+
+        &:hover .chat-app__message-image-download {
+            opacity: 1;
+        }
+    }
+
+    &__message-image {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        display: block;
+
+        &:hover {
+            opacity: 0.9;
+        }
+    }
+
+    &__message-image-download {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        padding: 0.5rem;
+        background: rgba(0, 0, 0, 0.6);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s, background 0.2s;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        &:hover {
+            background: rgba(0, 0, 0, 0.8);
+        }
+    }
+
+    &__message-document {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+    }
+
+    &__message-document-icon {
+        font-size: 1.5rem;
+    }
+
+    &__message-document-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    &__message-document-name {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    &__message-document-size {
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+
+    &__message-document-download {
+        padding: 0.5rem;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        color: #667eea;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+
+        svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        &:hover {
+            background: #f0f4ff;
+            color: #764ba2;
+        }
+    }
+
+    &__image-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 2rem;
+    }
+
+    &__image-modal-content {
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    &__image-modal-close {
+        position: absolute;
+        top: -3rem;
+        right: 0;
+        padding: 0.75rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1001;
+
+        svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    }
+
+    &__image-modal-image {
+        max-width: 100%;
+        max-height: 90vh;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
     &__message-time {
         font-size: 0.75rem;
         color: #9ca3af;
@@ -288,9 +456,116 @@
 
     &__input-container {
         display: flex;
+        flex-direction: column;
         gap: 0.75rem;
         padding-top: 1rem;
         border-top: 1px solid #e5e7eb;
+    }
+
+    &__file-preview {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    &__file-preview-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.875rem;
+    }
+
+    &__file-preview-icon {
+        font-size: 1.25rem;
+    }
+
+    &__file-preview-name {
+        flex: 1;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    &__file-preview-size {
+        color: #9ca3af;
+        font-size: 0.75rem;
+    }
+
+    &__file-remove {
+        padding: 0.25rem 0.5rem;
+        background: transparent;
+        border: none;
+        color: #ef4444;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: transform 0.2s;
+
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+
+    &__progress-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        background: #f0f4ff;
+        border-radius: 6px;
+    }
+
+    &__progress-bar {
+        flex: 1;
+        height: 6px;
+        background: #e5e7eb;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    &__progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 3px;
+        transition: width 0.3s ease;
+    }
+
+    &__progress-text {
+        font-size: 0.75rem;
+        color: #667eea;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    &__input-wrapper {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    &__file-button {
+        padding: 0.75rem 1rem;
+        background: white;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover:not(:disabled) {
+            border-color: #667eea;
+            background: #f9fafb;
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     }
 
     &__input {
