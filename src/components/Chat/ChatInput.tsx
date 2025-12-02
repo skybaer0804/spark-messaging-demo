@@ -52,11 +52,8 @@ function ChatInputComponent({
             const minHeight = lineHeight * 2 + 24; // 기본 2줄
             const maxHeight = lineHeight * 5 + 24; // 최대 5줄
             
-            if (scrollHeight <= maxHeight) {
-                textarea.style.height = `${scrollHeight}px`;
-            } else {
-                textarea.style.height = `${maxHeight}px`;
-            }
+            const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+            textarea.style.height = `${targetHeight}px`;
         }
     }, [input]);
 
