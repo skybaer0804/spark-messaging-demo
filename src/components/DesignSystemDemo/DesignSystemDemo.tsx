@@ -18,6 +18,12 @@ import { Avatar } from '@/ui-component/Avatar/Avatar';
 import { Badge } from '@/ui-component/Badge/Badge';
 import { List, ListItem, ListItemText, ListItemAvatar } from '@/ui-component/List/List';
 import { Divider } from '@/ui-component/Divider/Divider';
+import { Switch } from '@/ui-component/Switch/Switch';
+import { Checkbox } from '@/ui-component/Checkbox/Checkbox';
+import { Radio } from '@/ui-component/Radio/Radio';
+import { Alert } from '@/ui-component/Alert/Alert';
+import { CircularProgress } from '@/ui-component/CircularProgress/CircularProgress';
+import { Skeleton } from '@/ui-component/Skeleton/Skeleton';
 import { IconHome, IconUser, IconSettings, IconBell, IconSearch, IconTrash, IconMail } from '@tabler/icons-react';
 import './DesignSystemDemo.scss';
 
@@ -46,7 +52,7 @@ export function DesignSystemDemo() {
 
             <Container maxWidth="lg">
                 <Stack spacing="lg">
-                    
+
                     {/* Typography */}
                     <Paper padding="lg">
                         <Typography variant="h2" style={{ marginBottom: '16px' }}>Typography</Typography>
@@ -93,7 +99,7 @@ export function DesignSystemDemo() {
                                     </Badge>
                                 </Stack>
                             </Box>
-                            
+
                             {/* Lists */}
                             <Box>
                                 <Typography variant="h3" style={{ marginBottom: '12px' }}>Lists</Typography>
@@ -132,30 +138,30 @@ export function DesignSystemDemo() {
                                     <IconButton color="error"><IconTrash /></IconButton>
                                 </Flex>
                             </Stack>
-                            
+
                             <Stack spacing="md">
                                 <Typography variant="h3">Inputs</Typography>
-                                <Input 
-                                    label="Email (Input)" 
-                                    placeholder="user@example.com" 
-                                    fullWidth 
+                                <Input
+                                    label="Email (Input)"
+                                    placeholder="user@example.com"
+                                    fullWidth
                                     value={inputValue}
                                     onInput={(e) => setInputValue(e.currentTarget.value)}
                                 />
-                                <TextField 
-                                    label="Standard TextField" 
+                                <TextField
+                                    label="Standard TextField"
                                     variant="standard"
-                                    placeholder="Standard variant" 
-                                    fullWidth 
+                                    placeholder="Standard variant"
+                                    fullWidth
                                 />
-                                <TextField 
-                                    label="Filled TextField" 
+                                <TextField
+                                    label="Filled TextField"
                                     variant="filled"
-                                    placeholder="Filled variant" 
-                                    fullWidth 
+                                    placeholder="Filled variant"
+                                    fullWidth
                                 />
-                                <Select 
-                                    label="Role" 
+                                <Select
+                                    label="Role"
                                     options={[
                                         { label: 'Admin', value: 'admin' },
                                         { label: 'User', value: 'user' }
@@ -185,7 +191,7 @@ export function DesignSystemDemo() {
                                     <Button size="sm">Action</Button>
                                 </CardFooter>
                             </Card>
-                            
+
                             <Paper variant="outlined" padding="lg">
                                 <Typography variant="h3" style={{ marginBottom: '8px' }}>Outlined Paper</Typography>
                                 <Typography variant="body-medium">
@@ -240,7 +246,7 @@ export function DesignSystemDemo() {
                                     <Button size="sm">Action</Button>
                                 </CardFooter>
                             </Card>
-                            
+
                             <Paper variant="outlined" padding="lg">
                                 <Typography variant="h3" style={{ marginBottom: '8px' }}>Outlined Paper</Typography>
                                 <Typography variant="body-medium">
@@ -251,7 +257,7 @@ export function DesignSystemDemo() {
                     </Paper>
 
                     {/* Icons */}
-                     <Paper padding="lg">
+                    <Paper padding="lg">
                         <Typography variant="h2" style={{ marginBottom: '16px' }}>Icons</Typography>
                         <Flex gap="lg" wrap="wrap">
                             <Stack align="center" spacing="xs">
@@ -266,7 +272,7 @@ export function DesignSystemDemo() {
                                 <IconSettings />
                                 <Typography variant="caption">Settings</Typography>
                             </Stack>
-                             <Stack align="center" spacing="xs">
+                            <Stack align="center" spacing="xs">
                                 <IconBell />
                                 <Typography variant="caption">Bell</Typography>
                             </Stack>

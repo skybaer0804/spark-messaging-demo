@@ -1,4 +1,4 @@
-@use '../../styles/tokens/index';
+@use '/src/styles/tokens/index';
 
 .typography {
     margin: 0;
@@ -23,6 +23,7 @@
         font-weight: var(--typo-heading-2-weight);
         line-height: var(--typo-heading-2-line-height);
     }
+
     // Add h3 etc from tokens if available
 
     &--body-large {
@@ -44,8 +45,19 @@
     }
 
     // Alignment
-    &--align-left { text-align: left; }
-    &--align-center { text-align: center; }
-    &--align-right { text-align: right; }
-    &--align-justify { text-align: justify; }
+    &--align-left {
+        text-align: left;
+    }
+
+    &--align-center {
+        text-align: center;
+    }
+
+    &--align-right {
+        text-align: right;
+    }
+
+    &--align-justify {
+        text-align: justify;
+    }
 }

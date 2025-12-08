@@ -1,0 +1,131 @@
+@use '/src/styles/tokens/index';
+
+.checkbox {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    vertical-align: middle;
+    position: relative;
+
+    &--small {
+        .checkbox__input-wrapper {
+            width: 16px;
+            height: 16px;
+        }
+
+        .checkbox__label {
+            font-size: 0.875rem;
+        }
+    }
+
+    &--medium {
+        .checkbox__input-wrapper {
+            width: 20px;
+            height: 20px;
+        }
+
+        .checkbox__label {
+            font-size: 1rem;
+        }
+    }
+
+    &__input-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    &__input {
+        cursor: inherit;
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        margin: 0;
+        padding: 0;
+        z-index: 1;
+    }
+
+    &__control {
+        width: 100%;
+        height: 100%;
+        border: 2px solid var(--color-text-secondary);
+        border-radius: 2px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: transparent;
+        transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, border-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        color: var(--color-bg-surface);
+
+        svg {
+            transform: scale(0);
+            transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        }
+    }
+
+    &__label {
+        margin-left: 8px;
+        color: var(--color-text-primary);
+    }
+
+    // Checked state
+    &:has(.checkbox__input:checked),
+    &:has(.checkbox__input:indeterminate) {
+        // Note: :indeterminate pseudo-class might need JS handling for full support in some browsers, but React/Preact handles it via props usually.
+        // Actually :indeterminate works for checkboxes in CSS if set via JS property.
+    }
+
+    // We rely on the input:checked or props logic. Since we can't easily style based on 'indeterminate' prop without a class on wrapper if we use pure CSS :checked, 
+    // but Preact sets the property. 
+    // Let's assume the component handles the visual state via classes or we use the :checked pseudo class.
+    // For indeterminate, we might need a specific class if :indeterminate isn't reliable or if we want to style it differently.
+    // However, the IconMinus is rendered conditionally in JSX, so we just need to handle the background/border when checked OR indeterminate (if we could detect it via CSS).
+    // A common pattern is to use the same style for checked and indeterminate.
+
+    // Since we can't easily detect 'indeterminate' prop via CSS only on the input (unless we use :indeterminate which works if the property is set),
+    // we will trust the JSX to render the correct icon.
+    // We need to style the box when it is active (checked).
+
+    .checkbox__input:checked+.checkbox__control {
+        border-color: currentColor;
+        background-color: currentColor;
+
+        svg {
+            transform: scale(1);
+        }
+    }
+
+    // Colors
+    @each $color in primary, secondary, success, error, warning, info {
+        &--#{$color} {
+            .checkbox__input:checked+.checkbox__control {
+                color: var(--color-#{$color}-main);
+                border-color: var(--color-#{$color}-main);
+                background-color: var(--color-#{$color}-main);
+
+                svg {
+                    color: var(--color-bg-surface); // Icon color
+                }
+            }
+        }
+    }
+
+    // Disabled state
+    &--disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+
+        .checkbox__input {
+            cursor: not-allowed;
+        }
+
+        .checkbox__label {
+            color: var(--color-text-disabled);
+        }
+    }
+}

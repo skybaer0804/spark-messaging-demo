@@ -1,11 +1,11 @@
-@use '../../styles/tokens/index';
+@use '/src/styles/tokens/index';
 
 .list {
     list-style: none;
     margin: 0;
     padding: var(--space-padding-sm) 0;
     position: relative;
-    
+
     &--padding-off {
         padding: 0;
     }
@@ -21,7 +21,7 @@
     box-sizing: border-box;
     text-align: left;
     padding: var(--space-padding-sm) var(--space-padding-md);
-    
+
     &--gutters-off {
         padding-left: 0;
         padding-right: 0;

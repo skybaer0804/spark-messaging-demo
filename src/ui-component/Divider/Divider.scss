@@ -1,4 +1,4 @@
-@use '../../styles/tokens/index';
+@use '/src/styles/tokens/index';
 
 .divider {
     margin: 0;
@@ -6,7 +6,7 @@
     border-width: 0;
     border-style: solid;
     border-color: var(--color-border-default);
-    
+
     // Orientation
     &--horizontal {
         border-bottom-width: 1px;
@@ -24,12 +24,12 @@
     &--inset {
         margin-left: 72px; // Classic Material UI inset
     }
-    
+
     &--middle {
         margin-left: var(--space-gap-md);
         margin-right: var(--space-gap-md);
     }
-    
+
     &--flexItem {
         height: auto;
         align-self: auto;
