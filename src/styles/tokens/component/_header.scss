@@ -1,0 +1,21 @@
+// ============================================
+// Header Component Tokens (App Specific)
+// ============================================
+
+:root {
+    --header-height: 64px;
+    --header-background: var(--color-background-primary);
+    --header-padding: 0 var(--space-padding-md);
+    --header-border-bottom: 0px solid var(--color-border-default); // No border by default in design
+    --header-title-size: var(--typo-heading-3-size);
+    --header-title-weight: var(--primitive-font-weight-bold);
+    --header-title-color: var(--color-text-primary);
+    
+    // Sub-header / Back button area
+    --header-back-button-size: 32px;
+    --header-back-button-color: var(--color-text-secondary);
+    --header-back-button-hover-bg: var(--color-surface-level-1);
+    
+    // Header Actions
+    --header-action-gap: var(--space-gap-sm);
+}

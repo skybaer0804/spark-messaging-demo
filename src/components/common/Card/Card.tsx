@@ -1,4 +1,4 @@
-import { h, JSX } from 'preact';
+import { JSX } from 'preact';
 import { useTokens } from '../../../context/TokenProvider';
 import './Card.scss';
 

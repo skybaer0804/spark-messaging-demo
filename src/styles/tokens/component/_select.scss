@@ -1,0 +1,21 @@
+// ============================================
+// Select Component Tokens
+// ============================================
+
+:root {
+    --select-background: var(--color-background-primary);
+    --select-border: var(--color-border-default);
+    --select-border-width: 1px;
+    --select-padding: var(--space-padding-input);
+    --select-radius: var(--primitive-radius-medium);
+    --select-height: 48px;
+    --select-color: var(--color-text-primary);
+    --select-font-size: var(--typo-body-medium-size);
+    
+    // Chevron icon color usually handled by SVG fill or background-image
+    --select-icon-color: var(--color-text-secondary);
+
+    // Focus state
+    --select-focus-border: var(--color-border-focus);
+    --select-focus-shadow: 0 0 0 3px rgba(var(--color-border-focus), 0.1);
+}

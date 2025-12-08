@@ -1,0 +1,37 @@
+@use '../../../styles/tokens/index';
+
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    padding: var(--status-chip-padding);
+    border-radius: var(--status-chip-radius);
+    
+    font-size: var(--status-chip-font-size);
+    font-weight: var(--status-chip-font-weight);
+    white-space: nowrap;
+    
+    transition: all 0.2s ease;
+
+    // Variants
+    &.active {
+        background-color: var(--status-active-background);
+        color: var(--status-active-text);
+    }
+
+    &.pending {
+        background-color: var(--status-pending-background);
+        color: var(--status-pending-text);
+    }
+
+    &.badge {
+        background-color: var(--status-badge-background);
+        color: var(--status-badge-text);
+    }
+    
+    &.default {
+        background-color: var(--color-surface-level-2);
+        color: var(--color-text-secondary);
+    }
+}

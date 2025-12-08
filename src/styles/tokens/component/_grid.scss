@@ -1,0 +1,11 @@
+// ============================================
+// Grid Layout Component Tokens
+// ============================================
+
+:root {
+    --grid-gap-default: var(--space-gap-md);
+    --grid-gap-large: var(--space-gap-lg);
+    --grid-columns-default: repeat(12, 1fr);
+    --grid-columns-sidebar-content: 280px 1fr;
+    --grid-columns-room-list: repeat(auto-fill, minmax(280px, 1fr));
+}

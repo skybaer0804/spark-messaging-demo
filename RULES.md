@@ -61,3 +61,6 @@ Component: 컴포넌트 전용 (예: --btn-bg, --card-padding).
 - 관련 로직은 컴포넌트 내부 또는 별도의 훅/유틸리티로 분리합니다.
 - 타입 안정성을 위해 TypeScript를 사용하는 경우 타입을 명시합니다.
 
+
+# Output Language
+Always respond in Korean (한국어).

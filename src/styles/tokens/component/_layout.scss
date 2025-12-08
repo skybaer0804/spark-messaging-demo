@@ -1,0 +1,19 @@
+// ============================================
+// Layout Component Tokens
+// ============================================
+
+:root {
+    // Container Max Widths
+    --layout-container-sm: 640px;
+    --layout-container-md: 768px;
+    --layout-container-lg: 1024px;
+    --layout-container-xl: 1280px;
+    
+    // Z-Indices
+    --layout-z-dropdown: 1000;
+    --layout-z-sticky: 1100;
+    --layout-z-fixed: 1200;
+    --layout-z-modal: 1300;
+    --layout-z-popover: 1400;
+    --layout-z-tooltip: 1500;
+}

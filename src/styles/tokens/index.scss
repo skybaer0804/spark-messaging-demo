@@ -10,6 +10,18 @@
 @import './semantic/typography';
 @import './semantic/space';
 @import './semantic/elevation';
+// 1. Primitive Tokens
+@import './primitive/color';
+@import './primitive/typography';
+@import './primitive/space';
+@import './primitive/shape';
+@import './primitive/shadow';
+
+// 2. Semantic Tokens
+@import './semantic/color';
+@import './semantic/typography';
+@import './semantic/space';
+@import './semantic/elevation';
 
 // 3. Provider (Mode & Theme)
 @import './provider';
@@ -18,3 +30,10 @@
 @import './component/button';
 @import './component/input';
 @import './component/card';
+@import './component/grid';
+@import './component/header';
+@import './component/text';
+@import './component/select';
+@import './component/chat';
+@import './component/status';
+@import './component/layout';

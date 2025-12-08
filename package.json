@@ -12,6 +12,7 @@
     "dependencies": {
         "@preact/signals": "^2.5.1",
         "@skybaer0804/spark-messaging-client": "^1.0.1",
+        "@tabler/icons-react": "^3.35.0",
         "preact": "^10.19.3",
         "react-toastify": "^11.0.5"
     },

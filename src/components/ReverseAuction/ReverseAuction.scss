@@ -1,4 +1,5 @@
 // Chat 컴포넌트 스타일 mixin import
+@use '../../styles/tokens/index';
 @import '../Chat/styles/chat-mixins';
 
 .reverse-auction {
@@ -8,88 +9,95 @@
     // Chat 컴포넌트 스타일을 reverse-auction__chat prefix로 생성
     @include chat-component('reverse-auction__chat');
 
+    // Header (Unified Header Application)
     &__header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1.5rem;
+        height: var(--header-height);
+        padding: var(--header-padding);
+        background: var(--header-background);
+        border-bottom: var(--header-border-bottom);
+        margin-bottom: var(--space-gap-lg);
     }
 
     &__title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: #111827;
+        font-size: var(--header-title-size);
+        font-weight: var(--header-title-weight);
+        color: var(--header-title-color);
         margin: 0;
     }
 
     &__create-button {
-        padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        padding: var(--button-primary-padding);
+        background: var(--button-primary-background);
+        color: var(--button-primary-text);
         border: none;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        font-weight: 500;
+        border-radius: var(--button-primary-radius);
+        font-size: var(--button-primary-font-size);
+        font-weight: var(--button-primary-font-weight);
         cursor: pointer;
         transition: opacity 0.2s, transform 0.1s;
 
         &:hover:not(:disabled) {
-            opacity: 0.9;
+            opacity: var(--button-hover-opacity);
             transform: translateY(-1px);
         }
 
         &:disabled {
-            opacity: 0.5;
+            opacity: var(--button-disabled-opacity);
             cursor: not-allowed;
+            background: var(--color-background-tertiary);
+            color: var(--color-text-disabled);
         }
     }
 
     &__create-form {
         display: flex;
         flex-direction: column;
-        gap: 1.5rem;
-        padding: 1.5rem;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
+        gap: var(--space-gap-lg);
+        padding: var(--space-padding-xl);
+        background: var(--color-surface-base);
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--primitive-radius-lg);
     }
 
     &__form-field {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: var(--space-gap-sm);
     }
 
     &__label {
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: #374151;
+        font-size: var(--text-label-size);
+        font-weight: var(--text-label-weight);
+        color: var(--text-label-color);
     }
 
     &__category-tabs {
         display: flex;
-        gap: 0.5rem;
+        gap: var(--space-gap-sm);
     }
 
     &__category-tab {
         flex: 1;
-        padding: 0.75rem 1rem;
-        background: white;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        color: #374151;
+        padding: var(--space-padding-sm) var(--space-padding-md);
+        background: var(--color-surface-base);
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--primitive-radius-md);
+        font-size: var(--typo-body-small-size);
+        color: var(--color-text-secondary);
         cursor: pointer;
         transition: all 0.2s;
 
         &:hover:not(&--active) {
-            border-color: #667eea;
-            background: #f9fafb;
+            border-color: var(--color-interactive-primary);
+            background: var(--color-background-secondary);
         }
 
         &--active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--color-interactive-primary);
+            color: var(--primitive-gray-0);
             border-color: transparent;
 
             &:hover {
@@ -99,60 +107,65 @@
     }
 
     &__input {
-        padding: 0.75rem 1rem;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 0.875rem;
+        padding: var(--input-padding);
+        border: var(--input-border-width) solid var(--input-border);
+        border-radius: var(--input-radius);
+        font-size: var(--input-font-size);
         transition: border-color 0.2s;
+        background: var(--input-background);
+        color: var(--input-text-color);
+        height: var(--input-height);
 
         &:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--input-focus-border);
+            box-shadow: var(--input-focus-shadow);
         }
 
         &:disabled {
-            background-color: #f3f4f6;
+            background-color: var(--input-disabled-background);
+            color: var(--input-disabled-text);
             cursor: not-allowed;
         }
     }
 
     &__form-actions {
         display: flex;
-        gap: 0.75rem;
+        gap: var(--space-gap-md);
         justify-content: flex-end;
     }
 
     &__button {
-        padding: 0.75rem 1.5rem;
+        padding: var(--button-primary-padding);
         border: none;
-        border-radius: 8px;
-        font-size: 0.875rem;
-        font-weight: 500;
+        border-radius: var(--button-primary-radius);
+        font-size: var(--button-primary-font-size);
+        font-weight: var(--button-primary-font-weight);
         cursor: pointer;
         transition: opacity 0.2s, transform 0.1s;
 
         &--primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--button-primary-background);
+            color: var(--button-primary-text);
 
             &:hover:not(:disabled) {
-                opacity: 0.9;
+                opacity: var(--button-hover-opacity);
                 transform: translateY(-1px);
             }
         }
 
         &--secondary {
-            background: white;
-            color: #374151;
-            border: 1px solid #d1d5db;
+            background: var(--button-secondary-background);
+            color: var(--button-secondary-text);
+            border: 1px solid var(--button-secondary-border);
 
             &:hover:not(:disabled) {
-                background: #f9fafb;
+                background: var(--color-surface-level-1);
             }
         }
 
         &:disabled {
-            opacity: 0.5;
+            opacity: var(--button-disabled-opacity);
             cursor: not-allowed;
         }
     }
@@ -164,13 +177,13 @@
     }
 
     &__room-list-header {
-        margin-bottom: 1rem;
+        margin-bottom: var(--space-gap-lg);
     }
 
     &__room-list-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #111827;
+        font-size: var(--text-subtitle-size);
+        font-weight: var(--text-subtitle-weight);
+        color: var(--text-subtitle-color);
         margin: 0;
     }
 
@@ -184,35 +197,37 @@
         align-items: center;
         justify-content: center;
         height: 100%;
-        color: #9ca3af;
+        color: var(--color-text-tertiary);
         text-align: center;
-        padding: 2rem;
+        padding: var(--space-padding-xl);
 
         p {
             margin: 0;
-            font-size: 0.875rem;
+            font-size: var(--typo-body-small-size);
         }
     }
 
     &__room-items {
         display: flex;
         flex-direction: column;
-        gap: 0.75rem;
+        gap: var(--space-gap-md);
+        // Grid tokens could be used here for responsive grid if needed
+        // grid-template-columns: var(--grid-columns-room-list);
     }
 
     &__room-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1rem;
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
+        padding: var(--space-padding-md);
+        background: var(--color-surface-base);
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--primitive-radius-md);
         transition: all 0.2s;
 
         &:hover {
-            border-color: #667eea;
-            background: #f9fafb;
+            border-color: var(--color-interactive-primary);
+            background: var(--color-background-secondary);
         }
     }
 
@@ -220,69 +235,71 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+        gap: var(--space-gap-xs);
     }
 
     &__room-item-category {
         display: inline-block;
-        padding: 0.25rem 0.75rem;
-        background: #f3f4f6;
-        color: #667eea;
-        border-radius: 4px;
-        font-size: 0.75rem;
-        font-weight: 500;
+        padding: 4px 12px;
+        background: var(--color-background-secondary); // Or use status token
+        color: var(--color-interactive-primary);
+        border-radius: var(--primitive-radius-sm);
+        font-size: var(--typo-label-small-size);
+        font-weight: var(--primitive-font-weight-medium);
         width: fit-content;
     }
 
     &__room-item-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #111827;
+        font-size: var(--typo-body-large-size);
+        font-weight: var(--primitive-font-weight-bold);
+        color: var(--color-text-primary);
         margin: 0;
     }
 
     &__room-item-meta {
-        font-size: 0.875rem;
-        color: #6b7280;
+        font-size: var(--typo-body-small-size);
+        color: var(--color-text-tertiary);
         margin: 0;
     }
 
     &__room-item-button {
-        padding: 0.5rem 1rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        padding: var(--space-padding-sm) var(--space-padding-md);
+        background: var(--button-primary-background);
+        color: var(--button-primary-text);
         border: none;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        font-weight: 500;
+        border-radius: var(--primitive-radius-sm); // Slightly smaller for list items
+        font-size: var(--typo-body-small-size);
+        font-weight: var(--primitive-font-weight-medium);
         cursor: pointer;
         transition: opacity 0.2s;
 
         &:hover:not(:disabled) {
-            opacity: 0.9;
+            opacity: var(--button-hover-opacity);
         }
 
         &:disabled {
-            opacity: 0.5;
+            opacity: var(--button-disabled-opacity);
             cursor: not-allowed;
+            background: var(--color-background-tertiary);
         }
     }
 
     &__room-header {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid #e5e7eb;
+        gap: var(--space-gap-md);
+        margin-bottom: var(--space-gap-lg);
+        padding-bottom: var(--space-gap-bg); // Typo in original? No, added tokens. padding-bottom was 1rem in original.
+        border-bottom: 1px solid var(--color-border-default);
+        height: var(--header-height); // Use header tokens for room detail too, or custom
     }
 
     &__back-button {
-        padding: 0.5rem;
+        padding: var(--space-padding-sm);
         background: transparent;
         border: none;
-        font-size: 1.25rem;
-        color: #667eea;
+        font-size: var(--header-back-button-size);
+        color: var(--header-back-button-color);
         cursor: pointer;
         transition: transform 0.2s;
 
@@ -295,44 +312,44 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 4px;
     }
 
     &__room-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #111827;
+        font-size: var(--typo-heading-4-size-pc);
+        font-weight: var(--primitive-font-weight-bold);
+        color: var(--color-text-primary);
         margin: 0;
     }
 
     &__room-category {
-        font-size: 0.875rem;
-        color: #667eea;
-        font-weight: 500;
+        font-size: var(--typo-body-small-size);
+        color: var(--color-interactive-primary);
+        font-weight: var(--primitive-font-weight-medium);
     }
 
     &__main-content {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        gap: 1rem;
+        gap: var(--grid-gap-large);
         flex: 1;
         min-height: 400px;
-        margin-top: 1rem;
+        margin-top: var(--space-gap-lg);
         align-items: stretch;
     }
 
     &__pending-requests {
-        padding: 1rem;
-        background: #fef3c7;
-        border: 1px solid #fbbf24;
-        border-radius: 8px;
-        margin-bottom: 1rem;
+        padding: var(--space-padding-md);
+        background: var(--color-surface-level-1); // Was yellow specific
+        border: 1px solid var(--color-border-default);
+        border-radius: var(--primitive-radius-md);
+        margin-bottom: var(--space-gap-md);
 
         h4 {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #92400e;
-            margin: 0 0 0.75rem 0;
+            font-size: var(--typo-body-small-size);
+            font-weight: var(--primitive-font-weight-bold);
+            color: var(--color-text-primary);
+            margin: 0 0 var(--space-gap-sm) 0;
         }
     }
 
@@ -340,24 +357,24 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 0.5rem 0;
-        font-size: 0.875rem;
-        color: #78350f;
+        padding: var(--space-padding-xs) 0;
+        font-size: var(--typo-body-small-size);
+        color: var(--color-text-primary);
     }
 
     &__request-actions {
         display: flex;
-        gap: 0.5rem;
+        gap: var(--space-gap-sm);
     }
 
     &__approve-button {
-        padding: 0.5rem 1rem;
-        background: #10b981;
-        color: white;
+        padding: 4px 12px;
+        background: var(--color-status-success);
+        color: var(--primitive-gray-0);
         border: none;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        font-weight: 500;
+        border-radius: var(--primitive-radius-sm);
+        font-size: var(--typo-label-small-size);
+        font-weight: var(--primitive-font-weight-medium);
         cursor: pointer;
         transition: opacity 0.2s;
 
@@ -367,13 +384,13 @@
     }
 
     &__reject-button {
-        padding: 0.5rem 1rem;
-        background: #ef4444;
-        color: white;
+        padding: 4px 12px;
+        background: var(--color-status-error);
+        color: var(--primitive-gray-0);
         border: none;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        font-weight: 500;
+        border-radius: var(--primitive-radius-sm);
+        font-size: var(--typo-label-small-size);
+        font-weight: var(--primitive-font-weight-medium);
         cursor: pointer;
         transition: opacity 0.2s;
 
@@ -393,3 +410,4 @@
     // Chat 컴포넌트 스타일은 mixin으로 생성되므로 여기서는 레이아웃만 정의
     // 실제 Chat 스타일은 위의 @include chat-component('reverse-auction__chat')에서 생성됨
 }
+

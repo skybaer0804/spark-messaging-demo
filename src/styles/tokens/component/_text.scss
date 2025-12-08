@@ -1,0 +1,22 @@
+// ============================================
+// Text Component Tokens
+// ============================================
+
+:root {
+    // Subtitle / Section Title
+    --text-subtitle-size: var(--typo-heading-4-size);
+    --text-subtitle-weight: var(--primitive-font-weight-bold);
+    --text-subtitle-color: var(--color-text-primary);
+    --text-subtitle-margin-bottom: var(--space-gap-md);
+
+    // Body Text
+    --text-body-size: var(--typo-body-medium-size);
+    --text-body-color: var(--color-text-primary);
+    --text-body-line-height: var(--typo-body-medium-line-height);
+
+    // Label Text
+    --text-label-size: var(--typo-label-medium-size);
+    --text-label-weight: var(--primitive-font-weight-medium);
+    --text-label-color: var(--color-text-secondary);
+    --text-label-margin-bottom: var(--space-gap-xs);
+}

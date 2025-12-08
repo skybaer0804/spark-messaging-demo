@@ -1,4 +1,4 @@
-import { h, JSX } from 'preact';
+import { JSX } from 'preact';
 import { useTokens } from '../../../context/TokenProvider';
 import './Button.scss';
 
@@ -6,6 +6,7 @@ export interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
     variant?: 'primary' | 'secondary';
     size?: 'lg' | 'md' | 'sm';
     fullWidth?: boolean;
+    disabled?: boolean;
     children: preact.ComponentChildren;
 }
 

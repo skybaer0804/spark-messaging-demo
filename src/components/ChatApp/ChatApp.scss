@@ -33,7 +33,6 @@
     }
 
     &__room-create-input {
-        // Input 컴포넌트로 대체될 예정이므로 스타일 제거 또는 유지
         flex: 1;
     }
 
@@ -99,12 +98,13 @@
     }
 
     &__room-list-item-badge {
-        font-size: var(--typo-body-xsmall-size);
-        padding: 2px var(--space-gap-sm);
-        background: var(--color-interactive-primary);
-        color: var(--primitive-gray-0);
-        border-radius: 10px;
-        font-weight: var(--primitive-font-weight-bold);
+        // Status Chip Token Application
+        padding: var(--status-chip-padding);
+        border-radius: var(--status-chip-radius);
+        font-size: var(--status-chip-font-size);
+        font-weight: var(--status-chip-font-weight);
+        background: var(--status-badge-background);
+        color: var(--status-badge-text);
     }
 
     &__room-list-item-arrow {
@@ -112,42 +112,46 @@
         color: var(--color-text-tertiary);
     }
 
-    // 채팅 헤더
+    // 채팅 헤더 (Unified Header Application)
     &__chat-header {
         display: flex;
         align-items: center;
         gap: var(--space-gap-md);
-        margin-bottom: var(--space-gap-lg);
-        padding-bottom: var(--space-gap-lg);
-        border-bottom: 1px solid var(--color-border-default);
+        height: var(--header-height);
+        padding: var(--header-padding);
+        background: var(--header-background);
+        border-bottom: var(--header-border-bottom);
+        margin-bottom: var(--space-gap-md); // Add spacing below header
     }
 
     &__back-button {
         padding: var(--space-padding-sm);
         background: transparent;
         border: none;
-        font-size: var(--typo-heading-3-size-pc);
-        color: var(--color-interactive-primary);
+        font-size: var(--header-back-button-size);
+        color: var(--header-back-button-color);
         cursor: pointer;
         transition: transform 0.2s;
+        border-radius: var(--primitive-radius-sm);
 
         &:hover {
             transform: translateX(-2px);
+            background-color: var(--header-back-button-hover-bg);
         }
     }
 
     &__chat-title {
-        font-size: var(--typo-heading-3-size-pc);
-        font-weight: var(--primitive-font-weight-bold);
-        color: var(--color-text-primary);
+        font-size: var(--header-title-size);
+        font-weight: var(--header-title-weight);
+        color: var(--header-title-color);
         margin: 0;
     }
 
-    // 메인 콘텐츠 레이아웃
+    // 메인 콘텐츠 레이아웃 (Grid Layout Token Application)
     &__main-content {
         display: grid;
-        grid-template-columns: 1fr 300px;
-        gap: var(--space-gap-lg);
+        grid-template-columns: var(--grid-columns-sidebar-content);
+        gap: var(--grid-gap-large);
         flex: 1;
         min-height: 0;
 
@@ -157,7 +161,7 @@
 
             .chat-app__sidebar {
                 max-height: 300px;
-                display: none; // 모바일에서는 공간 확보를 위해 일단 숨김 처리 고려
+                display: none; 
             }
         }
     }
@@ -172,9 +176,8 @@
         flex: 1;
         overflow-y: auto;
         padding: var(--space-padding-md);
-        background: var(--color-background-secondary);
-        border: 1px solid var(--color-border-default);
-        border-radius: var(--primitive-radius-md);
+        background: var(--chat-message-list-background);
+        border-radius: var(--primitive-radius-md); // Using primitive as chat token might need specific
         margin-bottom: var(--space-gap-lg);
         display: flex;
         flex-direction: column;
@@ -208,9 +211,10 @@
             align-self: flex-end;
 
             .chat-app__message-content {
-                background: var(--color-interactive-primary);
-                color: var(--primitive-gray-0);
-                border-bottom-right-radius: 4px;
+                background: var(--chat-bubble-me-background);
+                color: var(--chat-bubble-me-text);
+                border-radius: var(--chat-bubble-me-radius);
+                border-top-right-radius: var(--chat-bubble-me-radius-top-right);
             }
 
             .chat-app__message-header {
@@ -223,10 +227,10 @@
             align-self: flex-start;
 
             .chat-app__message-content {
-                background: var(--color-surface-level-1);
-                color: var(--color-text-primary);
-                border: 1px solid var(--color-border-default);
-                border-bottom-left-radius: 4px;
+                background: var(--chat-bubble-other-background);
+                color: var(--chat-bubble-other-text);
+                border-radius: var(--chat-bubble-other-radius);
+                border-top-left-radius: var(--chat-bubble-other-radius-top-left);
             }
 
             .chat-app__message-header {
@@ -242,17 +246,16 @@
         gap: var(--space-gap-xs);
         margin-bottom: 4px;
         padding: 0 var(--space-gap-xs);
-        font-size: var(--typo-body-xsmall-size);
+        font-size: var(--chat-message-sender-size);
     }
 
     &__message-sender {
         font-weight: var(--primitive-font-weight-bold);
-        color: var(--color-interactive-primary);
+        color: var(--chat-message-sender-color);
     }
 
     &__message-content {
         padding: var(--space-padding-sm) var(--space-padding-md);
-        border-radius: var(--primitive-radius-lg);
         font-size: var(--typo-body-medium-size);
         line-height: 1.5;
         word-wrap: break-word;
@@ -260,7 +263,7 @@
 
     &__message-time {
         font-size: var(--typo-body-xsmall-size);
-        color: var(--color-text-tertiary);
+        color: var(--chat-message-time-color);
     }
     
     // 파일/이미지 메시지 관련
@@ -382,8 +385,10 @@
         display: flex;
         flex-direction: column;
         gap: var(--space-gap-md);
-        padding-top: var(--space-padding-md);
-        border-top: 1px solid var(--color-border-default);
+        // padding-top: var(--space-padding-md); // Handled by chat token if needed
+        background: var(--chat-input-area-background);
+        border-top: var(--chat-input-area-border-top);
+        padding: var(--chat-input-area-padding);
     }
 
     &__input-wrapper {
@@ -394,16 +399,17 @@
 
     &__file-button {
         padding: var(--space-padding-sm);
-        background: var(--color-surface-base);
+        background: var(--chat-attachment-bg);
         border: 1px solid var(--color-border-default);
-        border-radius: var(--primitive-radius-md);
+        border-radius: var(--chat-attachment-radius);
+        color: var(--chat-attachment-icon-color);
         font-size: 1.25rem;
         cursor: pointer;
         transition: all 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 48px; // Input height와 맞춤
+        height: 48px;
         width: 48px;
 
         &:hover:not(:disabled) {
@@ -500,6 +506,7 @@
         border-radius: var(--primitive-radius-lg);
         padding: var(--space-padding-md);
         min-height: 0;
+        height: 100%; // Ensure it sticks if grid height is set
     }
 
     &__sidebar-header {
@@ -584,11 +591,12 @@
     }
 
     &__sidebar-item-badge {
-        font-size: var(--typo-body-xsmall-size);
+        // Shared Status/Badge Token
         padding: 1px 6px;
-        background: var(--color-interactive-primary);
-        color: var(--primitive-gray-0);
+        background: var(--status-badge-background);
+        color: var(--status-badge-text);
         border-radius: 10px;
+        font-size: var(--typo-body-xsmall-size);
         font-weight: var(--primitive-font-weight-bold);
     }
 }
@@ -603,3 +611,4 @@
         transform: translateY(0);
     }
 }
+

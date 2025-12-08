@@ -1,4 +1,4 @@
-import { h, JSX } from 'preact';
+import { JSX } from 'preact';
 import { useTokens } from '../../../context/TokenProvider';
 import './Input.scss';
 
@@ -8,6 +8,10 @@ export interface InputProps extends Omit<JSX.HTMLAttributes<HTMLInputElement | H
     error?: boolean;
     multiline?: boolean;
     fullWidth?: boolean;
+    placeholder?: string;
+    disabled?: boolean;
+    value?: string | number;
+    type?: string;
 }
 
 export function Input({ label, helperText, error, multiline = false, fullWidth = true, className = '', ...props }: InputProps) {

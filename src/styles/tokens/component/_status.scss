@@ -1,0 +1,22 @@
+// ============================================
+// Status Chip / Badge Tokens
+// ============================================
+
+:root {
+    --status-chip-padding: 4px 8px;
+    --status-chip-radius: 12px;
+    --status-chip-font-size: var(--typo-label-small-size);
+    --status-chip-font-weight: var(--primitive-font-weight-medium);
+
+    // Active / Connected / Participating
+    --status-active-background: rgba(var(--color-status-success-rgb), 0.1); // Need to check if RGB vars exist, otherwise hardcode or use hex with opacity
+    --status-active-text: var(--color-status-success);
+
+    // Pending
+    --status-pending-background: var(--color-surface-level-2);
+    --status-pending-text: var(--color-text-secondary);
+
+    // Badge (e.g. participation count)
+    --status-badge-background: var(--color-interactive-primary);
+    --status-badge-text: var(--primitive-gray-0);
+}
