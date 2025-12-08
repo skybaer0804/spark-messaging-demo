@@ -17,10 +17,10 @@ export function NotificationApp() {
         <Paper square elevation={0} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box padding="lg">
                 <Stack direction="row" align="center" spacing="md" style={{ marginBottom: '16px' }}>
-                    <div style={{ 
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                        width: '40px', height: '40px', borderRadius: '8px', 
-                        backgroundColor: 'var(--primitive-blue-500)', color: 'white' 
+                    <div style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: '40px', height: '40px', borderRadius: '8px',
+                        backgroundColor: 'var(--primitive-blue-500)', color: 'white'
                     }}>
                         <IconBell size={24} />
                     </div>
@@ -29,7 +29,7 @@ export function NotificationApp() {
                 <Typography variant="body-medium" color="text-secondary" style={{ marginBottom: '24px' }}>
                     Send broadcast messages to all connected users.
                 </Typography>
-                
+
                 <Divider style={{ marginBottom: '24px' }} />
 
                 <Stack spacing="xl">
@@ -49,14 +49,14 @@ export function NotificationApp() {
                         value={scheduleOption}
                         onChange={(e) => setScheduleOption(e.currentTarget.value as any)}
                         options={[
-                            { label: 'Send Immediately', value: 'immediate' },
-                            { label: 'Send after 1 minute', value: '1min' },
-                            { label: 'Send after 5 minutes', value: '5min' }
+                            { label: '즉시', value: 'immediate' },
+                            { label: '1분 후', value: '1min' },
+                            { label: '5분 후', value: '5min' }
                         ]}
                         fullWidth
-                        disabled
+                        disabled={!isConnected}
                     />
-                     {/* Select disabled for demo as scheduling might not be fully implemented in backend yet, or just to keep it simple. 
+                    {/* Select disabled for demo as scheduling might not be fully implemented in backend yet, or just to keep it simple. 
                          Wait, the hook has setScheduleOption, so I should enable it? 
                          Original code had it enabled. Let's enable it. 
                          Wait, Select component has 'disabled' prop? Yes. 
@@ -66,11 +66,11 @@ export function NotificationApp() {
             </Box>
 
             <Box padding="lg" style={{ marginTop: 'auto', borderTop: '1px solid var(--color-border-default)' }}>
-                <Button 
-                    variant="primary" 
-                    fullWidth 
+                <Button
+                    variant="primary"
+                    fullWidth
                     size="lg"
-                    onClick={handleSend} 
+                    onClick={handleSend}
                     disabled={!isConnected || !message.trim()}
                 >
                     <Stack direction="row" align="center" spacing="sm" justify="center">

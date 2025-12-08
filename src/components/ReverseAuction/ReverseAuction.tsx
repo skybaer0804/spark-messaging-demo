@@ -71,7 +71,9 @@ export function ReverseAuction() {
             {currentRoom && (
                 <div className="reverse-auction__main-content">
                     {/* 영상 영역 */}
-                    {videoConferenceAdapter && <VideoConference adapter={videoConferenceAdapter} />}
+                    <div className="reverse-auction__video-section">
+                        {videoConferenceAdapter && <VideoConference adapter={videoConferenceAdapter} />}
+                    </div>
 
                     {/* 채팅 영역 */}
                     <div className="reverse-auction__chat-section">

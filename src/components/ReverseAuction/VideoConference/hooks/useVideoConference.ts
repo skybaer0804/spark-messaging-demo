@@ -38,9 +38,10 @@ export function useVideoConference(adapter: VideoConferenceAdapter) {
 
     // localStream이 변경될 때 로컬 비디오 엘리먼트 업데이트
     useEffect(() => {
-        if (localVideoRef.current && localStream) {
-            if (localVideoRef.current.srcObject !== localStream) {
-                localVideoRef.current.srcObject = localStream;
+        const currentStream = localStreamSignal?.value ?? localStream;
+        if (localVideoRef.current && currentStream) {
+            if (localVideoRef.current.srcObject !== currentStream) {
+                localVideoRef.current.srcObject = currentStream;
                 localVideoRef.current.autoplay = true;
                 localVideoRef.current.playsInline = true;
                 localVideoRef.current.muted = true;
@@ -48,34 +49,54 @@ export function useVideoConference(adapter: VideoConferenceAdapter) {
                     console.error('[ERROR] 로컬 비디오 재생 실패:', error);
                 });
             }
-        } else if (localVideoRef.current && !localStream) {
+        } else if (localVideoRef.current && !currentStream) {
             localVideoRef.current.srcObject = null;
         }
-    }, [localStream]);
+    }, [localStream, localStreamSignal?.value]);
 
     // participant.stream이 변경될 때 비디오 엘리먼트 업데이트
     useEffect(() => {
-        participants.forEach((participant) => {
-            if (participant.socketId === socketId) return; // 로컬 비디오는 제외
+        const currentParticipants = participantsSignal?.value ?? participants;
+        const currentSocketId = socketIdSignal?.value ?? socketId;
+        
+        currentParticipants.forEach((participant) => {
+            if (participant.socketId === currentSocketId) return; // 로컬 비디오는 제외
 
             const videoElement = videoElementRefs.current.get(participant.socketId);
-            if (videoElement) {
-                if (participant.stream) {
-                    if (videoElement.srcObject !== participant.stream) {
-                        videoElement.srcObject = participant.stream;
-                        videoElement.autoplay = true;
-                        videoElement.playsInline = true;
-                        videoElement.muted = false;
+            if (!videoElement) return;
+
+            if (participant.stream) {
+                // 스트림이 다르거나 아직 설정되지 않은 경우에만 업데이트
+                if (videoElement.srcObject !== participant.stream) {
+                    videoElement.srcObject = participant.stream;
+                    videoElement.autoplay = true;
+                    videoElement.playsInline = true;
+                    videoElement.muted = false;
+                    
+                    // canplay 이벤트 후 재생 시도 (가장 안정적)
+                    const handleCanPlay = () => {
                         videoElement.play().catch((error) => {
-                            console.error('[ERROR] 비디오 재생 실패:', error);
+                            // AbortError는 무시
+                            if (error.name !== 'AbortError') {
+                                console.error('[ERROR] 비디오 재생 실패:', { socketId: participant.socketId, error });
+                            }
                         });
+                        videoElement.removeEventListener('canplay', handleCanPlay);
+                    };
+                    
+                    videoElement.addEventListener('canplay', handleCanPlay, { once: true });
+                    
+                    // 이미 재생 가능한 상태면 즉시 시도
+                    if (videoElement.readyState >= 2) {
+                        handleCanPlay();
                     }
-                } else {
-                    videoElement.srcObject = null;
                 }
+            } else {
+                // 스트림이 없으면 정리
+                videoElement.srcObject = null;
             }
         });
-    }, [participants, socketId]);
+    }, [participants, participantsSignal?.value, socketId, socketIdSignal?.value]);
 
     const handleStartLocalStream = async () => {
         await adapter.startLocalStream();

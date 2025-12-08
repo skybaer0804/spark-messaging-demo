@@ -45,14 +45,14 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
                     </Button>
                 )}
             </Box>
-            
+
             <Grid columns={2} gap="sm" style={{ minHeight: '300px' }}>
                 {/* Local Video */}
                 {effectiveIsVideoEnabled && effectiveLocalStream && (
-                    <Paper 
+                    <Paper
                         elevation={0}
-                        style={{ 
-                            position: 'relative', overflow: 'hidden', aspectRatio: '16/9', 
+                        style={{
+                            position: 'relative', overflow: 'hidden', aspectRatio: '16/9',
                             border: '2px solid var(--primitive-primary-500)', padding: 0,
                             backgroundColor: 'black'
                         }}
@@ -62,22 +62,13 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
                                 localVideoRef.current = el;
                                 if (el && effectiveSocketId) {
                                     handleSetVideoRef('local', el);
-                                    if (effectiveLocalStream) {
-                                        el.srcObject = effectiveLocalStream;
-                                        el.autoplay = true;
-                                        el.playsInline = true;
-                                        el.muted = true;
-                                        el.play().catch((error) => {
-                                            console.error('[ERROR] Local video play failed:', error);
-                                        });
-                                    }
                                 }
                             }}
                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
-                        <Box style={{ 
-                            position: 'absolute', bottom: 0, left: 0, right: 0, 
-                            backgroundColor: 'rgba(0, 0, 0, 0.7)', padding: '4px', textAlign: 'center' 
+                        <Box style={{
+                            position: 'absolute', bottom: 0, left: 0, right: 0,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)', padding: '4px', textAlign: 'center'
                         }}>
                             <Typography variant="caption" style={{ color: 'white' }}>
                                 Me ({effectiveSocketId?.substring(0, 6)})
@@ -91,11 +82,11 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
                     .filter((p) => p.socketId !== effectiveSocketId)
                     .slice(0, 4 - (effectiveIsVideoEnabled ? 1 : 0))
                     .map((participant) => (
-                        <Paper 
+                        <Paper
                             key={participant.socketId}
                             elevation={0}
-                            style={{ 
-                                position: 'relative', overflow: 'hidden', aspectRatio: '16/9', 
+                            style={{
+                                position: 'relative', overflow: 'hidden', aspectRatio: '16/9',
                                 border: '1px solid var(--color-border-default)', padding: 0,
                                 backgroundColor: 'black'
                             }}
@@ -103,33 +94,24 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
                             <video
                                 ref={(el) => {
                                     handleSetVideoRef(participant.socketId, el);
-                                    if (el && participant.stream) {
-                                        el.srcObject = participant.stream;
-                                        el.autoplay = true;
-                                        el.playsInline = true;
-                                        el.muted = false;
-                                        el.play().catch((error) => {
-                                            console.error('[ERROR] Remote video play failed:', error);
-                                        });
-                                    }
                                 }}
-                                style={{ 
+                                style={{
                                     width: '100%', height: '100%', objectFit: 'cover',
-                                    display: participant.stream ? 'block' : 'none' 
+                                    display: participant.stream ? 'block' : 'none'
                                 }}
                             />
                             {participant.isVideoEnabled !== false && participant.stream ? (
-                                <Box style={{ 
-                                    position: 'absolute', bottom: 0, left: 0, right: 0, 
-                                    backgroundColor: 'rgba(0, 0, 0, 0.7)', padding: '4px', textAlign: 'center' 
+                                <Box style={{
+                                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.7)', padding: '4px', textAlign: 'center'
                                 }}>
                                     <Typography variant="caption" style={{ color: 'white' }}>
                                         {participant.name} ({participant.role === 'demander' ? 'Host' : 'Participant'})
                                     </Typography>
                                 </Box>
                             ) : (
-                                <Box style={{ 
-                                    width: '100%', height: '100%', display: 'flex', flexDirection: 'column', 
+                                <Box style={{
+                                    width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
                                     alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0',
                                     color: 'var(--color-text-secondary)'
                                 }}>
@@ -149,11 +131,11 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
 
                 {/* Empty Slot */}
                 {effectiveParticipants.length === 0 && !effectiveIsVideoEnabled && (
-                    <Paper 
+                    <Paper
                         variant="outlined"
-                        style={{ 
-                            gridColumn: 'span 2', aspectRatio: '16/9', display: 'flex', 
-                            alignItems: 'center', justifyContent: 'center', borderStyle: 'dashed' 
+                        style={{
+                            gridColumn: 'span 2', aspectRatio: '16/9', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center', borderStyle: 'dashed'
                         }}
                     >
                         <Typography variant="body-medium" color="text-secondary">

@@ -16,6 +16,7 @@ export function useChatApp() {
     const [roomList, setRoomList] = useState<string[]>([]);
     const [uploadingFile, setUploadingFile] = useState<File | null>(null);
     const [uploadProgress, setUploadProgress] = useState<number>(0);
+    const [socketId, setSocketId] = useState<string | null>(null);
 
     const connectionServiceRef = useRef<ConnectionService | null>(null);
     const chatServiceRef = useRef<ChatService | null>(null);
@@ -37,10 +38,22 @@ export function useChatApp() {
         // 연결 상태 관리
         connectionService.onConnected(() => {
             setIsConnected(true);
+            const status = connectionService.getConnectionStatus();
+            if (status.socketId) {
+                setSocketId(status.socketId);
+            }
         });
 
         connectionService.onConnectionStateChange((connected) => {
             setIsConnected(connected);
+            if (connected) {
+                const status = connectionService.getConnectionStatus();
+                if (status.socketId) {
+                    setSocketId(status.socketId);
+                }
+            } else {
+                setSocketId(null);
+            }
         });
 
         connectionService.onError((error) => {
@@ -83,6 +96,9 @@ export function useChatApp() {
         const status = connectionService.getConnectionStatus();
         if (status.isConnected) {
             setIsConnected(true);
+            if (status.socketId) {
+                setSocketId(status.socketId);
+            }
             // 룸 목록 가져오기
             const roomListData = roomService.getRoomList();
             if (roomListData.length > 0) {
@@ -228,5 +244,6 @@ export function useChatApp() {
         sendFile,
         uploadingFile,
         uploadProgress,
+        socketId,
     };
 }

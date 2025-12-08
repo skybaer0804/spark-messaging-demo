@@ -57,7 +57,7 @@ function ReverseAuctionCoreComponent({ store }: ReverseAuctionCoreProps) {
     // 초기 화면 (랜딩)
     if (!currentRoom) {
         return (
-            <Box padding="lg" style={{ height: '100%', overflowY: 'auto', backgroundColor: 'var(--color-bg-secondary)' }}>
+            <Box padding="lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
                 <Stack spacing="lg">
                     <Stack direction="row" align="center" justify="space-between">
                         <Typography variant="h2">Reverse Auction</Typography>
@@ -172,9 +172,9 @@ function ReverseAuctionCoreComponent({ store }: ReverseAuctionCoreProps) {
         );
     }
 
-    // 룸 내부 화면
+    // 룸 내부 화면 - 헤더만 렌더링 (메인 컨텐츠는 ReverseAuction.tsx에서 렌더링)
     return (
-        <Paper square elevation={0} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Box style={{ flexShrink: 0 }}>
             <Box padding="md" style={{ borderBottom: '1px solid var(--color-border-default)' }}>
                 <Stack direction="row" align="center" justify="space-between">
                     <Stack direction="row" align="center" spacing="md">
@@ -213,22 +213,7 @@ function ReverseAuctionCoreComponent({ store }: ReverseAuctionCoreProps) {
                     )}
                 </Stack>
             </Box>
-
-            {/* 메인 컨텐츠 영역은 ReverseAuction.tsx에서 렌더링됨 - 여기서는 헤더와 상태 관리 UI만 제공한다고 볼 수 있으나 
-                ReverseAuction.tsx 구조상 여기 아래엔 아무것도 렌더링 안하나?
-                ReverseAuction.tsx: 
-                <ReverseAuctionCore store={reverseAuctionStore} />
-                {currentRoom && ( <div className="reverse-auction__main-content"> ... </div> )}
-                
-                아, ReverseAuctionCore가 렌더링하는 것과 ReverseAuction이 렌더링하는 것이 형제 관계임.
-                currentRoom이 있으면 ReverseAuctionCore는 헤더만 렌더링하는게 아니라... 
-                ReverseAuctionCore의 currentRoom 조건문 분기:
-                if (!currentRoom) -> 랜딩 페이지 (룸 리스트)
-                return (...) -> 헤더와 룸 상태 UI
-                
-                이 구조가 맞음.
-            */}
-        </Paper>
+        </Box>
     );
 }
 

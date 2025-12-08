@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect } from 'preact/hooks';
 import { memo } from 'preact/compat';
 import type { ChatAdapter, ChatConfig, ChatMessage } from './types';
+import type { Signal } from '@preact/signals';
 import { ChatMessages } from './ChatMessages';
 import { ChatInput } from './ChatInput';
 import { ImageModal } from './ImageModal';
@@ -15,8 +16,7 @@ interface ChatProps {
 
 function ChatComponent({ adapter, config = {}, classNamePrefix = 'chat' }: ChatProps) {
     const baseClass = config.classNamePrefix || classNamePrefix;
-    const [messages, setMessages] = useState<ChatMessage[]>([]);
-
+    
     const {
         input,
         setInput,
@@ -31,26 +31,15 @@ function ChatComponent({ adapter, config = {}, classNamePrefix = 'chat' }: ChatP
         handleCloseImageModal,
     } = useChatCore(adapter);
 
-    // Adapter에서 메시지 업데이트
-    useEffect(() => {
-        // 초기 메시지 로드
-        setMessages(adapter.getMessages());
-
-        // Adapter가 변경될 때마다 메시지 업데이트
-        // 실제 구현에서는 Adapter가 메시지 변경을 알리는 메커니즘 필요
-        // 현재는 컴포넌트가 리렌더링될 때마다 업데이트
-    }, [adapter]);
-
-    // Adapter에서 메시지 업데이트
-    useEffect(() => {
-        // 초기 메시지 로드
-        setMessages(adapter.getMessages());
-    }, [adapter]);
-
-    // 렌더링 시마다 최신 메시지 가져오기 (실제로는 이벤트 기반으로 변경 필요)
-    const currentMessages = adapter.getMessages();
-    if (currentMessages.length !== messages.length || JSON.stringify(currentMessages) !== JSON.stringify(messages)) {
-        setMessages(currentMessages);
+    // Signal 기반 메시지 가져오기 (반응형 업데이트)
+    // Signal.value를 읽으면 자동으로 구독되어 Signal이 변경될 때 컴포넌트가 리렌더링됨
+    const messagesSignal = (adapter as any).getMessagesSignal?.() as Signal<ChatMessage[]> | undefined;
+    const messages = messagesSignal ? messagesSignal.value : adapter.getMessages();
+    
+    // Signal이 있으면 명시적으로 읽어서 구독 (컴포넌트 리렌더링 보장)
+    if (messagesSignal) {
+        // Signal.value를 읽어서 구독
+        void messagesSignal.value;
     }
 
     const showFileUpload = config.showFileUpload !== false && adapter.showFileUpload?.() !== false;
@@ -87,9 +76,6 @@ function ChatComponent({ adapter, config = {}, classNamePrefix = 'chat' }: ChatP
     );
 }
 
-// memo로 메모이제이션하여 adapter 참조가 변경되지 않으면 리렌더링 방지
-export const Chat = memo(ChatComponent, (prevProps, nextProps) => {
-    // adapter 참조가 같으면 리렌더링하지 않음
-    // 실제 상태 변경은 adapter 내부에서 관리되므로 여기서는 참조만 비교
-    return prevProps.adapter === nextProps.adapter && prevProps.classNamePrefix === nextProps.classNamePrefix;
-});
+// Signal을 사용하는 경우 memo를 사용하지 않음 (Signal이 자동으로 리렌더링 처리)
+// Signal이 없으면 memo 사용
+export const Chat = ChatComponent;

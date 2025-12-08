@@ -32,6 +32,7 @@ export function ChatApp() {
         sendFile,
         uploadingFile,
         uploadProgress,
+        socketId,
     } = useChatApp();
 
     const messagesRef = useRef<HTMLDivElement>(null);
@@ -146,7 +147,7 @@ export function ChatApp() {
 
     if (!currentRoom) {
         return (
-             <Box style={{ height: '100vh', display: 'flex' }}>
+             <Box style={{ display: 'flex', minHeight: '100%' }}>
                  <Box style={{ width: '300px', flexShrink: 0 }}>
                     <Sidebar />
                  </Box>
@@ -159,13 +160,13 @@ export function ChatApp() {
 
     // Active Chat Room
     return (
-        <Box style={{ height: '100vh', display: 'flex' }}>
+        <Box style={{ display: 'flex', minHeight: '100%' }}>
             <Box style={{ width: '300px', flexShrink: 0 }}>
                 <Sidebar />
             </Box>
-            <Flex direction="column" style={{ flex: 1, backgroundColor: 'var(--color-background-default)' }}>
+            <Flex direction="column" style={{ flex: 1, backgroundColor: 'var(--color-background-default)', minHeight: '100%' }}>
                 {/* Chat Header */}
-                <Paper square elevation={1} padding="md" style={{ zIndex: 10 }}>
+                <Paper square elevation={1} padding="md" style={{ zIndex: 10, flexShrink: 0 }}>
                     <Stack direction="row" align="center" spacing="md">
                         <IconButton onClick={leaveRoom}><IconArrowLeft /></IconButton>
                         <Avatar variant="rounded">{currentRoom.substring(0, 2)}</Avatar>
@@ -174,56 +175,69 @@ export function ChatApp() {
                 </Paper>
 
                 {/* Messages Area */}
-                <Box style={{ flex: 1, overflowY: 'auto', padding: 'var(--space-gap-lg)' }} ref={messagesRef}>
+                <Box style={{ flex: 1, overflow: 'hidden', padding: 'var(--space-gap-lg)', display: 'flex', flexDirection: 'column', minHeight: 0 }} ref={messagesRef}>
                     {messages.length === 0 ? (
                         <Box style={{ textAlign: 'center', marginTop: '40px' }}>
                             <Typography variant="body-medium" color="text-secondary">No messages yet. Say hello!</Typography>
                         </Box>
                     ) : (
-                        <Stack spacing="md">
+                        <Stack spacing="md" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
                             {messages.map((msg) => {
+                                const isOwnMessage = msg.senderId === socketId || msg.type === 'sent';
                                 return (
-                                    <Flex key={msg.id} direction="column" align="flex-start" style={{ maxWidth: '70%' }}>
-                                        <Flex align="center" gap="sm" style={{ marginBottom: '4px' }}>
-                                            <Typography variant="caption" color="text-secondary">{msg.senderId || 'Unknown'}</Typography>
-                                            <Typography variant="caption" color="text-tertiary">{formatTimestamp(msg.timestamp)}</Typography>
-                                        </Flex>
-                                        <Paper 
-                                            elevation={1} 
-                                            padding="sm" 
-                                            style={{ 
-                                                borderRadius: '0 12px 12px 12px', 
-                                                backgroundColor: 'var(--color-surface-level-1)'
-                                            }}
+                                    <Flex 
+                                        key={msg.id} 
+                                        direction="column" 
+                                        align={isOwnMessage ? 'flex-end' : 'flex-start'} 
+                                        style={{ width: '100%' }}
+                                    >
+                                        <Flex 
+                                            direction="column" 
+                                            align={isOwnMessage ? 'flex-end' : 'flex-start'}
+                                            style={{ maxWidth: '70%' }}
                                         >
-                                            {msg.fileData ? (
-                                                 <Box>
-                                                     {msg.fileData.fileType === 'image' ? (
-                                                         <Box>
-                                                             <img 
-                                                                 src={msg.fileData.data} 
-                                                                 alt={msg.fileData.fileName}
-                                                                 style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px', cursor: 'pointer' }}
-                                                                 onClick={() => handleImageClick(msg.fileData!.data, msg.fileData!.fileName)}
-                                                             />
-                                                         </Box>
-                                                     ) : (
-                                                         <Flex align="center" gap="sm">
-                                                             <IconFile size={24} />
+                                            <Flex align="center" gap="sm" style={{ marginBottom: '4px' }}>
+                                                <Typography variant="caption" color="text-secondary">{msg.senderId || 'Unknown'}</Typography>
+                                                <Typography variant="caption" color="text-tertiary">{formatTimestamp(msg.timestamp)}</Typography>
+                                            </Flex>
+                                            <Paper 
+                                                elevation={1} 
+                                                padding="sm" 
+                                                style={{ 
+                                                    borderRadius: isOwnMessage ? '12px 0 12px 12px' : '0 12px 12px 12px', 
+                                                    backgroundColor: isOwnMessage ? 'var(--color-interactive-primary)' : 'var(--color-surface-level-1)',
+                                                    color: isOwnMessage ? 'var(--primitive-gray-0)' : 'inherit'
+                                                }}
+                                            >
+                                                {msg.fileData ? (
+                                                     <Box>
+                                                         {msg.fileData.fileType === 'image' ? (
                                                              <Box>
-                                                                 <Typography variant="body-small" style={{ fontWeight: 'bold' }}>{msg.fileData.fileName}</Typography>
-                                                                 <Typography variant="caption">{formatFileSize(msg.fileData.size)}</Typography>
+                                                                 <img 
+                                                                     src={msg.fileData.data} 
+                                                                     alt={msg.fileData.fileName}
+                                                                     style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '4px', cursor: 'pointer' }}
+                                                                     onClick={() => handleImageClick(msg.fileData!.data, msg.fileData!.fileName)}
+                                                                 />
                                                              </Box>
-                                                             <IconButton size="small" onClick={() => downloadFile(msg.fileData!.fileName, msg.fileData!.data, msg.fileData!.mimeType)}>
-                                                                 <IconDownload size={16} />
-                                                             </IconButton>
-                                                         </Flex>
-                                                     )}
-                                                 </Box>
-                                            ) : (
-                                                <Typography variant="body-medium">{msg.content}</Typography>
-                                            )}
-                                        </Paper>
+                                                         ) : (
+                                                             <Flex align="center" gap="sm">
+                                                                 <IconFile size={24} />
+                                                                 <Box>
+                                                                     <Typography variant="body-small" style={{ fontWeight: 'bold' }}>{msg.fileData.fileName}</Typography>
+                                                                     <Typography variant="caption">{formatFileSize(msg.fileData.size)}</Typography>
+                                                                 </Box>
+                                                                 <IconButton size="small" onClick={() => downloadFile(msg.fileData!.fileName, msg.fileData!.data, msg.fileData!.mimeType)}>
+                                                                     <IconDownload size={16} />
+                                                                 </IconButton>
+                                                             </Flex>
+                                                         )}
+                                                     </Box>
+                                                ) : (
+                                                    <Typography variant="body-medium">{msg.content}</Typography>
+                                                )}
+                                            </Paper>
+                                        </Flex>
                                     </Flex>
                                 );
                             })}
@@ -232,7 +246,7 @@ export function ChatApp() {
                 </Box>
 
                 {/* Input Area */}
-                <Paper square elevation={4} padding="md">
+                <Paper square elevation={4} padding="md" style={{ flexShrink: 0 }}>
                     <Stack spacing="sm">
                         {/* File Previews */}
                         {selectedFiles.length > 0 && (

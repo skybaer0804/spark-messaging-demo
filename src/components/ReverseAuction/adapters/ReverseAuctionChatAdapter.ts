@@ -3,6 +3,7 @@ import type { ChatStore } from '../stores/ChatStore';
 import type { ReverseAuctionStore } from '../stores/ReverseAuctionStore';
 import { ChatService } from '../../../services/ChatService';
 import { FileTransferService } from '../../../services/FileTransferService';
+import type { Signal } from '@preact/signals';
 
 export class ReverseAuctionChatAdapter implements ChatAdapter {
     private chatStore: ChatStore;
@@ -33,6 +34,11 @@ export class ReverseAuctionChatAdapter implements ChatAdapter {
             senderId: msg.senderId,
             fileData: msg.fileData,
         }));
+    }
+
+    // Signal 기반 접근 (반응형 업데이트)
+    getMessagesSignal(): Signal<ChatMessage[]> {
+        return this.chatStore.messages as Signal<ChatMessage[]>;
     }
 
     async sendMessage(content: string): Promise<void> {

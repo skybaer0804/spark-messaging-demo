@@ -172,59 +172,13 @@ export class WebRTCService {
                     videoTracks: remoteStream.getVideoTracks().length,
                     audioTracks: remoteStream.getAudioTracks().length,
                 });
-                
-                // ParticipantService에 스트림 업데이트 알림
+
+                // ParticipantService에 스트림 업데이트 알림 (Store를 통해 전달)
+                // 실제 비디오 엘리먼트 설정은 useEffect에서 처리
                 if (this.streamReceivedCallback) {
                     console.log('[DEBUG] streamReceivedCallback 호출:', targetSocketId);
                     this.streamReceivedCallback(targetSocketId, remoteStream);
                 }
-
-                // 비디오 엘리먼트에 스트림 설정 (재시도 로직 포함)
-                const setStreamToVideoElement = (retryCount = 0) => {
-                    const videoElement = this.videoRefs.get(targetSocketId);
-                    console.log('[DEBUG] 비디오 엘리먼트 찾기 시도:', {
-                        targetSocketId,
-                        retryCount,
-                        found: !!videoElement,
-                        allVideoRefs: Array.from(this.videoRefs.keys()),
-                    });
-                    
-                    if (videoElement) {
-                        try {
-                            console.log('[DEBUG] 비디오 엘리먼트에 스트림 설정:', {
-                                targetSocketId,
-                                streamId: remoteStream.id,
-                                currentSrcObject: videoElement.srcObject ? '있음' : '없음',
-                            });
-                            videoElement.srcObject = remoteStream;
-                            videoElement.autoplay = true;
-                            videoElement.playsInline = true;
-                            videoElement.muted = false;
-                            videoElement.play().then(() => {
-                                console.log('[DEBUG] 비디오 재생 성공:', targetSocketId);
-                            }).catch((error) => {
-                                console.error('[ERROR] 비디오 재생 실패:', { targetSocketId, error });
-                            });
-                        } catch (error) {
-                            console.error('[ERROR] 비디오 엘리먼트에 스트림 설정 실패:', { targetSocketId, error });
-                        }
-                    } else if (retryCount < 10) {
-                        // 비디오 엘리먼트가 아직 없으면 재시도 (최대 10회, 총 1초)
-                        setTimeout(() => {
-                            setStreamToVideoElement(retryCount + 1);
-                        }, 100);
-                    } else {
-                        console.warn('[WARN] 비디오 엘리먼트를 찾을 수 없음:', {
-                            targetSocketId,
-                            availableRefs: Array.from(this.videoRefs.keys()),
-                        });
-                    }
-                };
-                
-                // 즉시 시도
-                setTimeout(() => {
-                    setStreamToVideoElement();
-                }, 100);
             } else {
                 console.warn('[WARN] 원격 스트림이 없음:', targetSocketId);
             }
