@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import sparkMessagingClient from './config/sparkMessaging';
-import { Header } from './layouts/Header/Header';
 import { Content } from './layouts/Content/Content';
 import { ChatApp } from './components/ChatApp/ChatApp';
 import { NotificationApp } from './components/NotificationApp/NotificationApp';
@@ -144,10 +143,13 @@ export function App() {
 
     return (
         <div className="app">
-            <Header title={getHeaderTitle()} isConnected={isConnected} socketId={socketId} />
             <div className="app__main">
                 <Sidebar currentView={currentView} onViewChange={handleViewChange} />
-                <Content>
+                <Content
+                    headerTitle={getHeaderTitle()}
+                    isConnected={isConnected}
+                    socketId={socketId}
+                >
                     {currentView === 'chat' && <ChatApp />}
                     {currentView === 'notification' && <NotificationApp />}
                     {currentView === 'reverse-auction' && <ReverseAuction />}

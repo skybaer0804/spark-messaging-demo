@@ -3,9 +3,10 @@ import './Radio.scss';
 
 export interface RadioProps extends Omit<JSX.HTMLAttributes<HTMLInputElement>, 'onChange'> {
     checked?: boolean;
+    defaultChecked?: boolean;
     disabled?: boolean;
     onChange?: (checked: boolean, event: Event) => void;
-    value?: string | number | readonly string[];
+    value?: string | number;
     name?: string;
     color?: 'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info';
     size?: 'small' | 'medium';

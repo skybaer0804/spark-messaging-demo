@@ -1,0 +1,64 @@
+@use '/src/styles/tokens/index';
+
+.collapsible {
+    width: 100%;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: var(--space-padding-button-sm);
+        background: transparent;
+        border: none;
+        border-radius: var(--primitive-radius-md);
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        text-align: left;
+
+        &:hover {
+            background: var(--color-background-secondary);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--color-interactive-primary);
+            outline-offset: 2px;
+        }
+    }
+
+    &__toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--color-text-secondary);
+        transition: transform 0.2s ease;
+    }
+
+    &__icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--color-text-secondary);
+    }
+
+    &__title {
+        flex: 1;
+        color: var(--color-text-primary);
+        font-weight: var(--primitive-font-weight-medium);
+    }
+
+    &__content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+        opacity: 0;
+
+        &--open {
+            max-height: 2000px;
+            opacity: 1;
+            transition: max-height 0.3s ease-in, opacity 0.2s ease-in;
+        }
+    }
+}
+

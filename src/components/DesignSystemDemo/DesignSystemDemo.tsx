@@ -279,6 +279,76 @@ export function DesignSystemDemo() {
                         </Flex>
                     </Paper>
 
+                    {/* Selection Controls */}
+                    <Paper padding="lg">
+                        <Typography variant="h2" style={{ marginBottom: '16px' }}>Selection Controls</Typography>
+                        <Grid columns={3} gap="xl">
+                            <Stack spacing="md">
+                                <Typography variant="h3">Switch</Typography>
+                                <Flex gap="md" align="center">
+                                    <Switch defaultChecked />
+                                    <Switch />
+                                    <Switch disabled defaultChecked />
+                                    <Switch color="success" defaultChecked />
+                                </Flex>
+                            </Stack>
+                            <Stack spacing="md">
+                                <Typography variant="h3">Checkbox</Typography>
+                                <Flex gap="md" align="center">
+                                    <Checkbox defaultChecked />
+                                    <Checkbox />
+                                    <Checkbox disabled defaultChecked />
+                                    <Checkbox color="error" defaultChecked />
+                                </Flex>
+                            </Stack>
+                            <Stack spacing="md">
+                                <Typography variant="h3">Radio</Typography>
+                                <Flex gap="md" align="center">
+                                    <Radio name="radio-demo" value="1" defaultChecked />
+                                    <Radio name="radio-demo" value="2" />
+                                    <Radio name="radio-demo" value="3" disabled />
+                                    <Radio name="radio-demo-2" value="4" color="warning" defaultChecked />
+                                </Flex>
+                            </Stack>
+                        </Grid>
+                    </Paper>
+
+                    {/* Feedback */}
+                    <Paper padding="lg">
+                        <Typography variant="h2" style={{ marginBottom: '16px' }}>Feedback</Typography>
+                        <Stack spacing="lg">
+                            <Box>
+                                <Typography variant="h3" style={{ marginBottom: '12px' }}>Alerts</Typography>
+                                <Stack spacing="sm">
+                                    <Alert severity="success" onClose={() => { }}>This is a success alert — check it out!</Alert>
+                                    <Alert severity="info" variant="outlined">This is an info alert — check it out!</Alert>
+                                    <Alert severity="warning" variant="filled">This is a warning alert — check it out!</Alert>
+                                    <Alert severity="error">This is an error alert — check it out!</Alert>
+                                </Stack>
+                            </Box>
+
+                            <Grid columns={2} gap="xl">
+                                <Box>
+                                    <Typography variant="h3" style={{ marginBottom: '12px' }}>Circular Progress</Typography>
+                                    <Flex gap="lg" align="center">
+                                        <CircularProgress />
+                                        <CircularProgress color="secondary" />
+                                        <CircularProgress variant="determinate" value={75} color="success" />
+                                    </Flex>
+                                </Box>
+                                <Box>
+                                    <Typography variant="h3" style={{ marginBottom: '12px' }}>Skeleton</Typography>
+                                    <Stack spacing="xs">
+                                        <Skeleton variant="text" width={210} />
+                                        <Skeleton variant="circular" width={40} height={40} />
+                                        <Skeleton variant="rectangular" width={210} height={60} />
+                                        <Skeleton variant="rounded" width={210} height={60} />
+                                    </Stack>
+                                </Box>
+                            </Grid>
+                        </Stack>
+                    </Paper>
+
                 </Stack>
             </Container>
         </div>

@@ -2,38 +2,66 @@
 
 .sidebar {
     display: none;
-    width: 240px; // 적절한 너비로 조정 (토큰화 고려 가능)
+    width: 280px;
     background: var(--color-background-primary);
     border-right: 1px solid var(--color-border-default);
     flex-shrink: 0;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     @media (min-width: 769px) {
         display: block;
     }
 
+    &__container {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: var(--space-padding-card-md);
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        padding: var(--space-padding-button-sm);
+        margin-bottom: var(--space-gap-lg);
+    }
+
+    &__logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--color-interactive-primary);
+    }
+
+    &__header-title {
+        font-weight: var(--primitive-font-weight-semibold);
+        color: var(--color-text-primary);
+    }
+
     &__nav {
         display: flex;
         flex-direction: column;
-        padding: var(--space-padding-card-md);
-        gap: var(--space-gap-sm);
+        gap: var(--space-gap-xs);
     }
 
-    &__item {
+    &__nav-item {
         display: flex;
         align-items: center;
-        padding: var(--space-padding-button-md); // 12px
+        gap: var(--space-gap-sm);
+        padding: var(--space-padding-button-sm);
         background: transparent;
         border: none;
-        border-radius: var(--primitive-radius-md); // 6px
+        border-radius: var(--primitive-radius-md);
         cursor: pointer;
         transition: all 0.2s ease;
         text-align: left;
-
-        // Typography
-        font-family: var(--primitive-font-family);
-        font-size: var(--typo-body-medium-size);
-        font-weight: var(--primitive-font-weight-regular);
         color: var(--color-text-secondary);
+
+        svg {
+            flex-shrink: 0;
+        }
 
         &:hover {
             background: var(--color-background-secondary);
@@ -41,10 +69,9 @@
         }
 
         &--active {
-            // KRDS Primary Color 적용
             background: var(--color-interactive-primary);
             color: var(--primitive-gray-0);
-            font-weight: var(--primitive-font-weight-bold);
+            font-weight: var(--primitive-font-weight-semibold);
 
             &:hover {
                 background: var(--color-interactive-primary);
@@ -52,9 +79,5 @@
                 opacity: 0.9;
             }
         }
-    }
-
-    &__item-label {
-        width: 100%;
     }
 }

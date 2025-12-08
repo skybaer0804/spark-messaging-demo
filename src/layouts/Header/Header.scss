@@ -5,12 +5,12 @@
     justify-content: space-between;
     align-items: center;
     height: 60px;
-    padding: 0 20px;
-    background: var(--color-interactive-primary); // Metabase Blue Style
-    color: white;
+    padding: 0 var(--space-padding-card-md);
+    background: var(--color-interactive-primary);
+    color: var(--primitive-gray-0);
     box-shadow: var(--shadow-sm);
     flex-shrink: 0;
-    z-index: 100;
+    width: 100%;
 
     &__left,
     &__right {
