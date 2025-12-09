@@ -3,7 +3,6 @@
 // 여기서는 reverse-auction-core 클래스도 reverse-auction과 동일하게 처리
 
 .reverse-auction-core {
-    // ReverseAuction.scss의 모든 스타일을 상속
-    @extend .reverse-auction;
+  // ReverseAuction.scss의 모든 스타일을 상속
+  @extend .reverse-auction;
 }
-

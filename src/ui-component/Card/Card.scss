@@ -1,0 +1,45 @@
+@use '/src/styles/tokens/index';
+
+.card {
+  background-color: var(--card-background);
+  border: var(--card-border-width) solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition:
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+
+  &.interactive {
+    cursor: var(--card-interactive-cursor);
+    transition: var(--card-interactive-transition);
+
+    &:hover {
+      box-shadow: var(--card-hover-shadow);
+      background-color: var(--card-hover-background);
+    }
+  }
+
+  &__header {
+    padding: var(--card-header-padding);
+    border-bottom: 1px solid var(--card-header-border-bottom);
+    display: flex;
+    align-items: center;
+    gap: var(--card-header-gap);
+  }
+
+  &__body {
+    padding: var(--card-body-padding);
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-body-gap);
+  }
+
+  &__footer {
+    padding: var(--card-footer-padding);
+    border-top: 1px solid var(--card-footer-border-top);
+    display: flex;
+    align-items: center;
+    gap: var(--card-footer-gap);
+  }
+}

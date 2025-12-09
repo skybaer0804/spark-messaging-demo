@@ -1,0 +1,44 @@
+// ============================================
+// SCSS Variables - Semantic Space Tokens
+// ============================================
+
+@use '../scss-variables/primitive-space' as space;
+
+// *** Layout Gap ***
+$space-layout-header-breadcrumb: space.$primitive-space-10; // 40px
+$space-layout-left-contents: space.$primitive-space-16; // 64px
+$space-layout-contents-right: space.$primitive-space-10; // 40px
+$space-layout-contents-footer: space.$primitive-space-16; // 64px
+$space-layout-breadcrumb-contents: space.$primitive-space-10; // 40px
+
+// *** Content Gap ***
+$space-content-gap-lg: space.$primitive-space-6; // 24px
+$space-content-gap-md: space.$primitive-space-4; // 16px
+$space-content-gap-sm: space.$primitive-space-2; // 8px
+
+// *** Component Gap ***
+$space-gap-xl: space.$primitive-space-6; // 24px
+$space-gap-lg: space.$primitive-space-4; // 16px
+$space-gap-md: space.$primitive-space-3; // 12px
+$space-gap-sm: space.$primitive-space-2; // 8px
+$space-gap-xs: space.$primitive-space-1; // 4px
+
+// *** Padding ***
+// Card/Modal/InfoBox/Alert Container
+$space-padding-card-lg: space.$primitive-space-6; // 24px
+$space-padding-card-md: space.$primitive-space-4; // 16px
+
+// Input Field
+$space-padding-input: space.$primitive-space-4; // 16px
+$space-padding-input-sm: space.$primitive-space-3; // 12px
+
+// Button
+$space-padding-button-lg: space.$primitive-space-4; // 16px
+$space-padding-button-md: space.$primitive-space-3; // 12px
+$space-padding-button-sm: space.$primitive-space-2; // 8px
+
+// *** Margin ***
+$space-margin-lg: space.$primitive-space-6;
+$space-margin-md: space.$primitive-space-4;
+$space-margin-sm: space.$primitive-space-2;
+$space-margin-xs: space.$primitive-space-1;

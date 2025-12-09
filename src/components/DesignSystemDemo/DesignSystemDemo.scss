@@ -1,0 +1,110 @@
+@use '/src/styles/tokens/index';
+
+.design-system-demo {
+  padding: var(--space-padding-xl);
+  background-color: var(--color-background-primary);
+  min-height: 100%;
+  box-sizing: border-box;
+
+  &__header {
+    margin-bottom: var(--space-gap-xl);
+    padding-bottom: var(--space-padding-lg);
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  &__header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-gap-md);
+  }
+
+  &__title {
+    font-family: var(--primitive-font-family);
+    font-size: var(--typo-display-small-size-pc);
+    font-weight: var(--primitive-font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+
+  &__description {
+    font-size: var(--typo-body-large-size);
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--space-gap-xl);
+  }
+
+  &__section {
+    background-color: var(--color-surface-level-1);
+    padding: var(--space-padding-card-lg);
+    border-radius: var(--primitive-radius-lg);
+    border: 1px solid var(--color-border-default);
+  }
+
+  &__section-title {
+    font-size: var(--typo-heading-3-size-pc);
+    font-weight: var(--primitive-font-weight-bold);
+    color: var(--color-text-primary);
+    margin: 0 0 var(--space-gap-lg) 0;
+    padding-bottom: var(--space-padding-sm);
+    border-bottom: 2px solid var(--color-interactive-primary);
+    display: inline-block;
+  }
+
+  &__color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: var(--space-gap-md);
+  }
+
+  &__color-item {
+    height: 80px;
+    border-radius: var(--primitive-radius-md);
+    display: flex;
+    align-items: flex-end;
+    padding: var(--space-padding-sm);
+    color: white;
+    font-size: var(--typo-body-xsmall-size);
+    font-weight: var(--primitive-font-weight-bold);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  &__typography-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-gap-md);
+    color: var(--color-text-primary);
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+  }
+
+  &__component-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-gap-md);
+    margin-bottom: var(--space-gap-md);
+    align-items: center;
+  }
+
+  &__component-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-gap-md);
+  }
+
+  &__card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-gap-md);
+  }
+}

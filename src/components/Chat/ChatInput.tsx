@@ -1,122 +1,125 @@
-import { useRef, useEffect } from 'preact/hooks';
+import { useRef } from 'preact/hooks';
 import { memo } from 'preact/compat';
 import { FilePreview } from './FilePreview';
+import { Input } from '@/ui-component/Input/Input';
+import { IconButton } from '@/ui-component/Button/IconButton';
+import { Paper } from '@/ui-component/Paper/Paper';
+import { Stack } from '@/ui-component/Layout/Stack';
+import { Flex } from '@/ui-component/Layout/Flex';
+import { Box } from '@/ui-component/Layout/Box';
+import { IconPaperclip, IconSend } from '@tabler/icons-react';
 import './Chat.scss';
 
 interface ChatInputProps {
-    input: string;
-    setInput: (value: string) => void;
-    selectedFiles: File[];
-    uploadingFile?: File | null;
-    uploadProgress?: number;
-    isConnected: boolean;
-    placeholder?: string;
-    showFileUpload?: boolean;
-    onSendMessage: () => void;
-    onSendFile: () => void;
-    onFileSelect: (e: Event) => void;
-    onFileRemove: (index: number) => void;
-    onKeyPress: (e: KeyboardEvent) => void;
-    classNamePrefix?: string;
+  input: string;
+  setInput: (value: string) => void;
+  selectedFiles: File[];
+  uploadingFile?: File | null;
+  uploadProgress?: number;
+  isConnected: boolean;
+  placeholder?: string;
+  showFileUpload?: boolean;
+  onSendMessage: () => void;
+  onSendFile: () => void;
+  onFileSelect: (e: Event) => void;
+  onFileRemove: (index: number) => void;
+  onKeyPress: (e: KeyboardEvent) => void;
+  classNamePrefix?: string;
 }
 
 function ChatInputComponent({
-    input,
-    setInput,
-    selectedFiles,
-    uploadingFile,
-    uploadProgress = 0,
-    isConnected,
-    placeholder,
-    showFileUpload = true,
-    onSendMessage,
-    onSendFile,
-    onFileSelect,
-    onFileRemove,
-    onKeyPress,
-    classNamePrefix = 'chat',
+  input,
+  setInput,
+  selectedFiles,
+  uploadingFile,
+  uploadProgress = 0,
+  isConnected,
+  placeholder,
+  showFileUpload = true,
+  onSendMessage,
+  onSendFile,
+  onFileSelect,
+  onFileRemove,
+  onKeyPress,
 }: ChatInputProps) {
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const baseClass = classNamePrefix;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // textarea 높이 자동 조절
-    useEffect(() => {
-        const textarea = textareaRef.current;
-        if (textarea) {
-            // 높이 초기화
-            textarea.style.height = 'auto';
-            // 스크롤 높이에 맞춰 조절 (최대 5줄)
-            const scrollHeight = textarea.scrollHeight;
-            const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 24;
-            const minHeight = lineHeight * 2 + 24; // 기본 2줄
-            const maxHeight = lineHeight * 5 + 24; // 최대 5줄
-            
-            const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
-            textarea.style.height = `${targetHeight}px`;
-        }
-    }, [input]);
-
-    return (
-        <div className={`${baseClass}__input-container`}>
-            <FilePreview
-                files={selectedFiles}
-                uploadingFile={uploadingFile}
-                uploadProgress={uploadProgress}
-                onRemove={onFileRemove}
-                classNamePrefix={classNamePrefix}
+  return (
+    <Paper
+      square
+      elevation={4}
+      padding="md"
+      style={{ flexShrink: 0, borderTop: '1px solid var(--color-border-default)' }}
+    >
+      <Stack spacing="sm">
+        <FilePreview
+          files={selectedFiles}
+          uploadingFile={uploadingFile}
+          uploadProgress={uploadProgress}
+          onRemove={onFileRemove}
+        />
+        <Flex gap="sm" align="center">
+          {showFileUpload && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                onChange={onFileSelect}
+                style={{ display: 'none' }}
+                multiple
+                accept="image/*,.xlsx,.xls,.csv,.md,.docx,.doc,.pdf"
+              />
+              <IconButton onClick={() => fileInputRef.current?.click()} color="secondary" size="medium">
+                <IconPaperclip />
+              </IconButton>
+            </>
+          )}
+          <Box style={{ flex: 1 }}>
+            <Input
+              multiline
+              value={input}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                setInput(target.value);
+                // 높이 자동 조절
+                target.style.height = 'auto';
+                const scrollHeight = target.scrollHeight;
+                const lineHeight = parseFloat(getComputedStyle(target).lineHeight) || 24;
+                const minHeight = lineHeight * 2 + 24;
+                const maxHeight = lineHeight * 5 + 24;
+                const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+                target.style.height = `${targetHeight}px`;
+              }}
+              onKeyPress={onKeyPress}
+              placeholder={placeholder || (isConnected ? '메시지를 입력하세요...' : '연결 중...')}
+              disabled={!isConnected}
+              fullWidth
+              rows={2}
             />
-            <div className={`${baseClass}__input-wrapper`}>
-                <textarea
-                    ref={textareaRef}
-                    className={`${baseClass}__input`}
-                    value={input}
-                    onInput={(e) => setInput(e.currentTarget.value)}
-                    onKeyPress={onKeyPress}
-                    placeholder={placeholder || (isConnected ? '메시지를 입력하세요...' : '연결 중...')}
-                    disabled={!isConnected}
-                    rows={2}
-                />
-            </div>
-            <div className={`${baseClass}__input-actions`}>
-                {showFileUpload && (
-                    <>
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            className={`${baseClass}__file-input`}
-                            onChange={onFileSelect}
-                            accept="image/*,.xlsx,.xls,.csv,.md,.docx,.doc,.pdf"
-                            multiple
-                            id={`${baseClass}-file-input`}
-                            style={{ display: 'none' }}
-                        />
-                        <label htmlFor={`${baseClass}-file-input`} className={`${baseClass}__file-label`} title="파일 첨부">
-                            📎
-                        </label>
-                    </>
-                )}
-                <button
-                    onClick={selectedFiles.length > 0 ? onSendFile : onSendMessage}
-                    disabled={!isConnected || (!input.trim() && selectedFiles.length === 0)}
-                    className={`${baseClass}__send-button`}
-                >
-                    전송
-                </button>
-            </div>
-        </div>
-    );
+          </Box>
+          <IconButton
+            onClick={selectedFiles.length > 0 ? onSendFile : onSendMessage}
+            color="primary"
+            disabled={!isConnected || (!input.trim() && selectedFiles.length === 0)}
+            size="medium"
+          >
+            <IconSend />
+          </IconButton>
+        </Flex>
+      </Stack>
+    </Paper>
+  );
 }
 
 // memo로 메모이제이션하여 props가 변경되지 않으면 리렌더링 방지
 export const ChatInput = memo(ChatInputComponent, (prevProps, nextProps) => {
-    return (
-        prevProps.input === nextProps.input &&
-        prevProps.isConnected === nextProps.isConnected &&
-        prevProps.uploadProgress === nextProps.uploadProgress &&
-        prevProps.selectedFiles.length === nextProps.selectedFiles.length &&
-        prevProps.classNamePrefix === nextProps.classNamePrefix &&
-        prevProps.showFileUpload === nextProps.showFileUpload &&
-        prevProps.placeholder === nextProps.placeholder
-    );
+  return (
+    prevProps.input === nextProps.input &&
+    prevProps.isConnected === nextProps.isConnected &&
+    prevProps.uploadProgress === nextProps.uploadProgress &&
+    prevProps.selectedFiles.length === nextProps.selectedFiles.length &&
+    prevProps.classNamePrefix === nextProps.classNamePrefix &&
+    prevProps.showFileUpload === nextProps.showFileUpload &&
+    prevProps.placeholder === nextProps.placeholder
+  );
 });

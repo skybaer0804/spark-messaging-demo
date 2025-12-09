@@ -1,0 +1,40 @@
+// ============================================
+// SCSS Variables - Primitive Space Tokens
+// 컴파일 타임에 값이 치환되어 성능 최적화
+// ============================================
+
+// Base Unit
+$primitive-space-base: 8px;
+
+// Space Scale
+$primitive-space-1: 4px; // 0.5 unit
+$primitive-space-2: 8px; // 1 unit
+$primitive-space-3: 12px; // 1.5 unit
+$primitive-space-4: 16px; // 2 unit
+$primitive-space-5: 20px; // 2.5 unit
+$primitive-space-6: 24px; // 3 unit
+$primitive-space-7: 28px; // 3.5 unit
+$primitive-space-8: 32px; // 4 unit
+$primitive-space-9: 36px; // 4.5 unit
+$primitive-space-10: 40px; // 5 unit
+$primitive-space-11: 44px; // 5.5 unit
+$primitive-space-12: 48px; // 6 unit
+$primitive-space-13: 52px; // 6.5 unit
+$primitive-space-14: 56px; // 7 unit
+$primitive-space-15: 60px; // 7.5 unit
+$primitive-space-16: 64px; // 8 unit
+$primitive-space-18: 72px; // 9 unit
+$primitive-space-20: 80px; // 10 unit
+
+// Aliases
+$primitive-gap-xs: $primitive-space-1;
+$primitive-gap-sm: $primitive-space-2;
+$primitive-gap-md: $primitive-space-4;
+$primitive-gap-lg: $primitive-space-6;
+$primitive-gap-xl: $primitive-space-8;
+
+$primitive-padding-xs: $primitive-space-2;
+$primitive-padding-sm: $primitive-space-3;
+$primitive-padding-md: $primitive-space-4;
+$primitive-padding-lg: $primitive-space-6;
+$primitive-padding-xl: $primitive-space-8;

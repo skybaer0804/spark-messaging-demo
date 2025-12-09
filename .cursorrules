@@ -1,5 +1,18 @@
 # 스타일 가이드
 
+## 디자인 토큰 시스템 (Design Tokens)
+3단계 계층 구조를 엄격히 준수합니다.
+
+Primitive: 원시 값 (예: --gray-500, --spacing-4). 직접 사용 금지.
+
+Semantic: 의미적 별칭 (예: --text-primary, --bg-default).
+
+Component: 컴포넌트 전용 (예: --btn-bg, --card-padding).
+
+사용 규칙: 스타일 작성 시 Component 토큰을 최우선으로 사용하고, 없으면 Semantic 토큰을 사용합니다.
+
+하드코딩된 값(Hex, px)이나 Primitive 토큰의 직접 사용을 지양합니다.
+
 ## SCSS 및 BEM 네이밍 규칙
 - 모든 스타일은 SCSS를 사용합니다.
 - CSS 클래스 네이밍은 BEM(Block Element Modifier) 방식을 따릅니다.

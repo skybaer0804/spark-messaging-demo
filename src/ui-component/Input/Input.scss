@@ -1,0 +1,79 @@
+@use '/src/styles/tokens/index';
+@use '/src/styles/tokens/scss-variables/component-input' as input;
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: input.$input-gap-label-input; // SCSS 변수 사용
+    width: 100%;
+}
+
+.input-label {
+    font-family: var(--primitive-font-family);
+    font-size: var(--input-label-font-size);
+    font-weight: var(--input-label-font-weight);
+    color: var(--color-text-primary);
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input {
+    width: 100%;
+    height: input.$input-height; // SCSS 변수 사용
+    padding: input.$input-padding; // SCSS 변수 사용
+
+    border: input.$input-border-width solid var(--input-border); // 테마 변경 지원을 위해 색상은 CSS 변수 유지
+    border-radius: input.$input-radius; // SCSS 변수 사용
+
+  font-family: var(--primitive-font-family);
+  font-size: var(--input-font-size);
+  font-weight: var(--input-font-weight);
+  line-height: var(--input-line-height);
+  color: var(--input-text-color);
+
+  background-color: var(--input-background);
+  box-shadow: var(--input-shadow);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &::placeholder {
+    color: var(--input-placeholder-color);
+  }
+
+  &:focus {
+    outline: none;
+    border-color: var(--input-focus-border);
+    box-shadow: var(--input-focus-shadow);
+  }
+
+  &:disabled {
+    background-color: var(--input-disabled-background);
+    color: var(--input-disabled-text);
+    cursor: not-allowed;
+  }
+
+  &.error {
+    border-color: var(--input-error-border);
+  }
+}
+
+.input-helper-text {
+    margin-top: input.$input-gap-input-helper; // SCSS 변수 사용
+    font-size: var(--input-helper-text-font-size);
+    color: var(--input-helper-text-color);
+
+    &.error {
+        color: var(--input-error-text-color);
+    }
+}
+
+.input-textarea {
+    min-height: input.$textarea-min-height; // SCSS 변수 사용
+    resize: vertical;
+    padding: input.$textarea-padding; // SCSS 변수 사용
+    font-family: inherit;
+}

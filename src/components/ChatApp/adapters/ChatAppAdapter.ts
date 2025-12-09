@@ -2,90 +2,90 @@ import type { ChatAdapter, ChatMessage } from '../../Chat/types';
 import type { useChatApp } from '../hooks/useChatApp';
 
 export class ChatAppAdapter implements ChatAdapter {
-    private chatAppHook: ReturnType<typeof useChatApp>;
+  private chatAppHook: ReturnType<typeof useChatApp>;
 
-    constructor(chatAppHook: ReturnType<typeof useChatApp>) {
-        this.chatAppHook = chatAppHook;
+  constructor(chatAppHook: ReturnType<typeof useChatApp>) {
+    this.chatAppHook = chatAppHook;
+  }
+
+  getMessages(): ChatMessage[] {
+    return this.chatAppHook.messages;
+  }
+
+  async sendMessage(content: string): Promise<void> {
+    // useChatApp의 sendMessage는 내부 input을 사용하므로
+    // 직접 메시지를 전송하도록 수정
+    const chatService = (this.chatAppHook as any).chatServiceRef?.current;
+    const roomService = (this.chatAppHook as any).roomServiceRef?.current;
+
+    if (!content.trim() || !this.chatAppHook.isConnected || !chatService) return;
+
+    const room = roomService?.getCurrentRoom();
+
+    try {
+      if (room) {
+        await chatService.sendRoomMessage(room, 'chat', content.trim());
+      } else {
+        await chatService.sendMessage('chat', content.trim());
+      }
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      throw error;
     }
+  }
 
-    getMessages(): ChatMessage[] {
-        return this.chatAppHook.messages;
-    }
+  async sendFile(file: File, _onProgress?: (progress: number) => void): Promise<void> {
+    await this.chatAppHook.sendFile(file);
+    // onProgress는 chatAppHook 내부에서 처리됨
+  }
 
-    async sendMessage(content: string): Promise<void> {
-        // useChatApp의 sendMessage는 내부 input을 사용하므로
-        // 직접 메시지를 전송하도록 수정
-        const chatService = (this.chatAppHook as any).chatServiceRef?.current;
-        const roomService = (this.chatAppHook as any).roomServiceRef?.current;
+  isConnected(): boolean {
+    return this.chatAppHook.isConnected;
+  }
 
-        if (!content.trim() || !this.chatAppHook.isConnected || !chatService) return;
+  getCurrentRoom(): string | null {
+    return this.chatAppHook.currentRoom;
+  }
 
-        const room = roomService?.getCurrentRoom();
+  getUploadingFile(): File | null {
+    return this.chatAppHook.uploadingFile;
+  }
 
-        try {
-            if (room) {
-                await chatService.sendRoomMessage(room, 'chat', content.trim());
-            } else {
-                await chatService.sendMessage('chat', content.trim());
-            }
-        } catch (error) {
-            console.error('Failed to send message:', error);
-            throw error;
-        }
-    }
+  getUploadProgress(): number {
+    return this.chatAppHook.uploadProgress;
+  }
 
-    async sendFile(file: File, _onProgress?: (progress: number) => void): Promise<void> {
-        await this.chatAppHook.sendFile(file);
-        // onProgress는 chatAppHook 내부에서 처리됨
-    }
+  showRoomList(): boolean {
+    return true;
+  }
 
-    isConnected(): boolean {
-        return this.chatAppHook.isConnected;
-    }
+  showSidebar(): boolean {
+    return true;
+  }
 
-    getCurrentRoom(): string | null {
-        return this.chatAppHook.currentRoom;
-    }
+  showFileUpload(): boolean {
+    return true;
+  }
 
-    getUploadingFile(): File | null {
-        return this.chatAppHook.uploadingFile;
-    }
+  getPlaceholder(): string {
+    const room = this.getCurrentRoom();
+    return room ? `${room} Room에 메시지를 입력하세요...` : '메시지를 입력하세요...';
+  }
 
-    getUploadProgress(): number {
-        return this.chatAppHook.uploadProgress;
-    }
+  getEmptyMessage(): string {
+    const room = this.getCurrentRoom();
+    return room ? `${room} Room에 메시지가 없습니다. 메시지를 보내보세요!` : '메시지가 없습니다.';
+  }
 
-    showRoomList(): boolean {
-        return true;
-    }
+  async onRoomSelect(roomId: string): Promise<void> {
+    await this.chatAppHook.handleRoomSelect(roomId);
+  }
 
-    showSidebar(): boolean {
-        return true;
-    }
+  async onRoomCreate(): Promise<void> {
+    await this.chatAppHook.handleCreateRoom();
+  }
 
-    showFileUpload(): boolean {
-        return true;
-    }
-
-    getPlaceholder(): string {
-        const room = this.getCurrentRoom();
-        return room ? `${room} Room에 메시지를 입력하세요...` : '메시지를 입력하세요...';
-    }
-
-    getEmptyMessage(): string {
-        const room = this.getCurrentRoom();
-        return room ? `${room} Room에 메시지가 없습니다. 메시지를 보내보세요!` : '메시지가 없습니다.';
-    }
-
-    async onRoomSelect(roomId: string): Promise<void> {
-        await this.chatAppHook.handleRoomSelect(roomId);
-    }
-
-    async onRoomCreate(): Promise<void> {
-        await this.chatAppHook.handleCreateRoom();
-    }
-
-    async onRoomLeave(): Promise<void> {
-        await this.chatAppHook.leaveRoom();
-    }
+  async onRoomLeave(): Promise<void> {
+    await this.chatAppHook.leaveRoom();
+  }
 }

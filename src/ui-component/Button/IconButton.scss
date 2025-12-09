@@ -1,0 +1,73 @@
+@use '/src/styles/tokens/index';
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-sizing: border-box;
+
+  background-color: transparent;
+  outline: 0;
+  border: 0;
+  margin: 0;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+  text-decoration: none;
+  color: inherit;
+
+  transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+
+  &:disabled {
+    color: var(--primitive-gray-300);
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  // Sizes
+  &--small {
+    padding: 5px;
+    font-size: 1.125rem;
+  }
+
+  &--medium {
+    padding: 8px;
+    font-size: 1.5rem;
+  }
+
+  &--large {
+    padding: 12px;
+    font-size: 1.75rem;
+  }
+
+  // Colors (Affects icon color mainly)
+  &--primary {
+    color: var(--color-interactive-primary);
+  }
+
+  &--secondary {
+    color: var(--color-interactive-secondary);
+  }
+
+  &--error {
+    color: var(--primitive-error-500);
+  }
+
+  &--default {
+    color: var(--color-text-secondary);
+  }
+
+  &__label {
+    width: 100%;
+    display: flex;
+    align-items: inherit;
+    justify-content: inherit;
+  }
+}

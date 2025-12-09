@@ -14,9 +14,9 @@ Chat 컴포넌트의 스타일을 SCSS placeholder나 mixin으로 변환하여 �
 
 **장점:**
 
--   하나의 소스코드에서 관리
--   classNamePrefix에 관계없이 동일한 스타일 적용
--   각 앱의 SCSS 구조와 독립적으로 동작
+- 하나의 소스코드에서 관리
+- classNamePrefix에 관계없이 동일한 스타일 적용
+- 각 앱의 SCSS 구조와 독립적으로 동작
 
 ### 2. 구조 제안
 
@@ -85,9 +85,9 @@ src/components/Chat/
 
 **장점:**
 
--   각 앱에서 독립적으로 스타일 생성
--   충돌 없음
--   하나의 소스코드에서 관리
+- 각 앱에서 독립적으로 스타일 생성
+- 충돌 없음
+- 하나의 소스코드에서 관리
 
 #### 방법 3: CSS 변수와 클래스 조합 (가장 유연함)
 
@@ -99,20 +99,20 @@ $chat-secondary-color: #764ba2;
 
 // Chat/styles/_mixins.scss
 @mixin chat-component($prefix) {
-    .#{$prefix} {
-        &__messages-list {
-            // CSS 변수 사용
-            background: var(--chat-bg-color, #fafafa);
-            // ...
-        }
-        // ...
+  .#{$prefix} {
+    &__messages-list {
+      // CSS 변수 사용
+      background: var(--chat-bg-color, #fafafa);
+      // ...
     }
+    // ...
+  }
 }
 
 // 각 앱에서 변수 오버라이드 가능
 .reverse-auction {
-    --chat-bg-color: #ffffff;
-    @include chat-component('reverse-auction__chat');
+  --chat-bg-color: #ffffff;
+  @include chat-component('reverse-auction__chat');
 }
 ```
 
@@ -123,33 +123,33 @@ $chat-secondary-color: #764ba2;
 ```scss
 // src/components/Chat/styles/_chat-mixins.scss
 @mixin chat-component($prefix: 'chat') {
-    .#{$prefix} {
-        // 메시지 리스트
-        &__messages-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-            background: #fafafa;
-            // ...
-        }
-
-        // 메시지 아이템
-        &__message {
-            display: flex;
-            flex-direction: column;
-            max-width: 70%;
-            // ...
-        }
-
-        // 입력 영역
-        &__input-container {
-            display: flex;
-            flex-direction: column;
-            // ...
-        }
-
-        // ... 모든 Chat 스타일
+  .#{$prefix} {
+    // 메시지 리스트
+    &__messages-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      background: #fafafa;
+      // ...
     }
+
+    // 메시지 아이템
+    &__message {
+      display: flex;
+      flex-direction: column;
+      max-width: 70%;
+      // ...
+    }
+
+    // 입력 영역
+    &__input-container {
+      display: flex;
+      flex-direction: column;
+      // ...
+    }
+
+    // ... 모든 Chat 스타일
+  }
 }
 ```
 
@@ -170,15 +170,15 @@ $chat-secondary-color: #764ba2;
 @import '../Chat/styles/chat-mixins';
 
 .reverse-auction {
-    // ... 기타 스타일
+  // ... 기타 스타일
 
-    // Chat 스타일을 reverse-auction__chat prefix로 생성
-    @include chat-component('reverse-auction__chat');
+  // Chat 스타일을 reverse-auction__chat prefix로 생성
+  @include chat-component('reverse-auction__chat');
 
-    // ReverseAuction 특화 스타일 오버라이드 가능
-    &__chat-section {
-        // 특정 스타일만 오버라이드
-    }
+  // ReverseAuction 특화 스타일 오버라이드 가능
+  &__chat-section {
+    // 특정 스타일만 오버라이드
+  }
 }
 ```
 
@@ -187,8 +187,8 @@ $chat-secondary-color: #764ba2;
 @import '../Chat/styles/chat-mixins';
 
 .chat-app {
-    // Chat 스타일을 chat-app__chat prefix로 생성
-    @include chat-component('chat-app__chat');
+  // Chat 스타일을 chat-app__chat prefix로 생성
+  @include chat-component('chat-app__chat');
 }
 ```
 

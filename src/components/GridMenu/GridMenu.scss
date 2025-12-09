@@ -1,37 +1,37 @@
 .grid-menu {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem;
+
+  // 모바일: 2x2
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  &__button {
+    aspect-ratio: 1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    font-weight: 500;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 1rem;
 
-    // 모바일: 2x2
-    @media (max-width: 768px) {
-        grid-template-columns: repeat(2, 1fr);
+    &:hover {
+      filter: brightness(1.1);
+      transform: scale(1.05);
     }
 
-    &__button {
-        aspect-ratio: 1;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        border-radius: 0.5rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        color: white;
-        font-weight: 500;
-        font-size: 0.875rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem;
-
-        &:hover {
-            filter: brightness(1.1);
-            transform: scale(1.05);
-        }
-
-        &:active {
-            transform: scale(0.95);
-        }
+    &:active {
+      transform: scale(0.95);
     }
+  }
 }

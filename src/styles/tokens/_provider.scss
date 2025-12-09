@@ -1,0 +1,81 @@
+// ============================================
+// Token Provider SCSS
+// Overriding CSS variables by theme & contrast
+// ============================================
+
+@use 'sass:meta';
+
+// ============================================
+// Theme: Light (Default)
+// ============================================
+:root[data-theme='light'] {
+  // Variables are already set in semantic/_color.scss
+  // Default behavior
+}
+
+// ============================================
+// Theme: Dark
+// ============================================
+:root[data-theme='dark'] {
+  // *** Background ***
+  --color-background-primary: #14171a; // Dark Navy
+  --color-background-secondary: #1f2329; // Slightly lighter
+  --color-background-tertiary: #2b3039;
+
+  // *** Text ***
+  --color-text-primary: #f0f4f8;
+  --color-text-secondary: #949bb2;
+  --color-text-tertiary: #656d82;
+  --color-text-disabled: #434a59;
+
+  // *** Border ***
+  --color-border-default: #2b3039;
+  --color-border-light: #1f2329;
+
+  // *** Surface ***
+  --color-surface-base: #1f2329;
+  --color-surface-level-1: #2b3039;
+  --color-surface-level-2: #363c48;
+  --color-surface-level-3: #434a59;
+
+  // *** Interactive ***
+  // Adjust primary color brightness if needed
+  --color-interactive-primary: hsl(210, 80%, 60%); // Brighter Blue for Dark Mode
+}
+
+// ============================================
+// Contrast: High (Enhanced)
+// ============================================
+:root[data-contrast='high'] {
+  // *** Light Theme + High Contrast ***
+  &[data-theme='light'] {
+    --color-text-primary: black;
+    --color-text-secondary: #222;
+    --color-border-default: #666;
+    --color-interactive-primary: #0056b3; // Darker Blue
+    --elevation-shadow-1: 0 0 0 2px #000; // Borders instead of shadows
+  }
+
+  // *** Dark Theme + High Contrast ***
+  &[data-theme='dark'] {
+    --color-text-primary: white;
+    --color-text-secondary: #ddd;
+    --color-border-default: #aaa;
+    --color-interactive-primary: #66b3ff; // Bright Blue
+    --elevation-shadow-1: 0 0 0 2px #fff;
+  }
+}
+
+// Mobile specific overrides
+@media (max-width: 768px) {
+  :root {
+    --space-padding-card-lg: var(--space-padding-card-md);
+  }
+}
+
+// PC specific overrides
+@media (min-width: 1024px) {
+  :root {
+    --space-layout-left-contents: var(--primitive-space-16);
+  }
+}

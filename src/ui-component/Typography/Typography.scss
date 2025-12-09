@@ -1,0 +1,63 @@
+@use '/src/styles/tokens/index';
+
+.typography {
+  margin: 0;
+  font-family: var(--primitive-font-family);
+  color: var(--color-text-primary); // Default color
+
+  // Variants
+  &--display-large {
+    font-size: var(--typo-display-large-size-pc);
+    font-weight: var(--typo-display-large-weight);
+    line-height: var(--typo-display-large-line-height);
+  }
+
+  &--h1 {
+    font-size: var(--typo-heading-1-size-pc);
+    font-weight: var(--typo-heading-1-weight);
+    line-height: var(--typo-heading-1-line-height);
+  }
+
+  &--h2 {
+    font-size: var(--typo-heading-2-size-pc);
+    font-weight: var(--typo-heading-2-weight);
+    line-height: var(--typo-heading-2-line-height);
+  }
+
+  // Add h3 etc from tokens if available
+
+  &--body-large {
+    font-size: var(--typo-body-large-size);
+    font-weight: var(--typo-body-large-weight);
+    line-height: var(--typo-body-large-line-height);
+  }
+
+  &--body-medium {
+    font-size: var(--typo-body-medium-size);
+    font-weight: var(--typo-body-medium-weight);
+    line-height: var(--typo-body-medium-line-height);
+  }
+
+  &--body-small {
+    font-size: var(--typo-body-small-size);
+    font-weight: var(--typo-body-small-weight);
+    line-height: var(--typo-body-small-line-height);
+  }
+
+  // Alignment
+  &--align-left {
+    text-align: left;
+  }
+
+  &--align-center {
+    text-align: center;
+  }
+
+  &--align-right {
+    text-align: right;
+  }
+
+  &--align-justify {
+    text-align: justify;
+  }
+}

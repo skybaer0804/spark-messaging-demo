@@ -1,0 +1,56 @@
+@use '/src/styles/tokens/index';
+
+.paper {
+  background-color: var(--color-surface-level-1);
+  color: var(--color-text-primary);
+  transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: var(--primitive-radius-md); // Default radius
+  overflow: hidden;
+
+  &--square {
+    border-radius: 0;
+  }
+
+  &--outlined {
+    border: 1px solid var(--color-border-default);
+    box-shadow: none;
+  }
+
+  &--elevation-0 {
+    box-shadow: none;
+  }
+
+  &--elevation-1 {
+    box-shadow: var(--elevation-shadow-1);
+  }
+
+  &--elevation-2 {
+    box-shadow: var(--elevation-shadow-2);
+  }
+
+  &--elevation-3 {
+    box-shadow: var(--elevation-shadow-3);
+  }
+
+  &--elevation-4 {
+    box-shadow: var(--elevation-shadow-4);
+  }
+
+  // Assuming we have up to 4 or define more
+
+  &--padding-none {
+    padding: 0;
+  }
+
+  &--padding-sm {
+    padding: var(--space-gap-sm);
+  }
+
+  &--padding-md {
+    padding: var(--space-gap-md);
+  }
+
+  &--padding-lg {
+    padding: var(--space-gap-lg);
+  }
+}

@@ -1,0 +1,115 @@
+@use '/src/styles/tokens/index';
+
+.alert {
+  display: flex;
+  padding: 6px 16px;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.43;
+  border-radius: 4px;
+  background-color: transparent;
+  color: var(--color-text-primary);
+  align-items: flex-start; // Align items to top for multiline
+
+  &__icon {
+    margin-right: 12px;
+    padding: 7px 0;
+    display: flex;
+    opacity: 0.9;
+  }
+
+  &__message {
+    padding: 8px 0;
+    flex: 1;
+    min-width: 0; // Fix flex overflow
+  }
+
+  &__action {
+    display: flex;
+    align-items: flex-start;
+    padding: 4px 0 0 16px;
+    margin-left: auto;
+    margin-right: -8px;
+  }
+
+  &__close-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-sizing: border-box;
+    background-color: transparent;
+    outline: 0;
+    border: 0;
+    margin: 0;
+    border-radius: 50%;
+    padding: 5px;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+    appearance: none;
+    text-decoration: none;
+    color: inherit;
+    opacity: 0.7;
+    transition:
+      background-color 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+      opacity 150ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+
+    &:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  // Standard Variant (Light background)
+  &--standard {
+    @each $severity in success, info, warning, error {
+      &.alert--#{$severity} {
+        // We need lighter colors for standard variant background.
+        // Assuming we can use opacity or specific tokens if available.
+        // Using a mix or opacity approach for now as we don't have explicit 'light' tokens for all colors.
+        // Or use the main color with very low opacity if supported, but solid colors are better.
+        // Let's try to find if we have surface colors for these.
+        // If not, we'll use a hardcoded approximation or rgba.
+
+        background-color: color-mix(in srgb, var(--color-#{$severity}-main), white 90%);
+        color: var(--color-#{$severity}-dark);
+
+        .alert__icon {
+          color: var(--color-#{$severity}-main);
+        }
+      }
+    }
+  }
+
+  // Outlined Variant
+  &--outlined {
+    border: 1px solid;
+
+    @each $severity in success, info, warning, error {
+      &.alert--#{$severity} {
+        border-color: var(--color-#{$severity}-main);
+        color: var(--color-#{$severity}-dark);
+
+        .alert__icon {
+          color: var(--color-#{$severity}-main);
+        }
+      }
+    }
+  }
+
+  // Filled Variant
+  &--filled {
+    color: #fff;
+
+    @each $severity in success, info, warning, error {
+      &.alert--#{$severity} {
+        background-color: var(--color-#{$severity}-main);
+
+        .alert__icon {
+          color: inherit;
+        }
+      }
+    }
+  }
+}

@@ -1,14 +1,17 @@
-.app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100%;
-    background: white;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+// Import Design Tokens
+@use './styles/tokens/index';
 
-    &__main {
-        display: flex;
-        flex: 1;
-        overflow: hidden;
-    }
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background: var(--color-background-primary);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+
+  &__main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
 }

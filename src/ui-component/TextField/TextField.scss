@@ -1,0 +1,35 @@
+@use '/src/styles/tokens/index';
+
+// TextField specific styles if any, on top of Input
+.text-field--standard {
+  // Override Input styles for standard variant (underline only)
+  .input {
+    border-radius: 0;
+    border-width: 0 0 1px 0;
+    background-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
+
+    &:focus {
+      border-bottom-width: 2px;
+      box-shadow: none;
+    }
+  }
+}
+
+.text-field--filled {
+  // Override Input styles for filled variant
+  .input {
+    background-color: var(--color-bg-surface-variant, #f5f5f5);
+    border-radius: 4px 4px 0 0;
+    border-width: 0 0 1px 0;
+
+    &:focus {
+      border-bottom-width: 2px;
+      box-shadow: none;
+      background-color: var(--color-bg-surface-variant-hover, #ebebeb);
+    }
+  }
+}
+
+// Outlined is default, handled by Input base styles

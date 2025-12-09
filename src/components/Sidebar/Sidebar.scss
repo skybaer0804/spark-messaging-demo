@@ -1,52 +1,83 @@
+@use '/src/styles/tokens/index';
+
 .sidebar {
-    display: none;
-    width: 200px;
-    background: white;
-    border-right: 1px solid #e5e7eb;
-    flex-shrink: 0;
+  display: none;
+  width: 280px;
+  background: var(--color-background-primary);
+  border-right: 1px solid var(--color-border-default);
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 
-    @media (min-width: 769px) {
-        display: block;
+  @media (min-width: 769px) {
+    display: block;
+  }
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: var(--space-padding-card-md);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    padding: var(--space-padding-button-sm);
+    margin-bottom: var(--space-gap-lg);
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-interactive-primary);
+  }
+
+  &__header-title {
+    font-weight: var(--primitive-font-weight-semibold);
+    color: var(--color-text-primary);
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-gap-xs);
+  }
+
+  &__nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-gap-sm);
+    padding: var(--space-padding-button-sm);
+    background: transparent;
+    border: none;
+    border-radius: var(--primitive-radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    color: var(--color-text-secondary);
+
+    svg {
+      flex-shrink: 0;
     }
 
-    &__nav {
-        display: flex;
-        flex-direction: column;
-        padding: 1rem;
-        gap: 0.5rem;
+    &:hover {
+      background: var(--color-background-secondary);
+      color: var(--color-text-primary);
     }
 
-    &__item {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-        background: transparent;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-align: left;
-        color: #6b7280;
-        font-size: 0.875rem;
-        font-weight: 500;
+    &--active {
+      background: var(--color-interactive-primary);
+      color: var(--primitive-gray-0);
+      font-weight: var(--primitive-font-weight-semibold);
 
-        &:hover {
-            background: #f9fafb;
-            color: #374151;
-        }
-
-        &--active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-
-            &:hover {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-            }
-        }
+      &:hover {
+        background: var(--color-interactive-primary);
+        color: var(--primitive-gray-0);
+        opacity: 0.9;
+      }
     }
-
-    &__item-label {
-        width: 100%;
-    }
+  }
 }

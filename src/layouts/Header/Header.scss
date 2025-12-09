@@ -1,62 +1,69 @@
+@use '/src/styles/tokens/index';
+
 .header {
-    padding: 1.5rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  padding: 0 var(--space-padding-card-md);
+  background: var(--color-interactive-primary);
+  color: var(--primitive-gray-0);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  width: 100%;
+
+  &__left,
+  &__right {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    gap: 16px;
+  }
 
-    &__title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0;
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__status {
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+  }
+
+  &__status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #f87171; // Red
+    margin-right: 8px;
+
+    &--connected {
+      background-color: #34d399; // Green
     }
+  }
 
-    &__status {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+  &__controls {
+    display: flex;
+    gap: 8px;
+    padding-left: 16px;
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  &__icon-button {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
     }
-
-    &__status-indicator {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: #ef4444;
-        animation: pulse 2s infinite;
-
-        &--connected {
-            background-color: #10b981;
-        }
-    }
-
-    &__status-text {
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-}
-
-@media (max-width: 768px) {
-    .header {
-        padding: 0.75rem 1rem;
-
-        &__title {
-            font-size: 1.125rem;
-        }
-
-        &__status-text {
-            display: none;
-        }
-    }
-}
-
-@keyframes pulse {
-    0%,
-    100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.5;
-    }
+  }
 }
