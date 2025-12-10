@@ -132,8 +132,8 @@ export function TokenProvider({ children, defaultTheme = 'light', defaultContras
 
   const toggleTheme = useCallback(() => {
     setConfig((prev) => {
-      const newTheme = prev.theme === 'light' ? 'dark' : 'light';
-      const newConfig = { ...prev, theme: newTheme };
+      const newTheme: Theme = prev.theme === 'light' ? 'dark' : 'light';
+      const newConfig: ThemeConfig = { ...prev, theme: newTheme };
       saveConfigToStorage(newConfig);
       return newConfig;
     });
@@ -149,8 +149,8 @@ export function TokenProvider({ children, defaultTheme = 'light', defaultContras
 
   const toggleContrast = useCallback(() => {
     setConfig((prev) => {
-      const newContrast = prev.contrast === 'standard' ? 'high' : 'standard';
-      const newConfig = { ...prev, contrast: newContrast };
+      const newContrast: Contrast = prev.contrast === 'standard' ? 'high' : 'standard';
+      const newConfig: ThemeConfig = { ...prev, contrast: newContrast };
       saveConfigToStorage(newConfig);
       return newConfig;
     });

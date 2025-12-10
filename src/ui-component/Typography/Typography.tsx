@@ -7,6 +7,7 @@ export type TypographyVariant =
   | 'h1'
   | 'h2'
   | 'h3'
+  | 'h4'
   | 'body-large'
   | 'body-medium'
   | 'body-small'

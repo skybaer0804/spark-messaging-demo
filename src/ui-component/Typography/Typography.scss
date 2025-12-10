@@ -24,7 +24,17 @@
     line-height: var(--typo-heading-2-line-height);
   }
 
-  // Add h3 etc from tokens if available
+  &--h3 {
+    font-size: var(--typo-heading-3-size-pc);
+    font-weight: var(--typo-heading-3-weight);
+    line-height: var(--typo-heading-3-line-height);
+  }
+
+  &--h4 {
+    font-size: var(--typo-heading-4-size-pc);
+    font-weight: var(--typo-heading-4-weight);
+    line-height: var(--typo-heading-4-line-height);
+  }
 
   &--body-large {
     font-size: var(--typo-body-large-size);
