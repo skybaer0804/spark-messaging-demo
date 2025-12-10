@@ -9,9 +9,19 @@
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  transition: width 0.3s ease;
+  position: relative;
 
   @media (min-width: 769px) {
     display: block;
+  }
+
+  &--mini {
+    width: 72px;
+  }
+
+  &--expanded {
+    width: 280px;
   }
 
   &__container {
@@ -24,8 +34,10 @@
   &__header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: var(--space-padding-button-sm);
     margin-bottom: var(--space-gap-lg);
+    min-height: 48px;
   }
 
   &__logo {
@@ -33,17 +45,40 @@
     align-items: center;
     justify-content: center;
     color: var(--color-interactive-primary);
+    flex-shrink: 0;
+
+    &--centered {
+      width: 100%;
+    }
   }
 
   &__header-title {
     font-weight: var(--primitive-font-weight-semibold);
     color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-gap-xs);
+    flex-shrink: 0;
+  }
+
+  &__pin-button,
+  &__collapse-button {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   &__nav {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-gap-xs);
+    flex: 1;
   }
 
   &__nav-item {
@@ -57,27 +92,81 @@
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: left;
-    color: var(--color-text-secondary);
-
-    svg {
-      flex-shrink: 0;
-    }
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
 
     &:hover {
       background: var(--color-background-secondary);
-      color: var(--color-text-primary);
     }
 
     &--active {
       background: var(--color-interactive-primary);
-      color: var(--primitive-gray-0);
-      font-weight: var(--primitive-font-weight-semibold);
+
+      .sidebar__nav-item-icon {
+        color: var(--primitive-gray-0);
+      }
+
+      .list-item-text__primary {
+        color: var(--primitive-gray-0);
+        font-weight: var(--primitive-font-weight-semibold);
+      }
+
+      .sidebar__nav-item-label {
+        color: var(--primitive-gray-0);
+      }
 
       &:hover {
         background: var(--color-interactive-primary);
-        color: var(--primitive-gray-0);
         opacity: 0.9;
       }
+    }
+
+    &-mini {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-gap-xs);
+      width: 100%;
+      padding: var(--space-padding-button-sm) 0;
+    }
+
+    &-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--color-text-primary);
+      transition: color 0.2s ease;
+    }
+
+    &-label {
+      font-size: 0.75rem;
+      color: var(--color-text-primary);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+  }
+
+  // ListItemText 기본 색상 설정
+  .list-item-text__primary {
+    color: var(--color-text-primary);
+  }
+
+  // 미니 모드에서 확장되지 않았을 때
+  &--mini:not(&--expanded) {
+    .sidebar__nav-item {
+      flex-direction: column;
+      justify-content: center;
+      padding: var(--space-padding-button-sm) 0;
+    }
+
+    .list-item-text {
+      display: none;
     }
   }
 }

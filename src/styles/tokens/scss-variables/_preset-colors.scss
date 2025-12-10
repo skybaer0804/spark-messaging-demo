@@ -1,0 +1,436 @@
+// ============================================
+// Preset Color Themes
+// 각 프리셋별 컬러셋 정의
+// Primary, Secondary, Text, Icon, Border 색상 포함
+// ============================================
+
+// ============================================
+// Default Theme (기본)
+// ============================================
+// 기본값은 _variables-unified.scss에서 정의됨
+// 추가 오버라이드가 필요한 경우 여기에 작성
+
+// ============================================
+// Monotone Theme (모노톤)
+// ============================================
+:root[data-preset-color='monotone'] {
+  // Primary 색상 팔레트
+  --hue-primary: 210;
+  --saturation-primary: 15%; // 낮은 채도로 모노톤 느낌
+  --color-interactive-primary: hsl(210, 15%, 50%);
+  --primitive-primary-50: hsl(210, 15%, 50%);
+  --primitive-primary-40: hsl(210, 15%, 60%);
+  --primitive-primary-60: hsl(210, 15%, 40%);
+
+  // Secondary 색상 팔레트 (Primary와 유사하지만 약간 다름)
+  --hue-secondary: 210;
+  --saturation-secondary: 20%;
+  --color-interactive-secondary: hsl(210, 20%, 55%);
+  --primitive-secondary-50: hsl(210, 20%, 55%);
+}
+
+// 다크 모드에서 Monotone
+:root[data-preset-color='monotone'][data-theme='dark'] {
+  // Primary 다크 모드
+  --color-interactive-primary: hsl(210, 15%, 60%);
+  --primitive-primary-50: hsl(210, 15%, 60%);
+  --primitive-primary-40: hsl(210, 15%, 70%);
+  --primitive-primary-60: hsl(210, 15%, 50%);
+
+  // Secondary 다크 모드
+  --color-interactive-secondary: hsl(210, 20%, 65%);
+  --primitive-secondary-50: hsl(210, 20%, 65%);
+
+  // 텍스트 색상 (다크 모드에서 더 밝게)
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-tertiary: #94a3b8;
+
+  // 아이콘 색상
+  --color-icon-primary: #cbd5e1;
+  --color-icon-secondary: #94a3b8;
+
+  // 보더 색상
+  --color-border-default: #334155;
+  --color-border-light: #1e293b;
+}
+
+// ============================================
+// Theme 1 (Cyan Blue)
+// ============================================
+:root[data-preset-color='theme1'] {
+  // Primary 색상 팔레트
+  --hue-primary: 200; // Cyan Blue
+  --saturation-primary: 75%;
+  --color-interactive-primary: hsl(200, 75%, 50%);
+  --primitive-primary-50: hsl(200, 75%, 50%);
+  --primitive-primary-40: hsl(200, 75%, 60%);
+  --primitive-primary-60: hsl(200, 75%, 40%);
+
+  // Secondary 색상 팔레트
+  --hue-secondary: 190; // Cyan
+  --saturation-secondary: 70%;
+  --color-interactive-secondary: hsl(190, 70%, 55%);
+  --primitive-secondary-50: hsl(190, 70%, 55%);
+}
+
+// 다크 모드에서 Theme 1
+:root[data-preset-color='theme1'][data-theme='dark'] {
+  --color-interactive-primary: hsl(200, 75%, 60%);
+  --primitive-primary-50: hsl(200, 75%, 60%);
+  --primitive-primary-40: hsl(200, 75%, 70%);
+  --primitive-primary-60: hsl(200, 75%, 50%);
+
+  --color-interactive-secondary: hsl(190, 70%, 65%);
+  --primitive-secondary-50: hsl(190, 70%, 65%);
+
+  --color-text-primary: #f0f9ff;
+  --color-text-secondary: #bae6fd;
+  --color-text-tertiary: #7dd3fc;
+
+  --color-icon-primary: #bae6fd;
+  --color-icon-secondary: #7dd3fc;
+
+  --color-border-default: #38bdf8;
+  --color-border-light: #0ea5e9;
+}
+
+// ============================================
+// Theme 2 (Green - 테스트용 그린 계열)
+// ============================================
+:root[data-preset-color='theme2'] {
+  // Primary 색상 팔레트 (Green)
+  --hue-primary: 140; // Green
+  --saturation-primary: 70%;
+  --color-interactive-primary: hsl(140, 70%, 50%);
+  --primitive-primary-50: hsl(140, 70%, 50%);
+  --primitive-primary-40: hsl(140, 70%, 60%);
+  --primitive-primary-60: hsl(140, 70%, 40%);
+
+  // Secondary 색상 팔레트 (Green 계열, 약간 다른 톤)
+  --hue-secondary: 150; // Green-Cyan
+  --saturation-secondary: 65%;
+  --color-interactive-secondary: hsl(150, 65%, 55%);
+  --primitive-secondary-50: hsl(150, 65%, 55%);
+}
+
+// 다크 모드에서 Theme 2
+:root[data-preset-color='theme2'][data-theme='dark'] {
+  // Primary 다크 모드 (더 밝은 그린)
+  --color-interactive-primary: hsl(140, 70%, 60%);
+  --primitive-primary-50: hsl(140, 70%, 60%);
+  --primitive-primary-40: hsl(140, 70%, 70%);
+  --primitive-primary-60: hsl(140, 70%, 50%);
+
+  // Secondary 다크 모드
+  --color-interactive-secondary: hsl(150, 65%, 65%);
+  --primitive-secondary-50: hsl(150, 65%, 65%);
+
+  // 텍스트 색상
+  --color-text-primary: #f0fdf4; // 매우 밝은 그린 톤
+  --color-text-secondary: #bbf7d0; // 밝은 그린
+  --color-text-tertiary: #86efac; // 중간 그린
+
+  // 아이콘 색상
+  --color-icon-primary: #bbf7d0;
+  --color-icon-secondary: #86efac;
+
+  // 보더 색상
+  --color-border-default: #4ade80; // 그린 보더
+  --color-border-light: #22c55e;
+}
+
+// ============================================
+// Theme 3 (Purple)
+// ============================================
+:root[data-preset-color='theme3'] {
+  // Primary 색상 팔레트
+  --hue-primary: 280; // Purple
+  --saturation-primary: 75%;
+  --color-interactive-primary: hsl(280, 75%, 50%);
+  --primitive-primary-50: hsl(280, 75%, 50%);
+  --primitive-primary-40: hsl(280, 75%, 60%);
+  --primitive-primary-60: hsl(280, 75%, 40%);
+
+  // Secondary 색상 팔레트
+  --hue-secondary: 270; // Violet
+  --saturation-secondary: 70%;
+  --color-interactive-secondary: hsl(270, 70%, 55%);
+  --primitive-secondary-50: hsl(270, 70%, 55%);
+}
+
+// 다크 모드에서 Theme 3
+:root[data-preset-color='theme3'][data-theme='dark'] {
+  --color-interactive-primary: hsl(280, 75%, 60%);
+  --primitive-primary-50: hsl(280, 75%, 60%);
+  --primitive-primary-40: hsl(280, 75%, 70%);
+  --primitive-primary-60: hsl(280, 75%, 50%);
+
+  --color-interactive-secondary: hsl(270, 70%, 65%);
+  --primitive-secondary-50: hsl(270, 70%, 65%);
+
+  --color-text-primary: #faf5ff;
+  --color-text-secondary: #e9d5ff;
+  --color-text-tertiary: #d8b4fe;
+
+  --color-icon-primary: #e9d5ff;
+  --color-icon-secondary: #d8b4fe;
+
+  --color-border-default: #c084fc;
+  --color-border-light: #a855f7;
+}
+
+// ============================================
+// Theme 4 (Red)
+// ============================================
+:root[data-preset-color='theme4'] {
+  // Primary 색상 팔레트
+  --hue-primary: 0; // Red
+  --saturation-primary: 70%;
+  --color-interactive-primary: hsl(0, 70%, 50%);
+  --primitive-primary-50: hsl(0, 70%, 50%);
+  --primitive-primary-40: hsl(0, 70%, 60%);
+  --primitive-primary-60: hsl(0, 70%, 40%);
+
+  // Secondary 색상 팔레트
+  --hue-secondary: 10; // Red-Orange
+  --saturation-secondary: 65%;
+  --color-interactive-secondary: hsl(10, 65%, 55%);
+  --primitive-secondary-50: hsl(10, 65%, 55%);
+}
+
+// 다크 모드에서 Theme 4
+:root[data-preset-color='theme4'][data-theme='dark'] {
+  --color-interactive-primary: hsl(0, 70%, 60%);
+  --primitive-primary-50: hsl(0, 70%, 60%);
+  --primitive-primary-40: hsl(0, 70%, 70%);
+  --primitive-primary-60: hsl(0, 70%, 50%);
+
+  --color-interactive-secondary: hsl(10, 65%, 65%);
+  --primitive-secondary-50: hsl(10, 65%, 65%);
+
+  --color-text-primary: #fef2f2;
+  --color-text-secondary: #fecaca;
+  --color-text-tertiary: #fca5a5;
+
+  --color-icon-primary: #fecaca;
+  --color-icon-secondary: #fca5a5;
+
+  --color-border-default: #f87171;
+  --color-border-light: #ef4444;
+}
+
+// ============================================
+// Theme 5 (Orange)
+// ============================================
+:root[data-preset-color='theme5'] {
+  // Primary 색상 팔레트
+  --hue-primary: 30; // Orange
+  --saturation-primary: 80%;
+  --color-interactive-primary: hsl(30, 80%, 50%);
+  --primitive-primary-50: hsl(30, 80%, 50%);
+  --primitive-primary-40: hsl(30, 80%, 60%);
+  --primitive-primary-60: hsl(30, 80%, 40%);
+
+  // Secondary 색상 팔레트
+  --hue-secondary: 40; // Yellow-Orange
+  --saturation-secondary: 75%;
+  --color-interactive-secondary: hsl(40, 75%, 55%);
+  --primitive-secondary-50: hsl(40, 75%, 55%);
+}
+
+// 다크 모드에서 Theme 5
+:root[data-preset-color='theme5'][data-theme='dark'] {
+  --color-interactive-primary: hsl(30, 80%, 60%);
+  --primitive-primary-50: hsl(30, 80%, 60%);
+  --primitive-primary-40: hsl(30, 80%, 70%);
+  --primitive-primary-60: hsl(30, 80%, 50%);
+
+  --color-interactive-secondary: hsl(40, 75%, 65%);
+  --primitive-secondary-50: hsl(40, 75%, 65%);
+
+  --color-text-primary: #fff7ed;
+  --color-text-secondary: #fed7aa;
+  --color-text-tertiary: #fdba74;
+
+  --color-icon-primary: #fed7aa;
+  --color-icon-secondary: #fdba74;
+
+  --color-border-default: #fb923c;
+  --color-border-light: #f97316;
+}
+
+// ============================================
+// Theme 6 (Blue)
+// ============================================
+:root[data-preset-color='theme6'] {
+  // Primary 색상 팔레트
+  --hue-primary: 240; // Blue
+  --saturation-primary: 85%;
+  --color-interactive-primary: hsl(240, 85%, 50%);
+  --primitive-primary-50: hsl(240, 85%, 50%);
+  --primitive-primary-40: hsl(240, 85%, 60%);
+  --primitive-primary-60: hsl(240, 85%, 40%);
+
+  // Secondary 색상 팔레트
+  --hue-secondary: 220; // Blue-Violet
+  --saturation-secondary: 80%;
+  --color-interactive-secondary: hsl(220, 80%, 55%);
+  --primitive-secondary-50: hsl(220, 80%, 55%);
+}
+
+// 다크 모드에서 Theme 6
+:root[data-preset-color='theme6'][data-theme='dark'] {
+  --color-interactive-primary: hsl(240, 85%, 60%);
+  --primitive-primary-50: hsl(240, 85%, 60%);
+  --primitive-primary-40: hsl(240, 85%, 70%);
+  --primitive-primary-60: hsl(240, 85%, 50%);
+
+  --color-interactive-secondary: hsl(220, 80%, 65%);
+  --primitive-secondary-50: hsl(220, 80%, 65%);
+
+  --color-text-primary: #eff6ff;
+  --color-text-secondary: #bfdbfe;
+  --color-text-tertiary: #93c5fd;
+
+  --color-icon-primary: #bfdbfe;
+  --color-icon-secondary: #93c5fd;
+
+  --color-border-default: #60a5fa;
+  --color-border-light: #3b82f6;
+}
+
+// ============================================
+// Theme 7 (Pink)
+// ============================================
+:root[data-preset-color='theme7'] {
+  // Primary 색상 팔레트
+  --hue-primary: 320; // Pink
+  --saturation-primary: 75%;
+  --color-interactive-primary: hsl(320, 75%, 50%);
+  --primitive-primary-50: hsl(320, 75%, 50%);
+  --primitive-primary-40: hsl(320, 75%, 60%);
+  --primitive-primary-60: hsl(320, 75%, 40%);
+
+  // Secondary 색상 팔레트
+  --hue-secondary: 330; // Rose
+  --saturation-secondary: 70%;
+  --color-interactive-secondary: hsl(330, 70%, 55%);
+  --primitive-secondary-50: hsl(330, 70%, 55%);
+}
+
+// 다크 모드에서 Theme 7
+:root[data-preset-color='theme7'][data-theme='dark'] {
+  --color-interactive-primary: hsl(320, 75%, 60%);
+  --primitive-primary-50: hsl(320, 75%, 60%);
+  --primitive-primary-40: hsl(320, 75%, 70%);
+  --primitive-primary-60: hsl(320, 75%, 50%);
+
+  --color-interactive-secondary: hsl(330, 70%, 65%);
+  --primitive-secondary-50: hsl(330, 70%, 65%);
+
+  --color-text-primary: #fdf2f8;
+  --color-text-secondary: #fbcfe8;
+  --color-text-tertiary: #f9a8d4;
+
+  --color-icon-primary: #fbcfe8;
+  --color-icon-secondary: #f9a8d4;
+
+  --color-border-default: #f472b6;
+  --color-border-light: #ec4899;
+}
+
+// ============================================
+// High Contrast Mode Overrides for Presets
+// ============================================
+:root[data-contrast='high'] {
+  // *** Default + High Contrast ***
+  &[data-preset-color='default'] {
+    &[data-theme='light'] {
+      --color-interactive-primary: #0056b3; // Darker Blue
+    }
+    &[data-theme='dark'] {
+      --color-interactive-primary: #66b3ff; // Bright Blue
+    }
+  }
+
+  // *** Monotone + High Contrast ***
+  &[data-preset-color='monotone'] {
+    &[data-theme='light'] {
+      --color-interactive-primary: hsl(210, 15%, 30%);
+    }
+    &[data-theme='dark'] {
+      --color-interactive-primary: hsl(210, 15%, 70%);
+    }
+  }
+
+  // *** Theme 1 + High Contrast ***
+  &[data-preset-color='theme1'] {
+    &[data-theme='light'] {
+      --color-interactive-primary: hsl(200, 75%, 40%);
+    }
+    &[data-theme='dark'] {
+      --color-interactive-primary: hsl(200, 75%, 60%);
+    }
+  }
+
+  // *** Theme 2 (Green) + High Contrast ***
+  &[data-preset-color='theme2'] {
+    &[data-theme='light'] {
+      --color-interactive-primary: hsl(140, 70%, 40%); // Darker Green
+    }
+    &[data-theme='dark'] {
+      --color-interactive-primary: hsl(140, 70%, 60%); // Brighter Green
+    }
+  }
+
+  // *** Theme 3 + High Contrast ***
+  &[data-preset-color='theme3'] {
+    &[data-theme='light'] {
+      --color-interactive-primary: hsl(280, 75%, 40%);
+    }
+    &[data-theme='dark'] {
+      --color-interactive-primary: hsl(280, 75%, 60%);
+    }
+  }
+
+  // *** Theme 4 + High Contrast ***
+  &[data-preset-color='theme4'] {
+    &[data-theme='light'] {
+      --color-interactive-primary: hsl(0, 70%, 40%);
+    }
+    &[data-theme='dark'] {
+      --color-interactive-primary: hsl(0, 70%, 60%);
+    }
+  }
+
+  // *** Theme 5 + High Contrast ***
+  &[data-preset-color='theme5'] {
+    &[data-theme='light'] {
+      --color-interactive-primary: hsl(30, 80%, 40%);
+    }
+    &[data-theme='dark'] {
+      --color-interactive-primary: hsl(30, 80%, 60%);
+    }
+  }
+
+  // *** Theme 6 + High Contrast ***
+  &[data-preset-color='theme6'] {
+    &[data-theme='light'] {
+      --color-interactive-primary: hsl(240, 85%, 40%);
+    }
+    &[data-theme='dark'] {
+      --color-interactive-primary: hsl(240, 85%, 60%);
+    }
+  }
+
+  // *** Theme 7 + High Contrast ***
+  &[data-preset-color='theme7'] {
+    &[data-theme='light'] {
+      --color-interactive-primary: hsl(320, 75%, 40%);
+    }
+    &[data-theme='dark'] {
+      --color-interactive-primary: hsl(320, 75%, 60%);
+    }
+  }
+}

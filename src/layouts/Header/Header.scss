@@ -16,54 +16,78 @@
   &__right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: var(--space-gap-md);
   }
 
   &__title {
-    font-size: 1.25rem;
-    font-weight: 600;
     margin: 0;
+    color: var(--primitive-gray-0);
   }
 
   &__status {
     display: flex;
     align-items: center;
-    font-size: 0.875rem;
   }
 
-  &__status-indicator {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #f87171; // Red
-    margin-right: 8px;
+  &__status-badge {
+    padding: var(--space-padding-button-sm) var(--space-padding-button-md);
+    border-radius: var(--primitive-radius-md);
+    background-color: rgba(255, 255, 255, 0.15);
+    transition: background-color 0.2s ease;
+
+    // 배지 내 아이콘 색상 명시적으로 설정
+    svg {
+      color: var(--primitive-gray-0);
+      stroke: var(--primitive-gray-0);
+    }
 
     &--connected {
-      background-color: #34d399; // Green
+      background-color: rgba(52, 211, 153, 0.2); // Green with opacity
     }
+
+    &--disconnected {
+      background-color: rgba(248, 113, 113, 0.2); // Red with opacity
+    }
+  }
+
+  &__status-text {
+    color: var(--primitive-gray-0);
+    font-size: 0.875rem;
   }
 
   &__controls {
     display: flex;
-    gap: 8px;
-    padding-left: 16px;
+    gap: var(--space-gap-xs);
+    padding-left: var(--space-padding-card-md);
     border-left: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   &__icon-button {
-    background: transparent;
-    border: none;
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 4px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: var(--primitive-gray-0);
+
+    // 아이콘 색상 명시적으로 설정
+    svg {
+      color: var(--primitive-gray-0);
+      stroke: var(--primitive-gray-0);
+    }
 
     &:hover {
       background-color: rgba(255, 255, 255, 0.1);
+
+      svg {
+        color: var(--primitive-gray-0);
+        stroke: var(--primitive-gray-0);
+      }
+    }
+
+    // IconButton의 기본 색상 오버라이드
+    &.icon-button--default {
+      color: var(--primitive-gray-0);
+
+      svg {
+        color: var(--primitive-gray-0);
+        stroke: var(--primitive-gray-0);
+      }
     }
   }
 }

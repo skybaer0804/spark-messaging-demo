@@ -1,0 +1,166 @@
+import { useState } from 'preact/hooks';
+import { useTokens, PresetColor } from '@/context/TokenProvider';
+import { Drawer } from '@/ui-component/Drawer/Drawer';
+import { Stack } from '@/ui-component/Layout/Stack';
+import { Flex } from '@/ui-component/Layout/Flex';
+import { Typography } from '@/ui-component/Typography/Typography';
+import { Button } from '@/ui-component/Button/Button';
+import { Switch } from '@/ui-component/Switch/Switch';
+import { Divider } from '@/ui-component/Divider/Divider';
+import { Paper } from '@/ui-component/Paper/Paper';
+import { IconPalette, IconShape, IconColorSwatch } from '@tabler/icons-react';
+import './ThemeCustomization.scss';
+
+interface ThemeCustomizationProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+const PRESET_COLORS: { value: PresetColor; label: string }[] = [
+  { value: 'default', label: '기본' },
+  { value: 'monotone', label: '모노톤' },
+  { value: 'theme1', label: '테마 1' },
+  { value: 'theme2', label: '테마 2' },
+  { value: 'theme3', label: '테마 3' },
+  { value: 'theme4', label: '테마 4' },
+  { value: 'theme5', label: '테마 5' },
+  { value: 'theme6', label: '테마 6' },
+  { value: 'theme7', label: '테마 7' },
+];
+
+export function ThemeCustomization({ open, onClose }: ThemeCustomizationProps) {
+  const {
+    theme,
+    toggleTheme,
+    contrast,
+    toggleContrast,
+    presetColor,
+    setPresetColor,
+    borderRadius,
+    setBorderRadius,
+    sidebarConfig,
+    setSidebarConfig,
+    resetToDefaults,
+  } = useTokens();
+
+  const [localBorderRadius, setLocalBorderRadius] = useState(borderRadius);
+
+  const handleBorderRadiusChange = (value: number) => {
+    setLocalBorderRadius(value);
+    setBorderRadius(value);
+  };
+
+  return (
+    <Drawer open={open} onClose={onClose} anchor="right" title="테마 설정" width="400px">
+      <Stack spacing="lg">
+        {/* 테마 모드 */}
+        <Paper padding="md">
+          <Stack spacing="md">
+            <Flex align="center" gap="sm">
+              <IconPalette size={20} />
+              <Typography variant="h4">테마 모드</Typography>
+            </Flex>
+            <Flex align="center" justify="space-between">
+              <Typography variant="body-medium">다크 모드</Typography>
+              <Switch
+                checked={theme === 'dark'}
+                onChange={(checked) => checked !== (theme === 'dark') && toggleTheme()}
+              />
+            </Flex>
+            <Flex align="center" justify="space-between">
+              <Typography variant="body-medium">고대비 모드</Typography>
+              <Switch
+                checked={contrast === 'high'}
+                onChange={(checked) => checked !== (contrast === 'high') && toggleContrast()}
+              />
+            </Flex>
+          </Stack>
+        </Paper>
+
+        <Divider />
+
+        {/* 프리셋 색상 */}
+        <Paper padding="md">
+          <Stack spacing="md">
+            <Flex align="center" gap="sm">
+              <IconColorSwatch size={20} />
+              <Typography variant="h4">프리셋 색상</Typography>
+            </Flex>
+            <div className="theme-customization__preset-grid">
+              {PRESET_COLORS.map((preset) => (
+                <button
+                  key={preset.value}
+                  className={`theme-customization__preset-button ${
+                    presetColor === preset.value ? 'theme-customization__preset-button--active' : ''
+                  }`}
+                  onClick={() => setPresetColor(preset.value)}
+                >
+                  <Typography variant="body-small">{preset.label}</Typography>
+                </button>
+              ))}
+            </div>
+          </Stack>
+        </Paper>
+
+        <Divider />
+
+        {/* Border Radius */}
+        <Paper padding="md">
+          <Stack spacing="md">
+            <Flex align="center" gap="sm">
+              <IconShape size={20} />
+              <Typography variant="h4">모서리 둥글기</Typography>
+            </Flex>
+            <div className="theme-customization__slider-container">
+              <input
+                type="range"
+                min="0"
+                max="16"
+                value={localBorderRadius}
+                onInput={(e) => handleBorderRadiusChange(Number((e.target as HTMLInputElement).value))}
+                className="theme-customization__slider"
+              />
+              <Flex align="center" justify="space-between">
+                <Typography variant="body-small">0px</Typography>
+                <Typography variant="body-medium" className="theme-customization__slider-value">
+                  {localBorderRadius}px
+                </Typography>
+                <Typography variant="body-small">16px</Typography>
+              </Flex>
+            </div>
+            <div className="theme-customization__preview" style={{ borderRadius: `${localBorderRadius}px` }}>
+              <Typography variant="body-small">미리보기</Typography>
+            </div>
+          </Stack>
+        </Paper>
+
+        <Divider />
+
+        {/* Sidebar 설정 */}
+        <Paper padding="md">
+          <Stack spacing="md">
+            <Typography variant="h4">사이드바 설정</Typography>
+            <Flex align="center" justify="space-between">
+              <Typography variant="body-medium">미니 드로우</Typography>
+              <Switch
+                checked={sidebarConfig.miniDrawer}
+                onChange={(checked) => setSidebarConfig({ miniDrawer: checked })}
+              />
+            </Flex>
+            <Flex align="center" justify="space-between">
+              <Typography variant="body-medium">고정</Typography>
+              <Switch checked={sidebarConfig.pinned} onChange={(checked) => setSidebarConfig({ pinned: checked })} />
+            </Flex>
+          </Stack>
+        </Paper>
+
+        <Divider />
+
+        {/* 초기화 */}
+        <Button variant="secondary" fullWidth onClick={resetToDefaults}>
+          기본값으로 복원
+        </Button>
+      </Stack>
+    </Drawer>
+  );
+}

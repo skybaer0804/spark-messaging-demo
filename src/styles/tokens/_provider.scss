@@ -4,14 +4,13 @@
 // ============================================
 
 @use 'sass:meta';
+@use './scss-variables/preset-colors';
 
 // ============================================
 // Theme: Light (Default)
 // ============================================
-:root[data-theme='light'] {
-  // Variables are already set in semantic/_color.scss
-  // Default behavior
-}
+// Variables are already set in _variables-unified.scss
+// Default behavior - no overrides needed
 
 // ============================================
 // Theme: Dark
@@ -22,15 +21,19 @@
   --color-background-secondary: #1f2329; // Slightly lighter
   --color-background-tertiary: #2b3039;
 
-  // *** Text ***
-  --color-text-primary: #f0f4f8;
-  --color-text-secondary: #949bb2;
-  --color-text-tertiary: #656d82;
-  --color-text-disabled: #434a59;
+  // *** Text *** - 프리셋 컬러가 없을 때만 기본값 사용
+  &:not([data-preset-color]) {
+    --color-text-primary: #f0f4f8;
+    --color-text-secondary: #cbd5e1; // 더 밝게 조정 (#949bb2 -> #cbd5e1)
+    --color-text-tertiary: #94a3b8; // 더 밝게 조정 (#656d82 -> #94a3b8)
+    --color-text-disabled: #64748b; // 더 밝게 조정 (#434a59 -> #64748b)
+  }
 
-  // *** Border ***
-  --color-border-default: #2b3039;
-  --color-border-light: #1f2329;
+  // *** Border *** - 프리셋 컬러가 없을 때만 기본값 사용
+  &:not([data-preset-color]) {
+    --color-border-default: #2b3039;
+    --color-border-light: #1f2329;
+  }
 
   // *** Surface ***
   --color-surface-base: #1f2329;
@@ -38,9 +41,17 @@
   --color-surface-level-2: #363c48;
   --color-surface-level-3: #434a59;
 
+  // *** Icon Colors *** - 프리셋 컬러가 없을 때만 기본값 사용
+  &:not([data-preset-color]) {
+    --color-icon-primary: #cbd5e1;
+    --color-icon-secondary: #94a3b8;
+  }
+
   // *** Interactive ***
-  // Adjust primary color brightness if needed
-  --color-interactive-primary: hsl(210, 80%, 60%); // Brighter Blue for Dark Mode
+  // 프리셋 컬러가 없을 때만 기본값 사용
+  &:not([data-preset-color]) {
+    --color-interactive-primary: hsl(210, 80%, 60%); // Brighter Blue for Dark Mode
+  }
 }
 
 // ============================================
@@ -52,8 +63,12 @@
     --color-text-primary: black;
     --color-text-secondary: #222;
     --color-border-default: #666;
-    --color-interactive-primary: #0056b3; // Darker Blue
     --elevation-shadow-1: 0 0 0 2px #000; // Borders instead of shadows
+
+    // 프리셋 컬러가 없을 때만 기본값 사용
+    &:not([data-preset-color]) {
+      --color-interactive-primary: #0056b3; // Darker Blue
+    }
   }
 
   // *** Dark Theme + High Contrast ***
@@ -61,8 +76,12 @@
     --color-text-primary: white;
     --color-text-secondary: #ddd;
     --color-border-default: #aaa;
-    --color-interactive-primary: #66b3ff; // Bright Blue
     --elevation-shadow-1: 0 0 0 2px #fff;
+
+    // 프리셋 컬러가 없을 때만 기본값 사용
+    &:not([data-preset-color]) {
+      --color-interactive-primary: #66b3ff; // Bright Blue
+    }
   }
 }
 
