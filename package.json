@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "start": "vite preview --host"
+    "start": "vite preview --host",
+    "generate-icons": "node scripts/generate-icons.js"
   },
   "dependencies": {
     "@preact/signals": "^2.5.1",
@@ -20,7 +21,9 @@
     "@preact/preset-vite": "^2.8.2",
     "@types/node": "^20.11.5",
     "sass": "^1.94.0",
+    "sharp": "^0.34.5",
     "typescript": "^5.3.3",
-    "vite": "^5.0.11"
+    "vite": "^5.0.11",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }
