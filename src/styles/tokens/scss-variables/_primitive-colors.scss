@@ -1,0 +1,63 @@
+// ============================================
+// SCSS Variables - Primitive Color Tokens
+// 컴파일 타임에 값이 치환되어 성능 최적화
+// ============================================
+
+// HSL Base Values (런타임 테마 변경을 위해 CSS 변수로도 정의됨)
+$hue-primary: 210; // Metabase Blue
+$saturation-primary: 80%;
+$hue-secondary: 260; // Purple accent
+$saturation-secondary: 60%;
+
+// Primary Color Palette (Blue)
+// Note: HSL 변수를 사용하는 색상은 _variables-unified.scss에서 CSS 변수로 생성됨
+$primitive-primary-0: hsl($hue-primary, 100%, 98%); // Very Light Blue
+$primitive-primary-5: hsl($hue-primary, 100%, 95%);
+$primitive-primary-10: hsl($hue-primary, 100%, 90%);
+$primitive-primary-15: hsl($hue-primary, 90%, 85%);
+$primitive-primary-20: hsl($hue-primary, 90%, 80%);
+$primitive-primary-25: hsl($hue-primary, 85%, 75%);
+$primitive-primary-30: hsl($hue-primary, 85%, 70%);
+$primitive-primary-40: hsl($hue-primary, 80%, 60%);
+$primitive-primary-50: hsl($hue-primary, 75%, 50%); // Base Blue (#509EE3 approx)
+$primitive-primary-60: hsl($hue-primary, 80%, 45%);
+$primitive-primary-70: hsl($hue-primary, 85%, 35%);
+$primitive-primary-80: hsl($hue-primary, 90%, 25%);
+$primitive-primary-90: hsl($hue-primary, 95%, 15%);
+$primitive-primary-100: hsl($hue-primary, 100%, 5%); // Very Dark Blue
+
+// Secondary Color Palette (Purple)
+$primitive-secondary-0: hsl($hue-secondary, 100%, 98%);
+$primitive-secondary-10: hsl($hue-secondary, 90%, 90%);
+$primitive-secondary-20: hsl($hue-secondary, 85%, 80%);
+$primitive-secondary-30: hsl($hue-secondary, 80%, 70%);
+$primitive-secondary-40: hsl($hue-secondary, 75%, 60%);
+$primitive-secondary-50: hsl($hue-secondary, 70%, 50%); // 더 진한 보라색
+$primitive-secondary-60: hsl($hue-secondary, 75%, 40%);
+$primitive-secondary-70: hsl($hue-secondary, 80%, 30%);
+$primitive-secondary-80: hsl($hue-secondary, 85%, 20%);
+$primitive-secondary-90: hsl($hue-secondary, 90%, 10%);
+$primitive-secondary-100: hsl($hue-secondary, 95%, 5%);
+
+// Gray Color Palette (Cool Grey for cleaner look)
+// 성능 최적화: HSL 값을 직접 계산 (hue: 210, saturation: 15% 고정)
+$primitive-gray-0: hsl(0, 0%, 100%); // White
+$primitive-gray-5: hsl(210, 15%, 97%); // Very Light BG
+$primitive-gray-10: hsl(210, 15%, 94%); // Light Border
+$primitive-gray-15: hsl(210, 15%, 90%);
+$primitive-gray-20: hsl(210, 15%, 85%); // Border
+$primitive-gray-25: hsl(210, 15%, 80%);
+$primitive-gray-30: hsl(210, 15%, 70%);
+$primitive-gray-40: hsl(210, 15%, 60%); // Tertiary Text
+$primitive-gray-50: hsl(210, 15%, 50%);
+$primitive-gray-60: hsl(210, 15%, 40%); // Secondary Text
+$primitive-gray-70: hsl(210, 15%, 30%);
+$primitive-gray-80: hsl(210, 15%, 20%); // Primary Text
+$primitive-gray-90: hsl(210, 15%, 10%);
+$primitive-gray-100: hsl(210, 15%, 5%); // Black
+
+// System Colors
+$primitive-success-50: hsl(100, 60%, 50%); // Green
+$primitive-warning-50: hsl(40, 90%, 60%); // Yellow/Orange
+$primitive-error-50: hsl(0, 70%, 60%); // Red
+$primitive-info-50: hsl(200, 90%, 60%); // Sky Blue

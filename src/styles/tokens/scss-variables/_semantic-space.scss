@@ -24,6 +24,13 @@ $space-gap-sm: space.$primitive-space-2; // 8px
 $space-gap-xs: space.$primitive-space-1; // 4px
 
 // *** Padding ***
+// General Padding
+$space-padding-xs: space.$primitive-padding-xs;
+$space-padding-sm: space.$primitive-padding-sm;
+$space-padding-md: space.$primitive-padding-md;
+$space-padding-lg: space.$primitive-padding-lg;
+$space-padding-xl: space.$primitive-padding-xl;
+
 // Card/Modal/InfoBox/Alert Container
 $space-padding-card-lg: space.$primitive-space-6; // 24px
 $space-padding-card-md: space.$primitive-space-4; // 16px

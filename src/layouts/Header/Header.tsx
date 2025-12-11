@@ -1,6 +1,6 @@
 import './Header.scss';
 import { useState } from 'preact/hooks';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import { IconButton } from '@/ui-component/Button/IconButton';
 import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
@@ -14,7 +14,7 @@ interface HeaderProps {
 }
 
 export function Header({ title, isConnected, socketId }: HeaderProps) {
-  const { theme, toggleTheme, contrast, toggleContrast } = useTokens();
+  const { theme, toggleTheme, contrast, toggleContrast } = useTheme();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (

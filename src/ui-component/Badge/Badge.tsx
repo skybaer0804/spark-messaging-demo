@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import './Badge.scss';
 
 export interface BadgeProps extends JSX.HTMLAttributes<HTMLSpanElement> {
@@ -19,7 +19,7 @@ export function Badge({
   children,
   ...props
 }: BadgeProps) {
-  const { theme } = useTokens();
+  const { theme } = useTheme();
 
   if (invisible) return <>{children}</>;
 

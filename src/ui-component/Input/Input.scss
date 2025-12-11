@@ -1,10 +1,11 @@
 @use '/src/styles/tokens/index';
-@use '/src/styles/tokens/scss-variables/component-input' as input;
+@use '/src/styles/tokens/scss-variables/semantic-space' as space;
+@use '/src/styles/tokens/scss-variables/primitive-shape' as shape;
 
 .input-group {
     display: flex;
     flex-direction: column;
-    gap: input.$input-gap-label-input; // SCSS 변수 사용
+    gap: space.$space-gap-sm; // 8px
     width: 100%;
 }
 
@@ -22,11 +23,11 @@
 
 .input {
     width: 100%;
-    height: input.$input-height; // SCSS 변수 사용
-    padding: input.$input-padding; // SCSS 변수 사용
+    height: 48px;
+    padding: space.$space-padding-input; // 16px
 
-    border: input.$input-border-width solid var(--input-border); // 테마 변경 지원을 위해 색상은 CSS 변수 유지
-    border-radius: input.$input-radius; // SCSS 변수 사용
+    border: 1px solid var(--input-border); // 테마 변경 지원을 위해 색상은 CSS 변수 유지
+    border-radius: shape.$primitive-radius-medium; // 6px
 
   font-family: var(--primitive-font-family);
   font-size: var(--input-font-size);
@@ -62,7 +63,7 @@
 }
 
 .input-helper-text {
-    margin-top: input.$input-gap-input-helper; // SCSS 변수 사용
+    margin-top: space.$space-gap-xs; // 4px
     font-size: var(--input-helper-text-font-size);
     color: var(--input-helper-text-color);
 
@@ -72,8 +73,8 @@
 }
 
 .input-textarea {
-    min-height: input.$textarea-min-height; // SCSS 변수 사용
+    min-height: 96px;
     resize: vertical;
-    padding: input.$textarea-padding; // SCSS 변수 사용
+    padding: space.$space-padding-input; // 16px
     font-family: inherit;
 }

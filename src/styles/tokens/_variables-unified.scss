@@ -3,189 +3,205 @@
 // 모든 CSS 변수를 하나의 :root 블록으로 통합하여 브라우저 파싱 성능 향상
 // ============================================
 
+// ============================================
+// Primitive Tokens Import
+// ============================================
+@use './scss-variables/primitive-colors' as color;
+@use './scss-variables/primitive-space' as space;
+@use './scss-variables/primitive-shape' as shape;
+@use './scss-variables/primitive-typography' as typo;
+@use './scss-variables/primitive-shadow' as shadow;
+
+// ============================================
+// Semantic Tokens Import
+// ============================================
+@use './scss-variables/semantic-space' as semantic-space;
+@use './scss-variables/semantic-color' as semantic-color;
+@use './scss-variables/semantic-typography' as semantic-typo;
+@use './scss-variables/semantic-elevation-shadow' as semantic-elevation;
+
 :root {
   // ============================================
   // 1. PRIMITIVE TOKENS
   // ============================================
 
-  // --- Primitive Color Tokens ---
-  // HSL Variables
-  --hue-primary: 210; // Metabase Blue
-  --saturation-primary: 80%;
-  --hue-secondary: 260; // Purple accent
-  --saturation-secondary: 60%;
-
-  // Primary Color Palette (Blue)
-  --primitive-primary-0: hsl(var(--hue-primary), 100%, 98%); // Very Light Blue
-  --primitive-primary-5: hsl(var(--hue-primary), 100%, 95%);
-  --primitive-primary-10: hsl(var(--hue-primary), 100%, 90%);
-  --primitive-primary-15: hsl(var(--hue-primary), 90%, 85%);
-  --primitive-primary-20: hsl(var(--hue-primary), 90%, 80%);
-  --primitive-primary-25: hsl(var(--hue-primary), 85%, 75%);
-  --primitive-primary-30: hsl(var(--hue-primary), 85%, 70%);
-  --primitive-primary-40: hsl(var(--hue-primary), 80%, 60%);
-  --primitive-primary-50: hsl(var(--hue-primary), 75%, 50%); // Base Blue (#509EE3 approx)
-  --primitive-primary-60: hsl(var(--hue-primary), 80%, 45%);
-  --primitive-primary-70: hsl(var(--hue-primary), 85%, 35%);
-  --primitive-primary-80: hsl(var(--hue-primary), 90%, 25%);
-  --primitive-primary-90: hsl(var(--hue-primary), 95%, 15%);
-  --primitive-primary-100: hsl(var(--hue-primary), 100%, 5%); // Very Dark Blue
-
-  // Secondary Color Palette (Purple) - 더 진한 보라색으로 변경
-  --primitive-secondary-0: hsl(var(--hue-secondary), 100%, 98%);
-  --primitive-secondary-10: hsl(var(--hue-secondary), 90%, 90%);
-  --primitive-secondary-20: hsl(var(--hue-secondary), 85%, 80%);
-  --primitive-secondary-30: hsl(var(--hue-secondary), 80%, 70%);
-  --primitive-secondary-40: hsl(var(--hue-secondary), 75%, 60%);
-  --primitive-secondary-50: hsl(var(--hue-secondary), 70%, 50%); // 더 진한 보라색
-  --primitive-secondary-60: hsl(var(--hue-secondary), 75%, 40%);
-  --primitive-secondary-70: hsl(var(--hue-secondary), 80%, 30%);
-  --primitive-secondary-80: hsl(var(--hue-secondary), 85%, 20%);
-  --primitive-secondary-90: hsl(var(--hue-secondary), 90%, 10%);
-  --primitive-secondary-100: hsl(var(--hue-secondary), 95%, 5%);
-
-  // Gray Color Palette (Cool Grey for cleaner look)
-  // 성능 최적화: HSL 값을 직접 계산 (hue: 210, saturation: 15% 고정)
-  --primitive-gray-0: hsl(0, 0%, 100%); // White
-  --primitive-gray-5: hsl(210, 15%, 97%); // Very Light BG
-  --primitive-gray-10: hsl(210, 15%, 94%); // Light Border
-  --primitive-gray-15: hsl(210, 15%, 90%);
-  --primitive-gray-20: hsl(210, 15%, 85%); // Border
-  --primitive-gray-25: hsl(210, 15%, 80%);
-  --primitive-gray-30: hsl(210, 15%, 70%);
-  --primitive-gray-40: hsl(210, 15%, 60%); // Tertiary Text
-  --primitive-gray-50: hsl(210, 15%, 50%);
-  --primitive-gray-60: hsl(210, 15%, 40%); // Secondary Text
-  --primitive-gray-70: hsl(210, 15%, 30%);
-  --primitive-gray-80: hsl(210, 15%, 20%); // Primary Text
-  --primitive-gray-90: hsl(210, 15%, 10%);
-  --primitive-gray-100: hsl(210, 15%, 5%); // Black
-
-  // System Colors
-  --primitive-success-50: hsl(100, 60%, 50%); // Green
-  --primitive-warning-50: hsl(40, 90%, 60%); // Yellow/Orange
-  --primitive-error-50: hsl(0, 70%, 60%); // Red
-  --primitive-info-50: hsl(200, 90%, 60%); // Sky Blue
-
   // --- Primitive Space Tokens ---
   // Base Unit
-  --primitive-space-base: 8px;
+  --primitive-space-base: #{space.$primitive-space-base};
 
   // Space Scale
-  --primitive-space-1: 4px; // 0.5 unit
-  --primitive-space-2: 8px; // 1 unit
-  --primitive-space-3: 12px; // 1.5 unit
-  --primitive-space-4: 16px; // 2 unit
-  --primitive-space-5: 20px; // 2.5 unit
-  --primitive-space-6: 24px; // 3 unit
-  --primitive-space-7: 28px; // 3.5 unit
-  --primitive-space-8: 32px; // 4 unit
-  --primitive-space-9: 36px; // 4.5 unit
-  --primitive-space-10: 40px; // 5 unit
-  --primitive-space-11: 44px; // 5.5 unit
-  --primitive-space-12: 48px; // 6 unit
-  --primitive-space-13: 52px; // 6.5 unit
-  --primitive-space-14: 56px; // 7 unit
-  --primitive-space-15: 60px; // 7.5 unit
-  --primitive-space-16: 64px; // 8 unit
-  --primitive-space-18: 72px; // 9 unit
-  --primitive-space-20: 80px; // 10 unit
+  --primitive-space-1: #{space.$primitive-space-1}; // 0.5 unit
+  --primitive-space-2: #{space.$primitive-space-2}; // 1 unit
+  --primitive-space-3: #{space.$primitive-space-3}; // 1.5 unit
+  --primitive-space-4: #{space.$primitive-space-4}; // 2 unit
+  --primitive-space-5: #{space.$primitive-space-5}; // 2.5 unit
+  --primitive-space-6: #{space.$primitive-space-6}; // 3 unit
+  --primitive-space-7: #{space.$primitive-space-7}; // 3.5 unit
+  --primitive-space-8: #{space.$primitive-space-8}; // 4 unit
+  --primitive-space-9: #{space.$primitive-space-9}; // 4.5 unit
+  --primitive-space-10: #{space.$primitive-space-10}; // 5 unit
+  --primitive-space-11: #{space.$primitive-space-11}; // 5.5 unit
+  --primitive-space-12: #{space.$primitive-space-12}; // 6 unit
+  --primitive-space-13: #{space.$primitive-space-13}; // 6.5 unit
+  --primitive-space-14: #{space.$primitive-space-14}; // 7 unit
+  --primitive-space-15: #{space.$primitive-space-15}; // 7.5 unit
+  --primitive-space-16: #{space.$primitive-space-16}; // 8 unit
+  --primitive-space-18: #{space.$primitive-space-18}; // 9 unit
+  --primitive-space-20: #{space.$primitive-space-20}; // 10 unit
 
   // Aliases
-  --primitive-gap-xs: var(--primitive-space-1);
-  --primitive-gap-sm: var(--primitive-space-2);
-  --primitive-gap-md: var(--primitive-space-4);
-  --primitive-gap-lg: var(--primitive-space-6);
-  --primitive-gap-xl: var(--primitive-space-8);
+  --primitive-gap-xs: #{space.$primitive-gap-xs};
+  --primitive-gap-sm: #{space.$primitive-gap-sm};
+  --primitive-gap-md: #{space.$primitive-gap-md};
+  --primitive-gap-lg: #{space.$primitive-gap-lg};
+  --primitive-gap-xl: #{space.$primitive-gap-xl};
 
-  --primitive-padding-xs: var(--primitive-space-2);
-  --primitive-padding-sm: var(--primitive-space-3);
-  --primitive-padding-md: var(--primitive-space-4);
-  --primitive-padding-lg: var(--primitive-space-6);
-  --primitive-padding-xl: var(--primitive-space-8);
+  --primitive-padding-xs: #{space.$primitive-padding-xs};
+  --primitive-padding-sm: #{space.$primitive-padding-sm};
+  --primitive-padding-md: #{space.$primitive-padding-md};
+  --primitive-padding-lg: #{space.$primitive-padding-lg};
+  --primitive-padding-xl: #{space.$primitive-padding-xl};
 
   // --- Primitive Shape Tokens (Radius) ---
   // Radius Scale
-  --primitive-radius-none: 0px;
-  --primitive-radius-xs: 2px;
-  --primitive-radius-sm: 4px;
-  --primitive-radius-md: 6px;
-  --primitive-radius-lg: 10px;
-  --primitive-radius-xl: 12px;
-  --primitive-radius-max: 50%;
+  --primitive-radius-none: #{shape.$primitive-radius-none};
+  --primitive-radius-xs: #{shape.$primitive-radius-xs};
+  --primitive-radius-sm: #{shape.$primitive-radius-sm};
+  --primitive-radius-md: #{shape.$primitive-radius-md};
+  --primitive-radius-lg: #{shape.$primitive-radius-lg};
+  --primitive-radius-xl: #{shape.$primitive-radius-xl};
+  --primitive-radius-max: #{shape.$primitive-radius-max};
 
   // Level Radius
-  --primitive-radius-xsmall: 2px;
-  --primitive-radius-small: 4px;
-  --primitive-radius-medium: 6px;
-  --primitive-radius-large: 10px;
-  --primitive-radius-xlarge: 12px;
+  --primitive-radius-xsmall: #{shape.$primitive-radius-xsmall};
+  --primitive-radius-small: #{shape.$primitive-radius-small};
+  --primitive-radius-medium: #{shape.$primitive-radius-medium};
+  --primitive-radius-large: #{shape.$primitive-radius-large};
+  --primitive-radius-xlarge: #{shape.$primitive-radius-xlarge};
 
   // --- Primitive Typography Tokens ---
   // Font Family
-  --primitive-font-family: 'Pretendard GOV', 'Pretendard', sans-serif;
+  --primitive-font-family: #{typo.$primitive-font-family};
 
   // Font Weight
-  --primitive-font-weight-regular: 400;
-  --primitive-font-weight-bold: 700;
+  --primitive-font-weight-regular: #{typo.$primitive-font-weight-regular};
+  --primitive-font-weight-bold: #{typo.$primitive-font-weight-bold};
 
   // Font Size
   // Display
-  --primitive-font-size-display-lg: 60px;
-  --primitive-font-size-display-lg-mobile: 44px;
-  --primitive-font-size-display-md: 44px;
-  --primitive-font-size-display-md-mobile: 32px;
-  --primitive-font-size-display-sm: 36px;
-  --primitive-font-size-display-sm-mobile: 28px;
+  --primitive-font-size-display-lg: #{typo.$primitive-font-size-display-lg};
+  --primitive-font-size-display-lg-mobile: #{typo.$primitive-font-size-display-lg-mobile};
+  --primitive-font-size-display-md: #{typo.$primitive-font-size-display-md};
+  --primitive-font-size-display-md-mobile: #{typo.$primitive-font-size-display-md-mobile};
+  --primitive-font-size-display-sm: #{typo.$primitive-font-size-display-sm};
+  --primitive-font-size-display-sm-mobile: #{typo.$primitive-font-size-display-sm-mobile};
 
   // Heading (h1 ~ h6)
-  --primitive-font-size-h1-xlarge: 40px;
-  --primitive-font-size-h1-xlarge-mobile: 28px;
-  --primitive-font-size-h2-large: 32px;
-  --primitive-font-size-h2-large-mobile: 24px;
-  --primitive-font-size-h3-medium: 24px;
-  --primitive-font-size-h3-medium-mobile: 22px;
-  --primitive-font-size-h4-small: 19px;
-  --primitive-font-size-h4-small-mobile: 19px;
-  --primitive-font-size-h5-xsmall: 17px;
-  --primitive-font-size-h5-xsmall-mobile: 17px;
-  --primitive-font-size-h6-xxsmall: 15px;
-  --primitive-font-size-h6-xxsmall-mobile: 15px;
+  --primitive-font-size-h1-xlarge: #{typo.$primitive-font-size-h1-xlarge};
+  --primitive-font-size-h1-xlarge-mobile: #{typo.$primitive-font-size-h1-xlarge-mobile};
+  --primitive-font-size-h2-large: #{typo.$primitive-font-size-h2-large};
+  --primitive-font-size-h2-large-mobile: #{typo.$primitive-font-size-h2-large-mobile};
+  --primitive-font-size-h3-medium: #{typo.$primitive-font-size-h3-medium};
+  --primitive-font-size-h3-medium-mobile: #{typo.$primitive-font-size-h3-medium-mobile};
+  --primitive-font-size-h4-small: #{typo.$primitive-font-size-h4-small};
+  --primitive-font-size-h4-small-mobile: #{typo.$primitive-font-size-h4-small-mobile};
+  --primitive-font-size-h5-xsmall: #{typo.$primitive-font-size-h5-xsmall};
+  --primitive-font-size-h5-xsmall-mobile: #{typo.$primitive-font-size-h5-xsmall-mobile};
+  --primitive-font-size-h6-xxsmall: #{typo.$primitive-font-size-h6-xxsmall};
+  --primitive-font-size-h6-xxsmall-mobile: #{typo.$primitive-font-size-h6-xxsmall-mobile};
 
   // Body
-  --primitive-font-size-body-lg: 19px;
-  --primitive-font-size-body-md: 17px;
-  --primitive-font-size-body-sm: 15px;
-  --primitive-font-size-body-xs: 13px;
+  --primitive-font-size-body-lg: #{typo.$primitive-font-size-body-lg};
+  --primitive-font-size-body-md: #{typo.$primitive-font-size-body-md};
+  --primitive-font-size-body-sm: #{typo.$primitive-font-size-body-sm};
+  --primitive-font-size-body-xs: #{typo.$primitive-font-size-body-xs};
 
   // Line Height
-  --primitive-line-height-tight: 1.2;
-  --primitive-line-height-normal: 1.5;
-  --primitive-line-height-relaxed: 1.75;
+  --primitive-line-height-tight: #{typo.$primitive-line-height-tight};
+  --primitive-line-height-normal: #{typo.$primitive-line-height-normal};
+  --primitive-line-height-relaxed: #{typo.$primitive-line-height-relaxed};
 
   // Letter Spacing
-  --primitive-letter-spacing-tight: 0px;
-  --primitive-letter-spacing-normal: 0px;
-  --primitive-letter-spacing-wide: 1px;
+  --primitive-letter-spacing-tight: #{typo.$primitive-letter-spacing-tight};
+  --primitive-letter-spacing-normal: #{typo.$primitive-letter-spacing-normal};
+  --primitive-letter-spacing-wide: #{typo.$primitive-letter-spacing-wide};
 
   // Text Transform
-  --primitive-text-transform-none: none;
-  --primitive-text-transform-uppercase: uppercase;
-  --primitive-text-transform-lowercase: lowercase;
+  --primitive-text-transform-none: #{typo.$primitive-text-transform-none};
+  --primitive-text-transform-uppercase: #{typo.$primitive-text-transform-uppercase};
+  --primitive-text-transform-lowercase: #{typo.$primitive-text-transform-lowercase};
 
   // --- Primitive Shadow Tokens ---
   // Shadow Levels
-  --primitive-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --primitive-shadow-2: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  --primitive-shadow-3: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-  --primitive-shadow-4: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --primitive-shadow-1: #{shadow.$primitive-shadow-1};
+  --primitive-shadow-2: #{shadow.$primitive-shadow-2};
+  --primitive-shadow-3: #{shadow.$primitive-shadow-3};
+  --primitive-shadow-4: #{shadow.$primitive-shadow-4};
 
   // Detailed Shadow Props (If needed for fine-tuning)
-  --primitive-shadow-offset-x: 0;
-  --primitive-shadow-offset-y: 1px;
-  --primitive-shadow-blur: 2px;
-  --primitive-shadow-spread: 0;
-  --primitive-shadow-color: rgba(0, 0, 0, 0.05);
+  --primitive-shadow-offset-x: #{shadow.$primitive-shadow-offset-x};
+  --primitive-shadow-offset-y: #{shadow.$primitive-shadow-offset-y};
+  --primitive-shadow-blur: #{shadow.$primitive-shadow-blur};
+  --primitive-shadow-spread: #{shadow.$primitive-shadow-spread};
+  --primitive-shadow-color: #{shadow.$primitive-shadow-color};
+
+  // --- Primitive Color Tokens ---
+  // HSL Variables (런타임 테마 변경을 위해 CSS 변수로 정의)
+  --hue-primary: #{color.$hue-primary}; // Metabase Blue
+  --saturation-primary: #{color.$saturation-primary};
+  --hue-secondary: #{color.$hue-secondary}; // Purple accent
+  --saturation-secondary: #{color.$saturation-secondary};
+
+  // Primary Color Palette (Blue)
+  --primitive-primary-0: #{color.$primitive-primary-0}; // Very Light Blue
+  --primitive-primary-5: #{color.$primitive-primary-5};
+  --primitive-primary-10: #{color.$primitive-primary-10};
+  --primitive-primary-15: #{color.$primitive-primary-15};
+  --primitive-primary-20: #{color.$primitive-primary-20};
+  --primitive-primary-25: #{color.$primitive-primary-25};
+  --primitive-primary-30: #{color.$primitive-primary-30};
+  --primitive-primary-40: #{color.$primitive-primary-40};
+  --primitive-primary-50: #{color.$primitive-primary-50}; // Base Blue (#509EE3 approx)
+  --primitive-primary-60: #{color.$primitive-primary-60};
+  --primitive-primary-70: #{color.$primitive-primary-70};
+  --primitive-primary-80: #{color.$primitive-primary-80};
+  --primitive-primary-90: #{color.$primitive-primary-90};
+  --primitive-primary-100: #{color.$primitive-primary-100}; // Very Dark Blue
+
+  // Secondary Color Palette (Purple)
+  --primitive-secondary-0: #{color.$primitive-secondary-0};
+  --primitive-secondary-10: #{color.$primitive-secondary-10};
+  --primitive-secondary-20: #{color.$primitive-secondary-20};
+  --primitive-secondary-30: #{color.$primitive-secondary-30};
+  --primitive-secondary-40: #{color.$primitive-secondary-40};
+  --primitive-secondary-50: #{color.$primitive-secondary-50}; // 더 진한 보라색
+  --primitive-secondary-60: #{color.$primitive-secondary-60};
+  --primitive-secondary-70: #{color.$primitive-secondary-70};
+  --primitive-secondary-80: #{color.$primitive-secondary-80};
+  --primitive-secondary-90: #{color.$primitive-secondary-90};
+  --primitive-secondary-100: #{color.$primitive-secondary-100};
+
+  // Gray Color Palette (Cool Grey for cleaner look)
+  --primitive-gray-0: #{color.$primitive-gray-0}; // White
+  --primitive-gray-5: #{color.$primitive-gray-5}; // Very Light BG
+  --primitive-gray-10: #{color.$primitive-gray-10}; // Light Border
+  --primitive-gray-15: #{color.$primitive-gray-15};
+  --primitive-gray-20: #{color.$primitive-gray-20}; // Border
+  --primitive-gray-25: #{color.$primitive-gray-25};
+  --primitive-gray-30: #{color.$primitive-gray-30};
+  --primitive-gray-40: #{color.$primitive-gray-40}; // Tertiary Text
+  --primitive-gray-50: #{color.$primitive-gray-50};
+  --primitive-gray-60: #{color.$primitive-gray-60}; // Secondary Text
+  --primitive-gray-70: #{color.$primitive-gray-70};
+  --primitive-gray-80: #{color.$primitive-gray-80}; // Primary Text
+  --primitive-gray-90: #{color.$primitive-gray-90};
+  --primitive-gray-100: #{color.$primitive-gray-100}; // Black
+
+  // System Colors
+  --primitive-success-50: #{color.$primitive-success-50}; // Green
+  --primitive-warning-50: #{color.$primitive-warning-50}; // Yellow/Orange
+  --primitive-error-50: #{color.$primitive-error-50}; // Red
+  --primitive-info-50: #{color.$primitive-info-50}; // Sky Blue
 
   // ============================================
   // 2. SEMANTIC TOKENS
@@ -193,267 +209,274 @@
 
   // --- Semantic Color Tokens ---
   // *** Background Colors ***
-  --color-background-primary: var(--primitive-gray-0); // White
-  --color-background-secondary: var(--primitive-gray-5); // Very Light Cool Grey
-  --color-background-tertiary: var(--primitive-gray-10); // Light Grey
-  --color-background-overlay: rgba(30, 40, 50, 0.6); // Dark Blue-ish Overlay
+  --color-background-primary: #{semantic-color.$color-background-primary}; // White
+  --color-background-secondary: #{semantic-color.$color-background-secondary}; // Very Light Cool Grey
+  --color-background-tertiary: #{semantic-color.$color-background-tertiary}; // Light Grey
+  --color-background-overlay: #{semantic-color.$color-background-overlay}; // Dark Blue-ish Overlay
 
   // *** Text Colors ***
-  --color-text-primary: var(--primitive-gray-80); // Dark Grey (Soft Black)
-  --color-text-secondary: var(--primitive-gray-50); // Medium Grey
-  --color-text-tertiary: var(--primitive-gray-40); // Light Grey
-  --color-text-disabled: var(--primitive-gray-30);
+  --color-text-primary: #{semantic-color.$color-text-primary}; // Dark Grey (Soft Black)
+  --color-text-secondary: #{semantic-color.$color-text-secondary}; // Medium Grey
+  --color-text-tertiary: #{semantic-color.$color-text-tertiary}; // Light Grey
+  --color-text-disabled: #{semantic-color.$color-text-disabled};
 
   // *** Icon Colors ***
-  --color-icon-primary: var(--primitive-gray-70);
-  --color-icon-secondary: var(--primitive-gray-50);
-  --color-icon-disabled: var(--primitive-gray-30);
+  --color-icon-primary: #{semantic-color.$color-icon-primary};
+  --color-icon-secondary: #{semantic-color.$color-icon-secondary};
+  --color-icon-disabled: #{semantic-color.$color-icon-disabled};
 
   // *** Border Colors (Soft & Subtle) ***
-  --color-border-default: var(--primitive-gray-15); // Very Subtle Border
-  --color-border-light: var(--primitive-gray-10);
-  --color-border-dark: var(--primitive-gray-30);
-  --color-border-focus: var(--primitive-primary-50);
+  --color-border-default: #{semantic-color.$color-border-default}; // Very Subtle Border
+  --color-border-light: #{semantic-color.$color-border-light};
+  --color-border-dark: #{semantic-color.$color-border-dark};
+  --color-border-focus: #{semantic-color.$color-border-focus};
 
   // *** Status Colors ***
-  --color-status-success: var(--primitive-success-50);
-  --color-status-warning: var(--primitive-warning-50);
-  --color-status-error: var(--primitive-error-50);
-  --color-status-info: var(--primitive-info-50);
+  --color-status-success: #{semantic-color.$color-status-success};
+  --color-status-warning: #{semantic-color.$color-status-warning};
+  --color-status-error: #{semantic-color.$color-status-error};
+  --color-status-info: #{semantic-color.$color-status-info};
 
   // *** Interactive Colors ***
-  --color-interactive-primary: var(--primitive-primary-50);
-  --color-interactive-secondary: var(--primitive-secondary-50);
-  --color-interactive-disabled: var(--primitive-gray-20);
+  --color-interactive-primary: #{semantic-color.$color-interactive-primary};
+  --color-interactive-secondary: #{semantic-color.$color-interactive-secondary};
+  --color-interactive-disabled: #{semantic-color.$color-interactive-disabled};
 
   // Preset color overrides will be applied via data-preset-color attribute
 
   // *** Surface (by Elevation) ***
-  --color-surface-base: var(--primitive-gray-0);
-  --color-surface-level-1: var(--primitive-gray-0);
-  --color-surface-level-2: var(--primitive-gray-0);
-  --color-surface-level-3: var(--primitive-gray-0);
-  --color-surface-level-4: var(--primitive-gray-0);
+  --color-surface-base: #{semantic-color.$color-surface-base};
+  --color-surface-level-1: #{semantic-color.$color-surface-level-1};
+  --color-surface-level-2: #{semantic-color.$color-surface-level-2};
+  --color-surface-level-3: #{semantic-color.$color-surface-level-3};
+  --color-surface-level-4: #{semantic-color.$color-surface-level-4};
 
   // --- Semantic Space Tokens ---
   // *** Layout Gap ***
-  --space-layout-header-breadcrumb: var(--primitive-space-10); // 40px
-  --space-layout-left-contents: var(--primitive-space-16); // 64px
-  --space-layout-contents-right: var(--primitive-space-10); // 40px
-  --space-layout-contents-footer: var(--primitive-space-16); // 64px
-  --space-layout-breadcrumb-contents: var(--primitive-space-10); // 40px
+  --space-layout-header-breadcrumb: #{semantic-space.$space-layout-header-breadcrumb}; // 40px
+  --space-layout-left-contents: #{semantic-space.$space-layout-left-contents}; // 64px
+  --space-layout-contents-right: #{semantic-space.$space-layout-contents-right}; // 40px
+  --space-layout-contents-footer: #{semantic-space.$space-layout-contents-footer}; // 64px
+  --space-layout-breadcrumb-contents: #{semantic-space.$space-layout-breadcrumb-contents}; // 40px
 
   // *** Content Gap ***
-  --space-content-gap-lg: var(--primitive-space-6); // 24px
-  --space-content-gap-md: var(--primitive-space-4); // 16px
-  --space-content-gap-sm: var(--primitive-space-2); // 8px
+  --space-content-gap-lg: #{semantic-space.$space-content-gap-lg}; // 24px
+  --space-content-gap-md: #{semantic-space.$space-content-gap-md}; // 16px
+  --space-content-gap-sm: #{semantic-space.$space-content-gap-sm}; // 8px
 
   // *** Component Gap ***
-  --space-gap-xl: var(--primitive-space-6); // 24px
-  --space-gap-lg: var(--primitive-space-4); // 16px
-  --space-gap-md: var(--primitive-space-3); // 12px
-  --space-gap-sm: var(--primitive-space-2); // 8px
-  --space-gap-xs: var(--primitive-space-1); // 4px
+  --space-gap-xl: #{semantic-space.$space-gap-xl}; // 24px
+  --space-gap-lg: #{semantic-space.$space-gap-lg}; // 16px
+  --space-gap-md: #{semantic-space.$space-gap-md}; // 12px
+  --space-gap-sm: #{semantic-space.$space-gap-sm}; // 8px
+  --space-gap-xs: #{semantic-space.$space-gap-xs}; // 4px
 
   // *** Padding ***
+  // General Padding
+  --space-padding-xs: #{semantic-space.$space-padding-xs};
+  --space-padding-sm: #{semantic-space.$space-padding-sm};
+  --space-padding-md: #{semantic-space.$space-padding-md};
+  --space-padding-lg: #{semantic-space.$space-padding-lg};
+  --space-padding-xl: #{semantic-space.$space-padding-xl};
+
   // Card/Modal/InfoBox/Alert Container
-  --space-padding-card-lg: var(--primitive-space-6); // PC: 24px
-  --space-padding-card-md: var(--primitive-space-4); // Mobile: 16px
+  --space-padding-card-lg: #{semantic-space.$space-padding-card-lg}; // PC: 24px
+  --space-padding-card-md: #{semantic-space.$space-padding-card-md}; // Mobile: 16px
 
   // Input Field
-  --space-padding-input: var(--primitive-space-4); // 16px
-  --space-padding-input-sm: var(--primitive-space-3); // 12px
+  --space-padding-input: #{semantic-space.$space-padding-input}; // 16px
+  --space-padding-input-sm: #{semantic-space.$space-padding-input-sm}; // 12px
 
   // Button
-  --space-padding-button-lg: var(--primitive-space-4); // 16px
-  --space-padding-button-md: var(--primitive-space-3); // 12px
-  --space-padding-button-sm: var(--primitive-space-2); // 8px
+  --space-padding-button-lg: #{semantic-space.$space-padding-button-lg}; // 16px
+  --space-padding-button-md: #{semantic-space.$space-padding-button-md}; // 12px
+  --space-padding-button-sm: #{semantic-space.$space-padding-button-sm}; // 8px
 
   // *** Margin ***
-  --space-margin-lg: var(--primitive-space-6);
-  --space-margin-md: var(--primitive-space-4);
-  --space-margin-sm: var(--primitive-space-2);
-  --space-margin-xs: var(--primitive-space-1);
+  --space-margin-lg: #{semantic-space.$space-margin-lg};
+  --space-margin-md: #{semantic-space.$space-margin-md};
+  --space-margin-sm: #{semantic-space.$space-margin-sm};
+  --space-margin-xs: #{semantic-space.$space-margin-xs};
 
   // --- Semantic Typography Tokens ---
   // Display (Banner/Marketing)
   // .display-large
-  --typo-display-large-size-pc: var(--primitive-font-size-display-lg);
-  --typo-display-large-size-mobile: var(--primitive-font-size-display-lg-mobile);
-  --typo-display-large-weight: var(--primitive-font-weight-bold);
-  --typo-display-large-line-height: 1.5;
-  --typo-display-large-letter-spacing: 1px;
+  --typo-display-large-size-pc: #{semantic-typo.$typo-display-large-size-pc};
+  --typo-display-large-size-mobile: #{semantic-typo.$typo-display-large-size-mobile};
+  --typo-display-large-weight: #{semantic-typo.$typo-display-large-weight};
+  --typo-display-large-line-height: #{semantic-typo.$typo-display-large-line-height};
+  --typo-display-large-letter-spacing: #{semantic-typo.$typo-display-large-letter-spacing};
 
   // .display-medium
-  --typo-display-medium-size-pc: var(--primitive-font-size-display-md);
-  --typo-display-medium-size-mobile: var(--primitive-font-size-display-md-mobile);
-  --typo-display-medium-weight: var(--primitive-font-weight-bold);
-  --typo-display-medium-line-height: 1.5;
-  --typo-display-medium-letter-spacing: 1px;
+  --typo-display-medium-size-pc: #{semantic-typo.$typo-display-medium-size-pc};
+  --typo-display-medium-size-mobile: #{semantic-typo.$typo-display-medium-size-mobile};
+  --typo-display-medium-weight: #{semantic-typo.$typo-display-medium-weight};
+  --typo-display-medium-line-height: #{semantic-typo.$typo-display-medium-line-height};
+  --typo-display-medium-letter-spacing: #{semantic-typo.$typo-display-medium-letter-spacing};
 
   // .display-small
-  --typo-display-small-size-pc: var(--primitive-font-size-display-sm);
-  --typo-display-small-size-mobile: var(--primitive-font-size-display-sm-mobile);
-  --typo-display-small-weight: var(--primitive-font-weight-bold);
-  --typo-display-small-line-height: 1.5;
-  --typo-display-small-letter-spacing: 1px;
+  --typo-display-small-size-pc: #{semantic-typo.$typo-display-small-size-pc};
+  --typo-display-small-size-mobile: #{semantic-typo.$typo-display-small-size-mobile};
+  --typo-display-small-weight: #{semantic-typo.$typo-display-small-weight};
+  --typo-display-small-line-height: #{semantic-typo.$typo-display-small-line-height};
+  --typo-display-small-letter-spacing: #{semantic-typo.$typo-display-small-letter-spacing};
 
   // Heading
   // .heading-1 (h1-xlarge)
-  --typo-heading-1-size-pc: var(--primitive-font-size-h1-xlarge);
-  --typo-heading-1-size-mobile: var(--primitive-font-size-h1-xlarge-mobile);
-  --typo-heading-1-weight: var(--primitive-font-weight-bold);
-  --typo-heading-1-line-height: 1.5;
-  --typo-heading-1-letter-spacing: 1px;
+  --typo-heading-1-size-pc: #{semantic-typo.$typo-heading-1-size-pc};
+  --typo-heading-1-size-mobile: #{semantic-typo.$typo-heading-1-size-mobile};
+  --typo-heading-1-weight: #{semantic-typo.$typo-heading-1-weight};
+  --typo-heading-1-line-height: #{semantic-typo.$typo-heading-1-line-height};
+  --typo-heading-1-letter-spacing: #{semantic-typo.$typo-heading-1-letter-spacing};
 
   // .heading-2 (h2-large)
-  --typo-heading-2-size-pc: var(--primitive-font-size-h2-large);
-  --typo-heading-2-size-mobile: var(--primitive-font-size-h2-large-mobile);
-  --typo-heading-2-weight: var(--primitive-font-weight-bold);
-  --typo-heading-2-line-height: 1.5;
-  --typo-heading-2-letter-spacing: 1px;
+  --typo-heading-2-size-pc: #{semantic-typo.$typo-heading-2-size-pc};
+  --typo-heading-2-size-mobile: #{semantic-typo.$typo-heading-2-size-mobile};
+  --typo-heading-2-weight: #{semantic-typo.$typo-heading-2-weight};
+  --typo-heading-2-line-height: #{semantic-typo.$typo-heading-2-line-height};
+  --typo-heading-2-letter-spacing: #{semantic-typo.$typo-heading-2-letter-spacing};
 
   // .heading-3 (h3-medium)
-  --typo-heading-3-size-pc: var(--primitive-font-size-h3-medium);
-  --typo-heading-3-size-mobile: var(--primitive-font-size-h3-medium-mobile);
-  --typo-heading-3-weight: var(--primitive-font-weight-bold);
-  --typo-heading-3-line-height: 1.5;
-  --typo-heading-3-letter-spacing: 0px;
+  --typo-heading-3-size-pc: #{semantic-typo.$typo-heading-3-size-pc};
+  --typo-heading-3-size-mobile: #{semantic-typo.$typo-heading-3-size-mobile};
+  --typo-heading-3-weight: #{semantic-typo.$typo-heading-3-weight};
+  --typo-heading-3-line-height: #{semantic-typo.$typo-heading-3-line-height};
+  --typo-heading-3-letter-spacing: #{semantic-typo.$typo-heading-3-letter-spacing};
 
   // .heading-4 (h4-small)
-  --typo-heading-4-size-pc: var(--primitive-font-size-h4-small);
-  --typo-heading-4-size-mobile: var(--primitive-font-size-h4-small-mobile);
-  --typo-heading-4-weight: var(--primitive-font-weight-bold);
-  --typo-heading-4-line-height: 1.5;
-  --typo-heading-4-letter-spacing: 0px;
+  --typo-heading-4-size-pc: #{semantic-typo.$typo-heading-4-size-pc};
+  --typo-heading-4-size-mobile: #{semantic-typo.$typo-heading-4-size-mobile};
+  --typo-heading-4-weight: #{semantic-typo.$typo-heading-4-weight};
+  --typo-heading-4-line-height: #{semantic-typo.$typo-heading-4-line-height};
+  --typo-heading-4-letter-spacing: #{semantic-typo.$typo-heading-4-letter-spacing};
 
   // .heading-5 (h5-xsmall)
-  --typo-heading-5-size-pc: var(--primitive-font-size-h5-xsmall);
-  --typo-heading-5-size-mobile: var(--primitive-font-size-h5-xsmall-mobile);
-  --typo-heading-5-weight: var(--primitive-font-weight-bold);
-  --typo-heading-5-line-height: 1.5;
-  --typo-heading-5-letter-spacing: 0px;
+  --typo-heading-5-size-pc: #{semantic-typo.$typo-heading-5-size-pc};
+  --typo-heading-5-size-mobile: #{semantic-typo.$typo-heading-5-size-mobile};
+  --typo-heading-5-weight: #{semantic-typo.$typo-heading-5-weight};
+  --typo-heading-5-line-height: #{semantic-typo.$typo-heading-5-line-height};
+  --typo-heading-5-letter-spacing: #{semantic-typo.$typo-heading-5-letter-spacing};
 
   // .heading-6 (h6-xxsmall)
-  --typo-heading-6-size-pc: var(--primitive-font-size-h6-xxsmall);
-  --typo-heading-6-size-mobile: var(--primitive-font-size-h6-xxsmall-mobile);
-  --typo-heading-6-weight: var(--primitive-font-weight-bold);
-  --typo-heading-6-line-height: 1.5;
-  --typo-heading-6-letter-spacing: 0px;
+  --typo-heading-6-size-pc: #{semantic-typo.$typo-heading-6-size-pc};
+  --typo-heading-6-size-mobile: #{semantic-typo.$typo-heading-6-size-mobile};
+  --typo-heading-6-weight: #{semantic-typo.$typo-heading-6-weight};
+  --typo-heading-6-line-height: #{semantic-typo.$typo-heading-6-line-height};
+  --typo-heading-6-letter-spacing: #{semantic-typo.$typo-heading-6-letter-spacing};
 
   // Body
   // .body-large
-  --typo-body-large-size: var(--primitive-font-size-body-lg);
-  --typo-body-large-size-mobile: var(--primitive-font-size-body-lg);
-  --typo-body-large-weight: var(--primitive-font-weight-regular);
-  --typo-body-large-weight-bold: var(--primitive-font-weight-bold);
-  --typo-body-large-line-height: 1.5;
-  --typo-body-large-letter-spacing: 0px;
+  --typo-body-large-size: #{semantic-typo.$typo-body-large-size};
+  --typo-body-large-size-mobile: #{semantic-typo.$typo-body-large-size-mobile};
+  --typo-body-large-weight: #{semantic-typo.$typo-body-large-weight};
+  --typo-body-large-weight-bold: #{semantic-typo.$typo-body-large-weight-bold};
+  --typo-body-large-line-height: #{semantic-typo.$typo-body-large-line-height};
+  --typo-body-large-letter-spacing: #{semantic-typo.$typo-body-large-letter-spacing};
 
   // .body-medium (Default)
-  --typo-body-medium-size: var(--primitive-font-size-body-md);
-  --typo-body-medium-size-mobile: var(--primitive-font-size-body-md);
-  --typo-body-medium-weight: var(--primitive-font-weight-regular);
-  --typo-body-medium-weight-bold: var(--primitive-font-weight-bold);
-  --typo-body-medium-line-height: 1.5;
-  --typo-body-medium-letter-spacing: 0px;
+  --typo-body-medium-size: #{semantic-typo.$typo-body-medium-size};
+  --typo-body-medium-size-mobile: #{semantic-typo.$typo-body-medium-size-mobile};
+  --typo-body-medium-weight: #{semantic-typo.$typo-body-medium-weight};
+  --typo-body-medium-weight-bold: #{semantic-typo.$typo-body-medium-weight-bold};
+  --typo-body-medium-line-height: #{semantic-typo.$typo-body-medium-line-height};
+  --typo-body-medium-letter-spacing: #{semantic-typo.$typo-body-medium-letter-spacing};
 
   // .body-small
-  --typo-body-small-size: var(--primitive-font-size-body-sm);
-  --typo-body-small-size-mobile: var(--primitive-font-size-body-sm);
-  --typo-body-small-weight: var(--primitive-font-weight-regular);
-  --typo-body-small-weight-bold: var(--primitive-font-weight-bold);
-  --typo-body-small-line-height: 1.5;
-  --typo-body-small-letter-spacing: 0px;
+  --typo-body-small-size: #{semantic-typo.$typo-body-small-size};
+  --typo-body-small-size-mobile: #{semantic-typo.$typo-body-small-size-mobile};
+  --typo-body-small-weight: #{semantic-typo.$typo-body-small-weight};
+  --typo-body-small-weight-bold: #{semantic-typo.$typo-body-small-weight-bold};
+  --typo-body-small-line-height: #{semantic-typo.$typo-body-small-line-height};
+  --typo-body-small-letter-spacing: #{semantic-typo.$typo-body-small-letter-spacing};
 
   // .body-xsmall
-  --typo-body-xsmall-size: var(--primitive-font-size-body-xs);
-  --typo-body-xsmall-size-mobile: var(--primitive-font-size-body-xs);
-  --typo-body-xsmall-weight: var(--primitive-font-weight-regular);
-  --typo-body-xsmall-weight-bold: var(--primitive-font-weight-bold);
-  --typo-body-xsmall-line-height: 1.5;
-  --typo-body-xsmall-letter-spacing: 0px;
+  --typo-body-xsmall-size: #{semantic-typo.$typo-body-xsmall-size};
+  --typo-body-xsmall-size-mobile: #{semantic-typo.$typo-body-xsmall-size-mobile};
+  --typo-body-xsmall-weight: #{semantic-typo.$typo-body-xsmall-weight};
+  --typo-body-xsmall-weight-bold: #{semantic-typo.$typo-body-xsmall-weight-bold};
+  --typo-body-xsmall-line-height: #{semantic-typo.$typo-body-xsmall-line-height};
+  --typo-body-xsmall-letter-spacing: #{semantic-typo.$typo-body-xsmall-letter-spacing};
 
   // Navigation
   // .nav-title-large
-  --typo-nav-title-large-size: var(--primitive-font-size-h3-medium);
-  --typo-nav-title-large-size-mobile: var(--primitive-font-size-h3-medium-mobile);
-  --typo-nav-title-large-weight: var(--primitive-font-weight-bold);
-  --typo-nav-title-large-line-height: 1.5;
-  --typo-nav-title-large-letter-spacing: 0px;
+  --typo-nav-title-large-size: #{semantic-typo.$typo-nav-title-large-size};
+  --typo-nav-title-large-size-mobile: #{semantic-typo.$typo-nav-title-large-size-mobile};
+  --typo-nav-title-large-weight: #{semantic-typo.$typo-nav-title-large-weight};
+  --typo-nav-title-large-line-height: #{semantic-typo.$typo-nav-title-large-line-height};
+  --typo-nav-title-large-letter-spacing: #{semantic-typo.$typo-nav-title-large-letter-spacing};
 
   // .nav-title-small
-  --typo-nav-title-small-size: var(--primitive-font-size-h4-small);
-  --typo-nav-title-small-size-mobile: var(--primitive-font-size-h4-small-mobile);
-  --typo-nav-title-small-weight: var(--primitive-font-weight-bold);
-  --typo-nav-title-small-line-height: 1.5;
-  --typo-nav-title-small-letter-spacing: 0px;
+  --typo-nav-title-small-size: #{semantic-typo.$typo-nav-title-small-size};
+  --typo-nav-title-small-size-mobile: #{semantic-typo.$typo-nav-title-small-size-mobile};
+  --typo-nav-title-small-weight: #{semantic-typo.$typo-nav-title-small-weight};
+  --typo-nav-title-small-line-height: #{semantic-typo.$typo-nav-title-small-line-height};
+  --typo-nav-title-small-letter-spacing: #{semantic-typo.$typo-nav-title-small-letter-spacing};
 
   // Label (Input Field)
   // .label-large
-  --typo-label-large-size: var(--primitive-font-size-body-lg);
-  --typo-label-large-weight: var(--primitive-font-weight-regular);
-  --typo-label-large-line-height: 1.5;
-  --typo-label-large-letter-spacing: 0px;
+  --typo-label-large-size: #{semantic-typo.$typo-label-large-size};
+  --typo-label-large-weight: #{semantic-typo.$typo-label-large-weight};
+  --typo-label-large-line-height: #{semantic-typo.$typo-label-large-line-height};
+  --typo-label-large-letter-spacing: #{semantic-typo.$typo-label-large-letter-spacing};
 
   // .label-medium
-  --typo-label-medium-size: var(--primitive-font-size-body-md);
-  --typo-label-medium-weight: var(--primitive-font-weight-regular);
-  --typo-label-medium-line-height: 1.5;
-  --typo-label-medium-letter-spacing: 0px;
+  --typo-label-medium-size: #{semantic-typo.$typo-label-medium-size};
+  --typo-label-medium-weight: #{semantic-typo.$typo-label-medium-weight};
+  --typo-label-medium-line-height: #{semantic-typo.$typo-label-medium-line-height};
+  --typo-label-medium-letter-spacing: #{semantic-typo.$typo-label-medium-letter-spacing};
 
   // .label-small
-  --typo-label-small-size: var(--primitive-font-size-body-sm);
-  --typo-label-small-weight: var(--primitive-font-weight-regular);
-  --typo-label-small-line-height: 1.5;
-  --typo-label-small-letter-spacing: 0px;
+  --typo-label-small-size: #{semantic-typo.$typo-label-small-size};
+  --typo-label-small-weight: #{semantic-typo.$typo-label-small-weight};
+  --typo-label-small-line-height: #{semantic-typo.$typo-label-small-line-height};
+  --typo-label-small-letter-spacing: #{semantic-typo.$typo-label-small-letter-spacing};
 
   // .label-xsmall
-  --typo-label-xsmall-size: var(--primitive-font-size-body-xs);
-  --typo-label-xsmall-weight: var(--primitive-font-weight-regular);
-  --typo-label-xsmall-line-height: 1.5;
-  --typo-label-xsmall-letter-spacing: 0px;
+  --typo-label-xsmall-size: #{semantic-typo.$typo-label-xsmall-size};
+  --typo-label-xsmall-weight: #{semantic-typo.$typo-label-xsmall-weight};
+  --typo-label-xsmall-line-height: #{semantic-typo.$typo-label-xsmall-line-height};
+  --typo-label-xsmall-letter-spacing: #{semantic-typo.$typo-label-xsmall-letter-spacing};
 
   // --- Semantic Elevation & Shadow Tokens ---
   // *** Surface (Background Color) by Elevation ***
   // Elevation -1 (Lower than background)
-  --elevation-surface-minus-1: var(--primitive-gray-0);
-  --elevation-shadow-minus-1: var(--primitive-shadow-2);
+  --elevation-surface-minus-1: #{semantic-elevation.$elevation-surface-minus-1};
+  --elevation-shadow-minus-1: #{semantic-elevation.$elevation-shadow-minus-1};
 
   // Elevation 0 (Default)
-  --elevation-surface-0: var(--primitive-gray-0);
-  --elevation-shadow-0: none;
+  --elevation-surface-0: #{semantic-elevation.$elevation-surface-0};
+  --elevation-shadow-0: #{semantic-elevation.$elevation-shadow-0};
 
   // Elevation +1 (Basic interactive)
-  --elevation-surface-1: var(--primitive-gray-0);
-  --elevation-shadow-1: var(--primitive-shadow-2);
+  --elevation-surface-1: #{semantic-elevation.$elevation-surface-1};
+  --elevation-shadow-1: #{semantic-elevation.$elevation-shadow-1};
 
   // Elevation +2 (Select open, Menu expand)
-  --elevation-surface-2: var(--primitive-gray-0);
-  --elevation-shadow-2: var(--primitive-shadow-3);
+  --elevation-surface-2: #{semantic-elevation.$elevation-surface-2};
+  --elevation-shadow-2: #{semantic-elevation.$elevation-shadow-2};
 
   // Elevation +3 (Tooltip, Panel)
-  --elevation-surface-3: var(--primitive-gray-0);
-  --elevation-shadow-3: var(--primitive-shadow-4);
+  --elevation-surface-3: #{semantic-elevation.$elevation-surface-3};
+  --elevation-shadow-3: #{semantic-elevation.$elevation-shadow-3};
 
   // Elevation +4 (Critical alerts)
-  --elevation-surface-4: var(--primitive-gray-0);
-  --elevation-shadow-4: var(--primitive-shadow-4);
-  --elevation-dimd: rgba(0, 0, 0, 0.5); // Overlay
+  --elevation-surface-4: #{semantic-elevation.$elevation-surface-4};
+  --elevation-shadow-4: #{semantic-elevation.$elevation-shadow-4};
+  --elevation-dimd: #{semantic-elevation.$elevation-dimd}; // Overlay
 
   // *** Shadow Aliases ***
-  --shadow-sm: var(--primitive-shadow-1);
-  --shadow-md: var(--primitive-shadow-2);
-  --shadow-lg: var(--primitive-shadow-3);
-  --shadow-xl: var(--primitive-shadow-4);
+  --shadow-sm: #{semantic-elevation.$shadow-sm};
+  --shadow-md: #{semantic-elevation.$shadow-md};
+  --shadow-lg: #{semantic-elevation.$shadow-lg};
+  --shadow-xl: #{semantic-elevation.$shadow-xl};
 
   // *** Border (by Elevation) ***
-  --border-color-elevation-minus-1: var(--primitive-gray-20);
-  --border-color-elevation-0: transparent;
-  --border-color-elevation-1: var(--primitive-gray-20);
-  --border-color-elevation-2: var(--color-border-focus);
-  --border-color-elevation-3: var(--color-border-focus);
-  --border-color-elevation-4: var(--color-border-focus);
+  --border-color-elevation-minus-1: #{semantic-elevation.$border-color-elevation-minus-1};
+  --border-color-elevation-0: #{semantic-elevation.$border-color-elevation-0};
+  --border-color-elevation-1: #{semantic-elevation.$border-color-elevation-1};
+  --border-color-elevation-2: #{semantic-elevation.$border-color-elevation-2};
+  --border-color-elevation-3: #{semantic-elevation.$border-color-elevation-3};
+  --border-color-elevation-4: #{semantic-elevation.$border-color-elevation-4};
 
   // ============================================
   // 3. COMPONENT TOKENS

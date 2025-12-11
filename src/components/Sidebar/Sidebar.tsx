@@ -14,7 +14,7 @@ import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { List, ListItem, ListItemText } from '@/ui-component/List/List';
 import { IconButton } from '@/ui-component/Button/IconButton';
-import { useTokens } from '@/context/TokenProvider';
+import { useTheme } from '@/context/ThemeProvider';
 import './Sidebar.scss';
 
 interface SidebarProps {
@@ -30,7 +30,7 @@ interface MenuItem {
 }
 
 export function Sidebar({ currentView, onViewChange }: SidebarProps) {
-  const { sidebarConfig, setSidebarConfig } = useTokens();
+  const { sidebarConfig, setSidebarConfig } = useTheme();
   const [isHovered, setIsHovered] = useState(false);
 
   const { miniDrawer, pinned } = sidebarConfig;

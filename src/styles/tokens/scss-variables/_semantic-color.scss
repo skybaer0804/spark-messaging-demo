@@ -1,0 +1,46 @@
+// ============================================
+// SCSS Variables - Semantic Color Tokens
+// ============================================
+
+@use '../scss-variables/primitive-colors' as color;
+
+// *** Background Colors ***
+$color-background-primary: color.$primitive-gray-0; // White
+$color-background-secondary: color.$primitive-gray-5; // Very Light Cool Grey
+$color-background-tertiary: color.$primitive-gray-10; // Light Grey
+$color-background-overlay: rgba(30, 40, 50, 0.6); // Dark Blue-ish Overlay
+
+// *** Text Colors ***
+$color-text-primary: color.$primitive-gray-80; // Dark Grey (Soft Black)
+$color-text-secondary: color.$primitive-gray-50; // Medium Grey
+$color-text-tertiary: color.$primitive-gray-40; // Light Grey
+$color-text-disabled: color.$primitive-gray-30;
+
+// *** Icon Colors ***
+$color-icon-primary: color.$primitive-gray-70;
+$color-icon-secondary: color.$primitive-gray-50;
+$color-icon-disabled: color.$primitive-gray-30;
+
+// *** Border Colors (Soft & Subtle) ***
+$color-border-default: color.$primitive-gray-15; // Very Subtle Border
+$color-border-light: color.$primitive-gray-10;
+$color-border-dark: color.$primitive-gray-30;
+$color-border-focus: color.$primitive-primary-50;
+
+// *** Status Colors ***
+$color-status-success: color.$primitive-success-50;
+$color-status-warning: color.$primitive-warning-50;
+$color-status-error: color.$primitive-error-50;
+$color-status-info: color.$primitive-info-50;
+
+// *** Interactive Colors ***
+$color-interactive-primary: color.$primitive-primary-50;
+$color-interactive-secondary: color.$primitive-secondary-50;
+$color-interactive-disabled: color.$primitive-gray-20;
+
+// *** Surface (by Elevation) ***
+$color-surface-base: color.$primitive-gray-0;
+$color-surface-level-1: color.$primitive-gray-0;
+$color-surface-level-2: color.$primitive-gray-0;
+$color-surface-level-3: color.$primitive-gray-0;
+$color-surface-level-4: color.$primitive-gray-0;

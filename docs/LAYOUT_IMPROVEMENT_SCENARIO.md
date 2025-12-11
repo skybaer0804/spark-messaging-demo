@@ -331,3 +331,7 @@ const applyPreset = (presetName: string) => {
 - MUI 7 버전 이상 문법 (현재는 Preact 사용 중)
 - 반응형 디자인 고려
 
+
+
+
+

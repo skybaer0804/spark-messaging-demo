@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import './Typography.scss';
 
 export type TypographyVariant =
@@ -31,7 +31,7 @@ export function Typography({
   style,
   ...props
 }: TypographyProps) {
-  const { theme, contrast } = useTokens();
+  const { theme, contrast } = useTheme();
 
   // Determine default tag based on variant if component is not provided
   const Tag = component || (variant.startsWith('h') ? variant : variant.startsWith('display') ? 'h1' : 'p');

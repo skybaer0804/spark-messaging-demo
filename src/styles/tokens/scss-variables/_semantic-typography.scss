@@ -1,0 +1,143 @@
+// ============================================
+// SCSS Variables - Semantic Typography Tokens
+// ============================================
+
+@use '../scss-variables/primitive-typography' as typo;
+
+// Display (Banner/Marketing)
+// .display-large
+$typo-display-large-size-pc: typo.$primitive-font-size-display-lg;
+$typo-display-large-size-mobile: typo.$primitive-font-size-display-lg-mobile;
+$typo-display-large-weight: typo.$primitive-font-weight-bold;
+$typo-display-large-line-height: typo.$primitive-line-height-normal;
+$typo-display-large-letter-spacing: typo.$primitive-letter-spacing-wide;
+
+// .display-medium
+$typo-display-medium-size-pc: typo.$primitive-font-size-display-md;
+$typo-display-medium-size-mobile: typo.$primitive-font-size-display-md-mobile;
+$typo-display-medium-weight: typo.$primitive-font-weight-bold;
+$typo-display-medium-line-height: typo.$primitive-line-height-normal;
+$typo-display-medium-letter-spacing: typo.$primitive-letter-spacing-wide;
+
+// .display-small
+$typo-display-small-size-pc: typo.$primitive-font-size-display-sm;
+$typo-display-small-size-mobile: typo.$primitive-font-size-display-sm-mobile;
+$typo-display-small-weight: typo.$primitive-font-weight-bold;
+$typo-display-small-line-height: typo.$primitive-line-height-normal;
+$typo-display-small-letter-spacing: typo.$primitive-letter-spacing-wide;
+
+// Heading
+// .heading-1 (h1-xlarge)
+$typo-heading-1-size-pc: typo.$primitive-font-size-h1-xlarge;
+$typo-heading-1-size-mobile: typo.$primitive-font-size-h1-xlarge-mobile;
+$typo-heading-1-weight: typo.$primitive-font-weight-bold;
+$typo-heading-1-line-height: typo.$primitive-line-height-normal;
+$typo-heading-1-letter-spacing: typo.$primitive-letter-spacing-wide;
+
+// .heading-2 (h2-large)
+$typo-heading-2-size-pc: typo.$primitive-font-size-h2-large;
+$typo-heading-2-size-mobile: typo.$primitive-font-size-h2-large-mobile;
+$typo-heading-2-weight: typo.$primitive-font-weight-bold;
+$typo-heading-2-line-height: typo.$primitive-line-height-normal;
+$typo-heading-2-letter-spacing: typo.$primitive-letter-spacing-wide;
+
+// .heading-3 (h3-medium)
+$typo-heading-3-size-pc: typo.$primitive-font-size-h3-medium;
+$typo-heading-3-size-mobile: typo.$primitive-font-size-h3-medium-mobile;
+$typo-heading-3-weight: typo.$primitive-font-weight-bold;
+$typo-heading-3-line-height: typo.$primitive-line-height-normal;
+$typo-heading-3-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .heading-4 (h4-small)
+$typo-heading-4-size-pc: typo.$primitive-font-size-h4-small;
+$typo-heading-4-size-mobile: typo.$primitive-font-size-h4-small-mobile;
+$typo-heading-4-weight: typo.$primitive-font-weight-bold;
+$typo-heading-4-line-height: typo.$primitive-line-height-normal;
+$typo-heading-4-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .heading-5 (h5-xsmall)
+$typo-heading-5-size-pc: typo.$primitive-font-size-h5-xsmall;
+$typo-heading-5-size-mobile: typo.$primitive-font-size-h5-xsmall-mobile;
+$typo-heading-5-weight: typo.$primitive-font-weight-bold;
+$typo-heading-5-line-height: typo.$primitive-line-height-normal;
+$typo-heading-5-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .heading-6 (h6-xxsmall)
+$typo-heading-6-size-pc: typo.$primitive-font-size-h6-xxsmall;
+$typo-heading-6-size-mobile: typo.$primitive-font-size-h6-xxsmall-mobile;
+$typo-heading-6-weight: typo.$primitive-font-weight-bold;
+$typo-heading-6-line-height: typo.$primitive-line-height-normal;
+$typo-heading-6-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// Body
+// .body-large
+$typo-body-large-size: typo.$primitive-font-size-body-lg;
+$typo-body-large-size-mobile: typo.$primitive-font-size-body-lg;
+$typo-body-large-weight: typo.$primitive-font-weight-regular;
+$typo-body-large-weight-bold: typo.$primitive-font-weight-bold;
+$typo-body-large-line-height: typo.$primitive-line-height-normal;
+$typo-body-large-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .body-medium (Default)
+$typo-body-medium-size: typo.$primitive-font-size-body-md;
+$typo-body-medium-size-mobile: typo.$primitive-font-size-body-md;
+$typo-body-medium-weight: typo.$primitive-font-weight-regular;
+$typo-body-medium-weight-bold: typo.$primitive-font-weight-bold;
+$typo-body-medium-line-height: typo.$primitive-line-height-normal;
+$typo-body-medium-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .body-small
+$typo-body-small-size: typo.$primitive-font-size-body-sm;
+$typo-body-small-size-mobile: typo.$primitive-font-size-body-sm;
+$typo-body-small-weight: typo.$primitive-font-weight-regular;
+$typo-body-small-weight-bold: typo.$primitive-font-weight-bold;
+$typo-body-small-line-height: typo.$primitive-line-height-normal;
+$typo-body-small-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .body-xsmall
+$typo-body-xsmall-size: typo.$primitive-font-size-body-xs;
+$typo-body-xsmall-size-mobile: typo.$primitive-font-size-body-xs;
+$typo-body-xsmall-weight: typo.$primitive-font-weight-regular;
+$typo-body-xsmall-weight-bold: typo.$primitive-font-weight-bold;
+$typo-body-xsmall-line-height: typo.$primitive-line-height-normal;
+$typo-body-xsmall-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// Navigation
+// .nav-title-large
+$typo-nav-title-large-size: typo.$primitive-font-size-h3-medium;
+$typo-nav-title-large-size-mobile: typo.$primitive-font-size-h3-medium-mobile;
+$typo-nav-title-large-weight: typo.$primitive-font-weight-bold;
+$typo-nav-title-large-line-height: typo.$primitive-line-height-normal;
+$typo-nav-title-large-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .nav-title-small
+$typo-nav-title-small-size: typo.$primitive-font-size-h4-small;
+$typo-nav-title-small-size-mobile: typo.$primitive-font-size-h4-small-mobile;
+$typo-nav-title-small-weight: typo.$primitive-font-weight-bold;
+$typo-nav-title-small-line-height: typo.$primitive-line-height-normal;
+$typo-nav-title-small-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// Label (Input Field)
+// .label-large
+$typo-label-large-size: typo.$primitive-font-size-body-lg;
+$typo-label-large-weight: typo.$primitive-font-weight-regular;
+$typo-label-large-line-height: typo.$primitive-line-height-normal;
+$typo-label-large-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .label-medium
+$typo-label-medium-size: typo.$primitive-font-size-body-md;
+$typo-label-medium-weight: typo.$primitive-font-weight-regular;
+$typo-label-medium-line-height: typo.$primitive-line-height-normal;
+$typo-label-medium-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .label-small
+$typo-label-small-size: typo.$primitive-font-size-body-sm;
+$typo-label-small-weight: typo.$primitive-font-weight-regular;
+$typo-label-small-line-height: typo.$primitive-line-height-normal;
+$typo-label-small-letter-spacing: typo.$primitive-letter-spacing-tight;
+
+// .label-xsmall
+$typo-label-xsmall-size: typo.$primitive-font-size-body-xs;
+$typo-label-xsmall-weight: typo.$primitive-font-weight-regular;
+$typo-label-xsmall-line-height: typo.$primitive-line-height-normal;
+$typo-label-xsmall-letter-spacing: typo.$primitive-letter-spacing-tight;

@@ -1,0 +1,47 @@
+// ============================================
+// SCSS Variables - Semantic Elevation & Shadow Tokens
+// ============================================
+
+@use '../scss-variables/primitive-colors' as color;
+@use '../scss-variables/primitive-shadow' as shadow;
+@use '../scss-variables/semantic-color' as semantic-color;
+
+// *** Surface (Background Color) by Elevation ***
+// Elevation -1 (Lower than background)
+$elevation-surface-minus-1: color.$primitive-gray-0;
+$elevation-shadow-minus-1: shadow.$primitive-shadow-2;
+
+// Elevation 0 (Default)
+$elevation-surface-0: color.$primitive-gray-0;
+$elevation-shadow-0: none;
+
+// Elevation +1 (Basic interactive)
+$elevation-surface-1: color.$primitive-gray-0;
+$elevation-shadow-1: shadow.$primitive-shadow-2;
+
+// Elevation +2 (Select open, Menu expand)
+$elevation-surface-2: color.$primitive-gray-0;
+$elevation-shadow-2: shadow.$primitive-shadow-3;
+
+// Elevation +3 (Tooltip, Panel)
+$elevation-surface-3: color.$primitive-gray-0;
+$elevation-shadow-3: shadow.$primitive-shadow-4;
+
+// Elevation +4 (Critical alerts)
+$elevation-surface-4: color.$primitive-gray-0;
+$elevation-shadow-4: shadow.$primitive-shadow-4;
+$elevation-dimd: rgba(0, 0, 0, 0.5); // Overlay
+
+// *** Shadow Aliases ***
+$shadow-sm: shadow.$primitive-shadow-1;
+$shadow-md: shadow.$primitive-shadow-2;
+$shadow-lg: shadow.$primitive-shadow-3;
+$shadow-xl: shadow.$primitive-shadow-4;
+
+// *** Border (by Elevation) ***
+$border-color-elevation-minus-1: color.$primitive-gray-20;
+$border-color-elevation-0: transparent;
+$border-color-elevation-1: color.$primitive-gray-20;
+$border-color-elevation-2: semantic-color.$color-border-focus;
+$border-color-elevation-3: semantic-color.$color-border-focus;
+$border-color-elevation-4: semantic-color.$color-border-focus;

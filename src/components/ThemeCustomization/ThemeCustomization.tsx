@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { useTokens, PresetColor } from '@/context/TokenProvider';
+import { useTheme, PresetColor } from '@/context/ThemeProvider';
 import { Drawer } from '@/ui-component/Drawer/Drawer';
 import { Stack } from '@/ui-component/Layout/Stack';
 import { Flex } from '@/ui-component/Layout/Flex';
@@ -41,7 +41,7 @@ export function ThemeCustomization({ open, onClose }: ThemeCustomizationProps) {
     sidebarConfig,
     setSidebarConfig,
     resetToDefaults,
-  } = useTokens();
+  } = useTheme();
 
   const [localBorderRadius, setLocalBorderRadius] = useState(borderRadius);
 

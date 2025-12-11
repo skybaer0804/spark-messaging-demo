@@ -33,7 +33,7 @@ interface ThemeConfig {
   sidebar: SidebarConfig;
 }
 
-interface TokenContextType {
+interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
@@ -57,9 +57,9 @@ interface TokenContextType {
   resetToDefaults: () => void;
 }
 
-const TokenContext = createContext<TokenContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-interface TokenProviderProps {
+interface ThemeProviderProps {
   children: ComponentChildren;
   defaultTheme?: Theme;
   defaultContrast?: Contrast;
@@ -100,7 +100,7 @@ function saveConfigToStorage(config: ThemeConfig): void {
   }
 }
 
-export function TokenProvider({ children, defaultTheme = 'light', defaultContrast = 'standard' }: TokenProviderProps) {
+export function ThemeProvider({ children, defaultTheme = 'light', defaultContrast = 'standard' }: ThemeProviderProps) {
   const [config, setConfig] = useState<ThemeConfig>(() => {
     const stored = loadConfigFromStorage();
     // props로 전달된 기본값이 있으면 우선 적용
@@ -237,7 +237,7 @@ export function TokenProvider({ children, defaultTheme = 'light', defaultContras
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const value: TokenContextType = {
+  const value: ThemeContextType = {
     theme: config.theme,
     setTheme,
     toggleTheme,
@@ -256,13 +256,15 @@ export function TokenProvider({ children, defaultTheme = 'light', defaultContras
     resetToDefaults,
   };
 
-  return <TokenContext.Provider value={value}>{children}</TokenContext.Provider>;
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-export const useTokens = () => {
-  const context = useContext(TokenContext);
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error('useTokens must be used within TokenProvider');
+    throw new Error('useTheme must be used within ThemeProvider');
   }
   return context;
 };
+
+

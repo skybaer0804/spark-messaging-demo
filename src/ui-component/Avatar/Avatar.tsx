@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import './Avatar.scss';
 
 export interface AvatarProps extends JSX.HTMLAttributes<HTMLDivElement> {
@@ -20,7 +20,7 @@ export function Avatar({
   style,
   ...props
 }: AvatarProps) {
-  const { theme, contrast } = useTokens();
+  const { theme, contrast } = useTheme();
 
   const classes = ['avatar', `avatar--${variant}`, `avatar--${size}`, className].filter(Boolean).join(' ');
 

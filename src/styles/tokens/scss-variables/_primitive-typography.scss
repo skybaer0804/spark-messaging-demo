@@ -1,0 +1,55 @@
+// ============================================
+// SCSS Variables - Primitive Typography Tokens
+// 컴파일 타임에 값이 치환되어 성능 최적화
+// ============================================
+
+// Font Family
+$primitive-font-family: 'Pretendard GOV', 'Pretendard', sans-serif;
+
+// Font Weight
+$primitive-font-weight-regular: 400;
+$primitive-font-weight-bold: 700;
+
+// Font Size
+// Display
+$primitive-font-size-display-lg: 60px;
+$primitive-font-size-display-lg-mobile: 44px;
+$primitive-font-size-display-md: 44px;
+$primitive-font-size-display-md-mobile: 32px;
+$primitive-font-size-display-sm: 36px;
+$primitive-font-size-display-sm-mobile: 28px;
+
+// Heading (h1 ~ h6)
+$primitive-font-size-h1-xlarge: 40px;
+$primitive-font-size-h1-xlarge-mobile: 28px;
+$primitive-font-size-h2-large: 32px;
+$primitive-font-size-h2-large-mobile: 24px;
+$primitive-font-size-h3-medium: 24px;
+$primitive-font-size-h3-medium-mobile: 22px;
+$primitive-font-size-h4-small: 19px;
+$primitive-font-size-h4-small-mobile: 19px;
+$primitive-font-size-h5-xsmall: 17px;
+$primitive-font-size-h5-xsmall-mobile: 17px;
+$primitive-font-size-h6-xxsmall: 15px;
+$primitive-font-size-h6-xxsmall-mobile: 15px;
+
+// Body
+$primitive-font-size-body-lg: 19px;
+$primitive-font-size-body-md: 17px;
+$primitive-font-size-body-sm: 15px;
+$primitive-font-size-body-xs: 13px;
+
+// Line Height
+$primitive-line-height-tight: 1.2;
+$primitive-line-height-normal: 1.5;
+$primitive-line-height-relaxed: 1.75;
+
+// Letter Spacing
+$primitive-letter-spacing-tight: 0px;
+$primitive-letter-spacing-normal: 0px;
+$primitive-letter-spacing-wide: 1px;
+
+// Text Transform
+$primitive-text-transform-none: none;
+$primitive-text-transform-uppercase: uppercase;
+$primitive-text-transform-lowercase: lowercase;
