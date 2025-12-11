@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import './Button.scss';
 
 export interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
@@ -18,7 +18,7 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const { theme, contrast } = useTokens();
+  const { theme, contrast } = useTheme();
 
   const classes = ['button', variant, size, fullWidth ? 'fullWidth' : '', className].filter(Boolean).join(' ');
 

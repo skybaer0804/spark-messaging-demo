@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import './IconButton.scss';
 
 export interface IconButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
@@ -17,7 +17,7 @@ export function IconButton({
   children,
   ...props
 }: IconButtonProps) {
-  const { theme } = useTokens();
+  const { theme } = useTheme();
 
   const classes = ['icon-button', `icon-button--${color}`, `icon-button--${size}`, className].filter(Boolean).join(' ');
 

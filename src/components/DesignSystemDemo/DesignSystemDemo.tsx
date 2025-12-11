@@ -1,5 +1,5 @@
 import { useState } from 'preact/hooks';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import { Button } from '@/ui-component/Button/Button';
 import { IconButton } from '@/ui-component/Button/IconButton';
 import { Input } from '@/ui-component/Input/Input';
@@ -28,7 +28,7 @@ import { IconHome, IconUser, IconSettings, IconBell, IconSearch, IconTrash, Icon
 import './DesignSystemDemo.scss';
 
 export function DesignSystemDemo() {
-  const { theme, toggleTheme, contrast, toggleContrast } = useTokens();
+  const { theme, toggleTheme, contrast, toggleContrast } = useTheme();
   const [inputValue, setInputValue] = useState('');
   const [selectValue, setSelectValue] = useState('option1');
 

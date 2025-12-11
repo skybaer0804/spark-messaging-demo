@@ -1,11 +1,11 @@
 import { render } from 'preact';
 import { App } from './app';
-import { TokenProvider } from './context/TokenProvider';
+import { ThemeProvider } from './context/ThemeProvider';
 import './index.css';
 
 render(
-  <TokenProvider>
+  <ThemeProvider>
     <App />
-  </TokenProvider>,
+  </ThemeProvider>,
   document.getElementById('app')!,
 );

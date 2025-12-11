@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import './Card.scss';
 
 export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
@@ -8,7 +8,7 @@ export interface CardProps extends JSX.HTMLAttributes<HTMLDivElement> {
 }
 
 export function Card({ interactive = false, className = '', children, ...props }: CardProps) {
-  const { theme, contrast } = useTokens();
+  const { theme, contrast } = useTheme();
 
   const classes = ['card', interactive ? 'interactive' : '', className].filter(Boolean).join(' ');
 

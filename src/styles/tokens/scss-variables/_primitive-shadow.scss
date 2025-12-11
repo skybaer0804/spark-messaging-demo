@@ -1,0 +1,18 @@
+// ============================================
+// SCSS Variables - Primitive Shadow Tokens
+// 컴파일 타임에 값이 치환되어 성능 최적화
+// ============================================
+
+// Shadow Levels
+$primitive-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.05);
+$primitive-shadow-2: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+$primitive-shadow-3: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+$primitive-shadow-4: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+
+// Detailed Shadow Props (If needed for fine-tuning)
+$primitive-shadow-offset-x: 0;
+$primitive-shadow-offset-y: 1px;
+$primitive-shadow-blur: 2px;
+$primitive-shadow-spread: 0;
+$primitive-shadow-color: rgba(0, 0, 0, 0.05);
+

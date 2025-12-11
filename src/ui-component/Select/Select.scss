@@ -1,11 +1,11 @@
 @use '/src/styles/tokens/index';
-@use '/src/styles/tokens/scss-variables/component-select' as select;
 @use '/src/styles/tokens/scss-variables/semantic-space' as space;
+@use '/src/styles/tokens/scss-variables/primitive-shape' as shape;
 
 .select-group {
   display: flex;
   flex-direction: column;
-  gap: space.$space-gap-sm; // SCSS 변수 사용 (컴파일 타임 치환)
+  gap: space.$space-gap-sm; // 8px
   width: 100%;
 
   &.fullWidth {
@@ -26,11 +26,11 @@
 
 .select {
   width: 100%;
-  height: select.$select-height; // SCSS 변수 사용
-  padding: select.$select-padding-top select.$select-padding-right select.$select-padding-bottom
-    select.$select-padding-left; // SCSS 변수 사용
-  border: select.$select-border-width solid var(--select-border); // 테마 변경 지원을 위해 색상은 CSS 변수 유지
-  border-radius: select.$select-radius; // SCSS 변수 사용
+  height: 48px;
+  padding: space.$space-padding-input space.$space-padding-input + 24px space.$space-padding-input
+    space.$space-padding-input; // top: 16px, right: 40px, bottom: 16px, left: 16px
+  border: 1px solid var(--select-border); // 테마 변경 지원을 위해 색상은 CSS 변수 유지
+  border-radius: shape.$primitive-radius-medium; // 6px
 
   font-size: var(--select-font-size);
   font-family: inherit;

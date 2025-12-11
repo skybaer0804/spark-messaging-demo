@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import './Select.scss';
 
 export interface SelectOption {
@@ -19,7 +19,7 @@ export interface SelectProps extends Omit<JSX.HTMLAttributes<HTMLSelectElement>,
 }
 
 export function Select({ label, options, error, helperText, fullWidth = true, className = '', ...props }: SelectProps) {
-  const { theme, contrast } = useTokens();
+  const { theme, contrast } = useTheme();
   const selectId = props.id || `select-${Math.random().toString(36).substr(2, 9)}`;
 
   const wrapperClasses = ['select-group', fullWidth ? 'fullWidth' : '', className].filter(Boolean).join(' ');

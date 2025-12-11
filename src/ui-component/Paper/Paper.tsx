@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import './Paper.scss';
 
 export interface PaperProps extends JSX.HTMLAttributes<HTMLDivElement> {
@@ -20,7 +20,7 @@ export function Paper({
   style,
   ...props
 }: PaperProps) {
-  const { theme, contrast } = useTokens();
+  const { theme, contrast } = useTheme();
 
   const classes = [
     'paper',

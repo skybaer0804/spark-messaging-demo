@@ -1,5 +1,5 @@
 import { JSX } from 'preact';
-import { useTokens } from '../../context/TokenProvider';
+import { useTheme } from '../../context/ThemeProvider';
 import './Input.scss';
 
 export interface InputProps extends Omit<JSX.HTMLAttributes<HTMLInputElement | HTMLTextAreaElement>, 'size'> {
@@ -24,7 +24,7 @@ export function Input({
   className = '',
   ...props
 }: InputProps) {
-  const { theme, contrast } = useTokens();
+  const { theme, contrast } = useTheme();
   const inputId = props.id || `input-${Math.random().toString(36).substr(2, 9)}`;
 
   const wrapperClasses = ['input-group', fullWidth ? 'fullWidth' : '', className].filter(Boolean).join(' ');
