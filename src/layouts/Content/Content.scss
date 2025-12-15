@@ -19,11 +19,16 @@
     overflow-y: auto;
     overflow-x: hidden;
     padding: var(--space-padding-card-md);
-    padding-bottom: calc(var(--space-padding-card-md) + 60px);
+    padding-bottom: calc(var(--space-padding-card-md) + 3.75rem); // 60px
 
     @media (min-width: 769px) {
       padding: var(--space-padding-card-md);
       padding-bottom: var(--space-padding-card-md);
+    }
+
+    @media (max-width: 768px) {
+      padding: 1rem; // 모바일에서 적절한 패딩
+      padding-bottom: 1rem;
     }
   }
 }

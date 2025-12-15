@@ -5,4 +5,10 @@
 .reverse-auction-core {
   // ReverseAuction.scss의 모든 스타일을 상속
   @extend .reverse-auction;
+
+  &__header {
+    @media (max-width: 768px) {
+      padding: 0.75rem;
+    }
+  }
 }

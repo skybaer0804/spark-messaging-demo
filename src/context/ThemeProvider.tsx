@@ -70,10 +70,10 @@ const DEFAULT_CONFIG: ThemeConfig = {
   theme: 'light',
   contrast: 'standard',
   presetColor: 'default',
-  borderRadius: 6,
+  borderRadius: 5,
   customColors: {},
   sidebar: {
-    miniDrawer: false,
+    miniDrawer: true,
     pinned: false,
   },
 };
@@ -266,5 +266,6 @@ export const useTheme = () => {
   }
   return context;
 };
+
 
 

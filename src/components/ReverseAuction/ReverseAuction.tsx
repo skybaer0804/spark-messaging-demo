@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'preact/hooks';
 import { VideoConference } from './VideoConference/VideoConference';
 import { ReverseAuctionVideoConferenceAdapter } from './VideoConference/adapters/VideoConferenceAdapter';
 import { Chat } from '../Chat/Chat';
@@ -71,6 +72,8 @@ export function ReverseAuction() {
 
   const currentRoom = reverseAuctionStore.currentRoom.value;
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
   return (
     <div className="reverse-auction">
       {/* 역경매 핵심 로직 (룸 리스트, 룸 생성, 참가 요청 등) */}
@@ -79,6 +82,8 @@ export function ReverseAuction() {
       {/* 룸 상세 화면에서만 영상과 채팅 표시 */}
       {currentRoom && (
         <div className="reverse-auction__main-content">
+          {/* 모바일: 상단-영상-채팅 순서 */}
+          {/* PC: 영상-채팅 가로 배치 */}
           {/* 영상 영역 */}
           <div className="reverse-auction__video-section">
             {videoConferenceAdapter && <VideoConference adapter={videoConferenceAdapter} />}

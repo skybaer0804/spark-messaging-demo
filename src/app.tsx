@@ -7,7 +7,6 @@ import { ChatApp } from './components/ChatApp/ChatApp';
 import { NotificationApp } from './components/NotificationApp/NotificationApp';
 import { ReverseAuction } from './components/ReverseAuction/ReverseAuction';
 import { DesignSystemDemo } from './components/DesignSystemDemo/DesignSystemDemo';
-import { BottomTab } from './components/BottomTab/BottomTab';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import './app.scss';
 import './index.css';
@@ -133,10 +132,6 @@ export function App() {
     return 'Spark Messaging Demo';
   };
 
-  const handleTabClick = (view: string) => {
-    setCurrentView(view);
-  };
-
   const handleViewChange = (view: string) => {
     setCurrentView(view);
   };
@@ -145,14 +140,19 @@ export function App() {
     <div className="app">
       <div className="app__main">
         <Sidebar currentView={currentView} onViewChange={handleViewChange} />
-        <Content headerTitle={getHeaderTitle()} isConnected={isConnected} socketId={socketId}>
+        <Content 
+          headerTitle={getHeaderTitle()} 
+          isConnected={isConnected} 
+          socketId={socketId}
+          currentView={currentView}
+          onViewChange={handleViewChange}
+        >
           {currentView === 'chat' && <ChatApp />}
           {currentView === 'notification' && <NotificationApp />}
           {currentView === 'reverse-auction' && <ReverseAuction />}
           {currentView === 'design-system' && <DesignSystemDemo />}
         </Content>
       </div>
-      <BottomTab currentView={currentView} onTabClick={handleTabClick} />
       <ToastContainer
         position="top-center"
         autoClose={5000}

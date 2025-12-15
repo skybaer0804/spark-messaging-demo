@@ -2,6 +2,7 @@ import { memo } from 'preact/compat';
 import type { Category, Room } from '../types';
 import type { ReverseAuctionStore } from '../stores/ReverseAuctionStore';
 import { Button } from '@/ui-component/Button/Button';
+import { IconButton } from '@/ui-component/Button/IconButton';
 import { Input } from '@/ui-component/Input/Input';
 import { Box } from '@/ui-component/Layout/Box';
 import { Stack } from '@/ui-component/Layout/Stack';
@@ -10,6 +11,7 @@ import { Paper } from '@/ui-component/Paper/Paper';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { Card, CardHeader, CardBody, CardFooter } from '@/ui-component/Card/Card';
 import { StatusChip } from '@/ui-component/StatusChip/StatusChip';
+import { IconArrowLeft } from '@tabler/icons-react';
 
 interface ReverseAuctionCoreProps {
   store: ReverseAuctionStore;
@@ -60,7 +62,6 @@ function ReverseAuctionCoreComponent({ store }: ReverseAuctionCoreProps) {
       <Box padding="lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
         <Stack spacing="lg">
           <Stack direction="row" align="center" justify="space-between">
-            <Typography variant="h2">Reverse Auction</Typography>
             {!showCreateForm && (
               <Button onClick={() => store.setShowCreateForm(true)} disabled={!isConnected}>
                 🏠 Create Room (Demander)
@@ -150,8 +151,8 @@ function ReverseAuctionCoreComponent({ store }: ReverseAuctionCoreProps) {
                           {myRooms.has(room.roomId)
                             ? 'Enter'
                             : joinRequestStatus === 'pending'
-                              ? 'Request Sent...'
-                              : 'Join Request'}
+                            ? 'Request Sent...'
+                            : 'Join Request'}
                         </Button>
                       </CardFooter>
                     </Card>
@@ -166,22 +167,21 @@ function ReverseAuctionCoreComponent({ store }: ReverseAuctionCoreProps) {
   }
 
   // 룸 내부 화면 - 헤더만 렌더링 (메인 컨텐츠는 ReverseAuction.tsx에서 렌더링)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
   return (
-    <Box style={{ flexShrink: 0 }}>
+    <Box style={{ flexShrink: 0 }} className="reverse-auction-core__header">
       <Box padding="md" style={{ borderBottom: '1px solid var(--color-border-default)' }}>
         <Stack direction="row" align="center" justify="space-between">
-          <Stack direction="row" align="center" spacing="md">
-            <Button onClick={handleLeaveRoom} variant="secondary" size="sm">
-              ← Exit
-            </Button>
+          <Stack direction="row" align="center" spacing="sm">
+            <IconButton onClick={handleLeaveRoom} color="default" size="medium" title="나가기">
+              <IconArrowLeft size={24} />
+            </IconButton>
             <Stack spacing="xs">
               <Stack direction="row" align="center" spacing="sm">
-                <Typography variant="h3">{currentRoom.title}</Typography>
+                <Typography variant={isMobile ? 'h4' : 'h3'}>{currentRoom.title}</Typography>
                 <StatusChip label={currentRoom.category} variant="badge" />
               </Stack>
-              <Typography variant="caption">
-                Role: {userRole === 'demander' ? 'Demander (Host)' : 'Supplier'}
-              </Typography>
             </Stack>
           </Stack>
 

@@ -5,21 +5,46 @@ import { IconButton } from '@/ui-component/Button/IconButton';
 import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { ThemeCustomization } from '@/components/ThemeCustomization/ThemeCustomization';
+import { Select, SelectOption } from '@/ui-component/Select/Select';
 import { IconMoon, IconSun, IconEye, IconEyeOff, IconWifi, IconWifiOff, IconSettings } from '@tabler/icons-react';
 
 interface HeaderProps {
   title: string;
   isConnected: boolean;
   socketId: string | null;
+  currentView?: string;
+  onViewChange?: (view: string) => void;
 }
 
-export function Header({ title, isConnected, socketId }: HeaderProps) {
+export function Header({ title, isConnected, socketId, currentView, onViewChange }: HeaderProps) {
   const { theme, toggleTheme, contrast, toggleContrast } = useTheme();
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const viewOptions: SelectOption[] = [
+    { value: 'chat', label: 'Chat' },
+    { value: 'notification', label: 'Notification' },
+    { value: 'reverse-auction', label: 'Reverse Auction' },
+  ];
+
+  const handleViewSelectChange = (e: JSX.TargetedEvent<HTMLSelectElement>) => {
+    if (onViewChange) {
+      onViewChange(e.currentTarget.value);
+    }
+  };
 
   return (
     <header className="header">
       <div className="header__left">
+        {/* 모바일: Select로 뷰 전환 */}
+        <div className="header__mobile-select">
+          <Select
+            options={viewOptions}
+            value={currentView || 'chat'}
+            onChange={handleViewSelectChange}
+            className="header__view-select"
+          />
+        </div>
+        {/* 데스크톱: 타이틀 표시 */}
         <Typography variant="h3" className="header__title">
           {title}
         </Typography>
