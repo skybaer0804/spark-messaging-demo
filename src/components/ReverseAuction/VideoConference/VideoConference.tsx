@@ -148,9 +148,12 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
               <Box
                 style={{
                   position: 'absolute',
-                  bottom: '48px',
+                  bottom: '12px',
                   right: '8px',
                   zIndex: 10,
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  borderRadius: '50%',
+                  padding: '4px',
                 }}
               >
                 <IconButton onClick={handleStopLocalStream} color="primary" size="small" title="영상 중지">
@@ -278,9 +281,12 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
               <Box
                 style={{
                   position: 'absolute',
-                  bottom: '48px',
+                  bottom: '12px',
                   right: '8px',
                   zIndex: 10,
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  borderRadius: '50%',
+                  padding: '4px',
                 }}
               >
                 <IconButton onClick={handleStopLocalStream} color="primary" size="small" title="영상 중지">
