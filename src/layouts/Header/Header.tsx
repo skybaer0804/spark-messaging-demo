@@ -6,9 +6,10 @@ import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { ThemeCustomization } from '@/components/ThemeCustomization/ThemeCustomization';
 import { Select, SelectOption } from '@/ui-component/Select/Select';
-import { IconMoon, IconSun, IconEye, IconEyeOff, IconWifi, IconWifiOff, IconSettings } from '@tabler/icons-react';
+import { IconMoon, IconSun, IconEye, IconEyeOff, IconWifi, IconWifiOff, IconSettings, IconMenu2 } from '@tabler/icons-react';
 import { useRouterState } from '@/routes/RouterState';
 import { appRoutes } from '@/routes/appRoutes';
+import { useSidebarLayoutOptional } from '@/layouts/SidebarLayout/SidebarLayoutContext';
 
 interface HeaderProps {
   title: string;
@@ -17,9 +18,10 @@ interface HeaderProps {
 }
 
 export function Header({ title, isConnected, socketId }: HeaderProps) {
-  const { theme, toggleTheme, contrast, toggleContrast } = useTheme();
+  const { theme, toggleTheme, contrast, toggleContrast, deviceSize } = useTheme();
   const { pathname, navigate } = useRouterState();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const sidebarLayout = useSidebarLayoutOptional();
 
   const viewOptions: SelectOption[] = appRoutes
     .filter((r) => r.id !== 'design-system')
@@ -35,6 +37,18 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
   return (
     <header className="header">
       <div className="header__left">
+        {/* 모바일: 사이드바 열기 */}
+        {deviceSize === 'mobile' && sidebarLayout && (
+          <IconButton
+            size="medium"
+            color="default"
+            onClick={sidebarLayout.openMobileSidebar}
+            title="메뉴 열기"
+            className="header__menu-button"
+          >
+            <IconMenu2 size={20} />
+          </IconButton>
+        )}
         {/* 모바일: Select로 뷰 전환 */}
         <div className="header__mobile-select">
           <Select

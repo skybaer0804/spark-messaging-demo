@@ -18,6 +18,7 @@ interface SidebarConfig {
   miniDrawer: boolean;
   pinned: boolean;
   submenuPinned: boolean;
+  secondMenuPinned: boolean;
 }
 
 interface CustomColors {
@@ -77,6 +78,7 @@ const DEFAULT_CONFIG: ThemeConfig = {
     miniDrawer: true,
     pinned: false,
     submenuPinned: false,
+    secondMenuPinned: false,
   },
 };
 
@@ -237,7 +239,7 @@ export function ThemeProvider({ children, defaultTheme = 'light', defaultContras
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
-      setDeviceSize(width < 768 ? 'mobile' : 'pc');
+      setDeviceSize(width <= 768 ? 'mobile' : 'pc');
     };
 
     window.addEventListener('resize', handleResize);

@@ -6,6 +6,7 @@ import { FileTransferService } from '../../../services/FileTransferService';
 import { RoomService } from '../services/RoomService';
 import type { Message } from '../types';
 import { SparkMessagingError } from '@skybaer0804/spark-messaging-client';
+import { setChatCurrentRoom, setChatRoomList } from '@/stores/chatRoomsStore';
 
 export function useChatApp() {
   const [isConnected, setIsConnected] = useState(false);
@@ -118,6 +119,15 @@ export function useChatApp() {
       roomService.cleanup();
     };
   }, []);
+
+  // 전역 사이드바에서 사용할 수 있도록 roomList/currentRoom을 스토어에 동기화
+  useEffect(() => {
+    setChatRoomList(roomList);
+  }, [roomList]);
+
+  useEffect(() => {
+    setChatCurrentRoom(currentRoom);
+  }, [currentRoom]);
 
   const sendFile = async (file: File) => {
     if (!isConnected || !fileTransferServiceRef.current || !roomServiceRef.current) {

@@ -1,0 +1,54 @@
+@use '/src/styles/tokens/index';
+
+.sidebar-layout {
+  // Grid.tsx가 내부에서 grid-template-columns를 --grid-template-columns로 구성하므로
+  // 여기서는 "columns"에 전달할 변수만 관리합니다.
+  // 기본은 미니 사이드바 너비
+  --sidebar-layout-columns: var(--sidebar-width-mini) 1fr;
+
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+
+  &__sidebar {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__second-menu {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__content {
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &__mobile-drawer {
+    // Sidebar.scss가 내부적으로 width를 토큰으로 관리하므로 여기서는 레이아웃 전용만
+    .drawer__content {
+      padding: 0;
+    }
+  }
+
+  // 2차 사이드메뉴가 고정되었을 때 콘텐츠 크기 조정 (1차 사이드바는 미니 너비)
+  &--with-second-menu {
+    --sidebar-layout-columns: var(--sidebar-width-mini) var(--sidebar-second-menu-width) 1fr;
+  }
+
+  @media (max-width: 768px) {
+    --sidebar-layout-columns: 1fr;
+
+    &__sidebar {
+      display: none;
+    }
+  }
+}
+
+

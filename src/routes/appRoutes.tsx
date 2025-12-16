@@ -14,6 +14,7 @@ export interface AppRouteNode {
   icon: JSX.Element;
   title: string;
   element: JSX.Element;
+  secondMenu?: boolean; // true이면 호버시 2차 사이드메뉴 Drawer 열림
   children?: Array<{
     id: string;
     label: string;
@@ -98,6 +99,7 @@ export const appRoutes: AppRouteNode[] = [
     icon: <IconPalette size={20} />,
     title: 'Design System Demo',
     element: <DesignSystemDemo />,
+    secondMenu: true,
     children: [
       {
         id: 'overview',

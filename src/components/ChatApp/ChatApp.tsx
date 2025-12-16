@@ -20,6 +20,7 @@ import {
   IconDownload,
   IconCirclePlus,
 } from '@tabler/icons-react';
+import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
 import './ChatApp.scss';
 
 export function ChatApp() {
@@ -41,6 +42,16 @@ export function ChatApp() {
     uploadProgress,
     socketId,
   } = useChatApp();
+
+  // Sidebar에서 "이 룸으로 들어가기" 요청을 보내면 여기서 실제 join을 수행
+  const pendingJoinRoom = chatPendingJoinRoom.value;
+  useEffect(() => {
+    if (!pendingJoinRoom) return;
+    if (!isConnected) return;
+
+    handleRoomSelect(pendingJoinRoom);
+    clearPendingJoinChatRoom();
+  }, [handleRoomSelect, isConnected, pendingJoinRoom]);
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);

@@ -2,11 +2,10 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import sparkMessagingClient from './config/sparkMessaging';
-import { Content } from './layouts/Content/Content';
-import { Sidebar } from './components/Sidebar/Sidebar';
 import { AppRouter } from './routes/AppRouter';
 import { RouterStateProvider, useRouterState } from './routes/RouterState';
 import { findRouteTitleByPath } from './routes/appRoutes';
+import { SidebarLayout } from './layouts/SidebarLayout/SidebarLayout';
 import './app.scss';
 import './index.css';
 
@@ -141,10 +140,9 @@ function AppShell(props: { isConnected: boolean; socketId: string | null }) {
 
   return (
     <div className="app__main">
-      <Sidebar />
-      <Content headerTitle={headerTitle} isConnected={props.isConnected} socketId={props.socketId}>
+      <SidebarLayout headerTitle={headerTitle} isConnected={props.isConnected} socketId={props.socketId}>
         <AppRouter />
-      </Content>
+      </SidebarLayout>
     </div>
   );
 }

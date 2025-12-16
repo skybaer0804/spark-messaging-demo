@@ -32,6 +32,21 @@
     }
   }
 
+  &__menu-button {
+    display: inline-flex;
+    color: var(--primitive-gray-0);
+    flex-shrink: 0;
+
+    svg {
+      color: var(--primitive-gray-0);
+      stroke: var(--primitive-gray-0);
+    }
+
+    @media (min-width: 769px) {
+      display: none;
+    }
+  }
+
   &__left {
     flex: 1;
     min-width: 0;

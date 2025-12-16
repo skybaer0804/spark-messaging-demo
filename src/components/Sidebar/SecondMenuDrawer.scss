@@ -1,0 +1,111 @@
+@use '/src/styles/tokens/index';
+
+.second-menu-drawer {
+  position: fixed;
+  top: 0;
+  width: var(--sidebar-second-menu-width);
+  height: 100vh;
+  background: var(--color-background-primary);
+  border-right: 1px solid var(--color-border-default);
+  box-shadow: var(--elevation-shadow-2);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease, left 0.3s ease;
+  overflow: hidden;
+
+  // 사이드메뉴 우측부터 시작 (기본은 미니 사이드바 너비)
+  left: var(--current-sidebar-width, var(--sidebar-width-mini));
+
+  &--open {
+    transform: translateX(0);
+  }
+
+  &--pinned {
+    transform: translateX(0);
+    position: relative;
+    z-index: 1;
+    box-shadow: none;
+    height: 100%;
+    left: 0; // 고정되었을 때는 left를 0으로 설정하여 Grid에 포함
+    width: 100%; // Grid 컬럼 너비에 맞춤
+  }
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sidebar-item-padding);
+    min-height: var(--sidebar-flyout-header-height);
+    border-bottom: 1px solid var(--color-border-default);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+
+  &__pin-button {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--sidebar-item-padding);
+  }
+
+  &__link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border-radius: var(--sidebar-radius);
+
+    &:hover {
+      background: var(--sidebar-item-hover-bg);
+    }
+
+    &--active {
+      background: var(--sidebar-item-active-bg);
+
+      .list-item-text__primary {
+        color: var(--sidebar-item-active-text);
+        font-weight: var(--text-label-weight);
+      }
+    }
+  }
+
+  &__item {
+    padding: var(--sidebar-item-padding);
+    border-radius: var(--sidebar-radius);
+    min-height: 40px;
+
+    .list-item-text__primary {
+      color: var(--color-text-primary);
+    }
+  }
+
+  // 미니 사이드바일 때 위치 조정 (고정되지 않았을 때만)
+  &:not(&--pinned) {
+    .sidebar--mini ~ & {
+      left: var(--sidebar-width-mini);
+    }
+  }
+}
+
