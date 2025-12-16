@@ -753,6 +753,21 @@
   --pagination-disabled-opacity: 0.5;
   --pagination-focus-ring: 2px solid var(--color-border-focus);
 
+  // --- Breadcrumbs Component Tokens ---
+  --breadcrumbs-gap: var(--space-gap-xs);
+  --breadcrumbs-padding-y: 0px;
+  --breadcrumbs-padding-x: 0px;
+  --breadcrumbs-font-size: var(--typo-body-small-size);
+  --breadcrumbs-font-weight: var(--primitive-font-weight-regular);
+  --breadcrumbs-text: var(--color-text-secondary);
+  --breadcrumbs-link-text: var(--color-text-primary);
+  --breadcrumbs-link-hover-text: var(--color-interactive-primary);
+  --breadcrumbs-separator-text: var(--color-text-tertiary);
+  --breadcrumbs-focus-ring: 2px solid var(--color-border-focus);
+  --breadcrumbs-collapse-bg: var(--color-surface-level-1);
+  --breadcrumbs-collapse-radius: var(--primitive-radius-medium);
+  --breadcrumbs-collapse-padding: 0 var(--space-padding-sm);
+
   // --- Chat Component Tokens ---
   // Chat Window
   --chat-window-background: var(--color-background-secondary); // Main background area

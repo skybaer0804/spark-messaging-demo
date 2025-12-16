@@ -28,6 +28,7 @@ import { Tabs } from '@/ui-component/Tabs/Tabs';
 import { Stepper } from '@/ui-component/Stepper/Stepper';
 import { SpeedDial } from '@/ui-component/SpeedDial/SpeedDial';
 import { Pagination } from '@/ui-component/Pagination/Pagination';
+import { Breadcrumbs } from '@/ui-component/Breadcrumbs/Breadcrumbs';
 import { IconHome, IconUser, IconSettings, IconBell, IconSearch, IconTrash, IconMail, IconPlus, IconX } from '@tabler/icons-react';
 import './DesignSystemDemo.scss';
 
@@ -280,6 +281,16 @@ export function DesignSystemDemo() {
             <Typography variant="h2" style={{ marginBottom: '16px' }}>
               Navigation
             </Typography>
+            <Breadcrumbs
+              ariaLabel="design system breadcrumbs demo"
+              maxItems={3}
+              items={[
+                { label: 'Home', onClick: () => {} },
+                { label: 'Library', onClick: () => {} },
+                { label: 'Data', onClick: () => {} },
+                { label: 'Current Page' },
+              ]}
+            />
             <Tabs
               ariaLabel="design system tabs demo"
               value={tabValue}
