@@ -1,0 +1,75 @@
+@use '/src/styles/tokens/index';
+
+.button-group {
+  display: inline-flex;
+  align-items: stretch;
+  gap: var(--button-group-gap);
+  width: fit-content;
+
+  &--full-width {
+    width: 100%;
+
+    .button-group__item {
+      flex: 1 1 0;
+    }
+  }
+
+  &--vertical {
+    flex-direction: column;
+  }
+
+  &__item {
+    display: inline-flex;
+    min-width: 0;
+  }
+
+  &--attached {
+    gap: 0;
+
+    .button-group__item > :is(.button, .icon-button) {
+      border-radius: 0;
+    }
+
+    // Round corners only on the outside
+    &.button-group--horizontal {
+      .button-group__item:first-child > :is(.button, .icon-button) {
+        border-top-left-radius: var(--button-group-radius);
+        border-bottom-left-radius: var(--button-group-radius);
+      }
+
+      .button-group__item:last-child > :is(.button, .icon-button) {
+        border-top-right-radius: var(--button-group-radius);
+        border-bottom-right-radius: var(--button-group-radius);
+      }
+
+      // Merge borders for outlined-like buttons (e.g. secondary has border)
+      .button-group__item + .button-group__item > :is(.button.secondary, .icon-button) {
+        margin-left: -1px;
+      }
+    }
+
+    &.button-group--vertical {
+      .button-group__item:first-child > :is(.button, .icon-button) {
+        border-top-left-radius: var(--button-group-radius);
+        border-top-right-radius: var(--button-group-radius);
+      }
+
+      .button-group__item:last-child > :is(.button, .icon-button) {
+        border-bottom-left-radius: var(--button-group-radius);
+        border-bottom-right-radius: var(--button-group-radius);
+      }
+
+      .button-group__item + .button-group__item > :is(.button.secondary, .icon-button) {
+        margin-top: -1px;
+      }
+    }
+  }
+
+  &--spaced {
+    .button-group__item > :is(.button, .icon-button) {
+      border-radius: var(--button-group-radius);
+    }
+  }
+}
+
+

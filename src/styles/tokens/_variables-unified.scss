@@ -520,6 +520,12 @@
   --button-sm-font-size: var(--typo-body-small-size);
   --button-sm-height: 40px;
 
+  // --- Button Group Component Tokens ---
+  --button-group-gap: var(--space-gap-xs);
+  --button-group-radius: var(--button-primary-radius);
+  --button-group-divider: 1px solid var(--color-border-default);
+  --button-group-focus-ring: 2px solid var(--color-border-focus);
+
   // --- Input Component Tokens ---
   // Text Input (Default)
   --input-background: var(--color-background-primary);

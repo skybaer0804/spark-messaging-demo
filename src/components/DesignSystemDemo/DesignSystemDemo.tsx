@@ -31,6 +31,7 @@ import { Pagination } from '@/ui-component/Pagination/Pagination';
 import { Breadcrumbs } from '@/ui-component/Breadcrumbs/Breadcrumbs';
 import { BottomNavigation } from '@/ui-component/BottomNavigation/BottomNavigation';
 import { Accordion } from '@/ui-component/Accordion/Accordion';
+import { ButtonGroup } from '@/ui-component/ButtonGroup/ButtonGroup';
 import { IconHome, IconUser, IconSettings, IconBell, IconSearch, IconTrash, IconMail, IconPlus, IconX } from '@tabler/icons-react';
 import './DesignSystemDemo.scss';
 
@@ -181,6 +182,25 @@ export function DesignSystemDemo() {
                     <IconTrash />
                   </IconButton>
                 </Flex>
+                <Typography variant="h3">Button Group</Typography>
+                <Stack spacing="sm">
+                  <ButtonGroup>
+                    <Button variant="secondary">Left</Button>
+                    <Button variant="secondary">Center</Button>
+                    <Button variant="secondary">Right</Button>
+                  </ButtonGroup>
+                  <ButtonGroup orientation="vertical" fullWidth>
+                    <Button variant="secondary" fullWidth>
+                      One
+                    </Button>
+                    <Button variant="secondary" fullWidth>
+                      Two
+                    </Button>
+                    <Button variant="secondary" fullWidth disabled>
+                      Disabled
+                    </Button>
+                  </ButtonGroup>
+                </Stack>
               </Stack>
 
               <Stack spacing="md">
