@@ -8,7 +8,6 @@ import {
 import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { List, ListItem, ListItemText } from '@/ui-component/List/List';
-import { IconButton } from '@/ui-component/Button/IconButton';
 import { useTheme } from '@/context/ThemeProvider';
 import { appRoutes, type AppRouteNode } from '@/routes/appRoutes';
 import { useRouterState } from '@/routes/RouterState';
@@ -49,7 +48,7 @@ function NavLink(props: {
 }
 
 export function Sidebar() {
-  const { sidebarConfig, setSidebarConfig, deviceSize } = useTheme();
+  const { sidebarConfig, deviceSize } = useTheme();
   const { pathname, navigate } = useRouterState();
   const sidebarLayout = useSidebarLayoutOptional();
   const [isSidebarHovered, setIsSidebarHovered] = useState(false);

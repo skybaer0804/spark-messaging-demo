@@ -1,6 +1,5 @@
-import type { ComponentChildren, JSX } from 'preact';
+import type { ComponentChildren } from 'preact';
 import { IconPin, IconPinFilled } from '@tabler/icons-react';
-import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { List, ListItem, ListItemText } from '@/ui-component/List/List';
 import { IconButton } from '@/ui-component/Button/IconButton';
@@ -13,7 +12,7 @@ interface SecondMenuDrawerProps {
   open: boolean;
   onClose: () => void;
   title: string;
-  children: Array<{
+  children?: Array<{
     id: string;
     label: string;
     path: string;
@@ -21,11 +20,7 @@ interface SecondMenuDrawerProps {
   }>;
 }
 
-function NavLink(props: {
-  to: string;
-  className?: string;
-  children: ComponentChildren;
-}) {
+function NavLink(props: { to: string; className?: string; children: ComponentChildren }) {
   const { navigate } = useRouterState();
   const sidebarLayout = useSidebarLayoutOptional();
   const { deviceSize } = useTheme();
@@ -44,7 +39,7 @@ function NavLink(props: {
   );
 }
 
-export function SecondMenuDrawer({ open, onClose, title, children }: SecondMenuDrawerProps) {
+export function SecondMenuDrawer({ open, onClose: _onClose, title, children }: SecondMenuDrawerProps) {
   const { pathname } = useRouterState();
   const { sidebarConfig, setSidebarConfig, deviceSize } = useTheme();
   const { secondMenuPinned } = sidebarConfig;
@@ -58,7 +53,11 @@ export function SecondMenuDrawer({ open, onClose, title, children }: SecondMenuD
   if (isMobile) return null; // 모바일에서는 표시하지 않음
 
   return (
-    <div className={`second-menu-drawer ${open || secondMenuPinned ? 'second-menu-drawer--open' : ''} ${secondMenuPinned ? 'second-menu-drawer--pinned' : ''}`}>
+    <div
+      className={`second-menu-drawer ${open || secondMenuPinned ? 'second-menu-drawer--open' : ''} ${
+        secondMenuPinned ? 'second-menu-drawer--pinned' : ''
+      }`}
+    >
       <div className="second-menu-drawer__container">
         <div className="second-menu-drawer__header">
           <Typography variant="body-large" className="second-menu-drawer__title">
@@ -76,7 +75,7 @@ export function SecondMenuDrawer({ open, onClose, title, children }: SecondMenuD
         </div>
         <div className="second-menu-drawer__body">
           <List disablePadding>
-            {children.map((c) => {
+            {children?.map((c) => {
               const isActive = pathname === c.path;
               return (
                 <NavLink
@@ -96,4 +95,3 @@ export function SecondMenuDrawer({ open, onClose, title, children }: SecondMenuD
     </div>
   );
 }
-
