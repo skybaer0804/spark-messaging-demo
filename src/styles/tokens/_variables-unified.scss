@@ -679,6 +679,31 @@
   // Panel
   --tabs-panel-padding: var(--space-padding-md);
 
+  // --- Stepper Component Tokens ---
+  --stepper-gap: var(--space-gap-md);
+  --stepper-step-gap: var(--space-gap-sm);
+  --stepper-icon-size: 28px;
+  --stepper-icon-radius: 9999px;
+  --stepper-icon-font-size: var(--typo-label-medium-size);
+  --stepper-icon-font-weight: var(--primitive-font-weight-bold);
+  --stepper-icon-bg: var(--color-surface-level-2);
+  --stepper-icon-text: var(--color-text-secondary);
+  --stepper-icon-bg-active: var(--color-interactive-primary);
+  --stepper-icon-text-active: var(--primitive-gray-0);
+  --stepper-icon-bg-completed: var(--color-status-success);
+  --stepper-icon-text-completed: var(--primitive-gray-0);
+  --stepper-icon-bg-error: var(--color-status-error);
+  --stepper-icon-text-error: var(--primitive-gray-0);
+  --stepper-label-color: var(--color-text-primary);
+  --stepper-label-color-inactive: var(--color-text-secondary);
+  --stepper-label-font-size: var(--typo-body-small-size);
+  --stepper-label-font-weight: var(--primitive-font-weight-bold);
+  --stepper-disabled-opacity: 0.5;
+  --stepper-connector-color: var(--color-border-default);
+  --stepper-connector-thickness: 2px;
+  --stepper-focus-ring: 2px solid var(--color-border-focus);
+  --stepper-content-padding: var(--space-padding-md);
+
   // --- Chat Component Tokens ---
   // Chat Window
   --chat-window-background: var(--color-background-secondary); // Main background area

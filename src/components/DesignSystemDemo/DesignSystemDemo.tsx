@@ -25,6 +25,7 @@ import { Alert } from '@/ui-component/Alert/Alert';
 import { CircularProgress } from '@/ui-component/CircularProgress/CircularProgress';
 import { Skeleton } from '@/ui-component/Skeleton/Skeleton';
 import { Tabs } from '@/ui-component/Tabs/Tabs';
+import { Stepper } from '@/ui-component/Stepper/Stepper';
 import { IconHome, IconUser, IconSettings, IconBell, IconSearch, IconTrash, IconMail } from '@tabler/icons-react';
 import './DesignSystemDemo.scss';
 
@@ -33,6 +34,7 @@ export function DesignSystemDemo() {
   const [inputValue, setInputValue] = useState('');
   const [selectValue, setSelectValue] = useState('option1');
   const [tabValue, setTabValue] = useState<string | number>('overview');
+  const [activeStep, setActiveStep] = useState(1);
 
   return (
     <div
@@ -309,6 +311,32 @@ export function DesignSystemDemo() {
                 },
               ]}
             />
+            <Box style={{ marginTop: '16px' }}>
+              <Stepper
+                ariaLabel="design system stepper demo"
+                nonLinear
+                activeStep={activeStep}
+                onChange={(next) => setActiveStep(next)}
+                steps={[
+                  {
+                    label: '계정',
+                    description: '프로필 설정',
+                    content: <Typography variant="body-medium">Step 1 content</Typography>,
+                  },
+                  {
+                    label: '인증',
+                    description: '보안 확인',
+                    content: <Typography variant="body-medium">Step 2 content</Typography>,
+                  },
+                  {
+                    label: '완료',
+                    description: '설정 저장',
+                    content: <Typography variant="body-medium">Step 3 content</Typography>,
+                  },
+                ]}
+                showContent
+              />
+            </Box>
           </Paper>
 
           {/* Surfaces */}
