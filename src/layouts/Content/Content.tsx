@@ -7,13 +7,21 @@ interface ContentProps {
   headerTitle: string;
   isConnected: boolean;
   socketId: string | null;
+  currentView?: string;
+  onViewChange?: (view: string) => void;
 }
 
-export function Content({ children, headerTitle, isConnected, socketId }: ContentProps) {
+export function Content({ children, headerTitle, isConnected, socketId, currentView, onViewChange }: ContentProps) {
   return (
     <main className="content">
       <div className="content__header">
-        <Header title={headerTitle} isConnected={isConnected} socketId={socketId} />
+        <Header 
+          title={headerTitle} 
+          isConnected={isConnected} 
+          socketId={socketId}
+          currentView={currentView}
+          onViewChange={onViewChange}
+        />
       </div>
       <div className="content__body">{children}</div>
     </main>

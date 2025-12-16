@@ -79,6 +79,8 @@ export function ReverseAuction() {
       {/* 룸 상세 화면에서만 영상과 채팅 표시 */}
       {currentRoom && (
         <div className="reverse-auction__main-content">
+          {/* 모바일: 상단-영상-채팅 순서 */}
+          {/* PC: 영상-채팅 가로 배치 */}
           {/* 영상 영역 */}
           <div className="reverse-auction__video-section">
             {videoConferenceAdapter && <VideoConference adapter={videoConferenceAdapter} />}

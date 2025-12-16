@@ -8,7 +8,6 @@ import {
   IconSparkles,
   IconPin,
   IconPinFilled,
-  IconChevronLeft,
 } from '@tabler/icons-react';
 import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
@@ -57,15 +56,11 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
     },
     {
       id: 'design-system',
-      label: '디자인 시스템',
+      label: '디자인',
       icon: <IconPalette size={20} />,
       view: 'design-system',
     },
   ];
-
-  const handleToggleMiniDrawer = () => {
-    setSidebarConfig({ miniDrawer: !miniDrawer });
-  };
 
   const handleTogglePin = () => {
     setSidebarConfig({ pinned: !pinned });
@@ -97,26 +92,15 @@ export function Sidebar({ currentView, onViewChange }: SidebarProps) {
           )}
           <div className="sidebar__header-actions">
             {isExpanded && (
-              <>
-                <IconButton
-                  size="small"
-                  color="default"
-                  onClick={handleTogglePin}
-                  title={pinned ? '고정 해제' : '고정'}
-                  className="sidebar__pin-button"
-                >
-                  {pinned ? <IconPinFilled size={18} /> : <IconPin size={18} />}
-                </IconButton>
-                <IconButton
-                  size="small"
-                  color="default"
-                  onClick={handleToggleMiniDrawer}
-                  title="사이드바 축소"
-                  className="sidebar__collapse-button"
-                >
-                  <IconChevronLeft size={18} />
-                </IconButton>
-              </>
+              <IconButton
+                size="small"
+                color="default"
+                onClick={handleTogglePin}
+                title={pinned ? '고정 해제' : '고정'}
+                className="sidebar__pin-button"
+              >
+                {pinned ? <IconPinFilled size={18} /> : <IconPin size={18} />}
+              </IconButton>
             )}
           </div>
         </div>

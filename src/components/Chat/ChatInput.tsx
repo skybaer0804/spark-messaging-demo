@@ -58,54 +58,63 @@ function ChatInputComponent({
           uploadProgress={uploadProgress}
           onRemove={onFileRemove}
         />
-        <Flex gap="sm" align="center">
-          {showFileUpload && (
-            <>
-              <input
-                ref={fileInputRef}
-                type="file"
-                onChange={onFileSelect}
-                style={{ display: 'none' }}
-                multiple
-                accept="image/*,.xlsx,.xls,.csv,.md,.docx,.doc,.pdf"
-              />
-              <IconButton onClick={() => fileInputRef.current?.click()} color="secondary" size="medium">
-                <IconPaperclip />
-              </IconButton>
-            </>
-          )}
-          <Box style={{ flex: 1 }}>
-            <Input
-              multiline
-              value={input}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement;
-                setInput(target.value);
-                // 높이 자동 조절
-                target.style.height = 'auto';
-                const scrollHeight = target.scrollHeight;
-                const lineHeight = parseFloat(getComputedStyle(target).lineHeight) || 24;
-                const minHeight = lineHeight * 2 + 24;
-                const maxHeight = lineHeight * 5 + 24;
-                const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
-                target.style.height = `${targetHeight}px`;
-              }}
-              onKeyPress={onKeyPress}
-              placeholder={placeholder || (isConnected ? '메시지를 입력하세요...' : '연결 중...')}
-              disabled={!isConnected}
-              fullWidth
-              rows={2}
-            />
-          </Box>
-          <IconButton
-            onClick={selectedFiles.length > 0 ? onSendFile : onSendMessage}
-            color="primary"
-            disabled={!isConnected || (!input.trim() && selectedFiles.length === 0)}
-            size="medium"
+        <Box style={{ position: 'relative', width: '100%' }}>
+          <Input
+            multiline
+            value={input}
+            onInput={(e) => {
+              const target = e.target as HTMLTextAreaElement;
+              setInput(target.value);
+              // 높이 자동 조절
+              target.style.height = 'auto';
+              const scrollHeight = target.scrollHeight;
+              const lineHeight = parseFloat(getComputedStyle(target).lineHeight) || 24;
+              const minHeight = lineHeight * 2 + 24;
+              const maxHeight = lineHeight * 5 + 24;
+              const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+              target.style.height = `${targetHeight}px`;
+            }}
+            onKeyPress={onKeyPress}
+            placeholder={placeholder || (isConnected ? '메시지를 입력하세요...' : '연결 중...')}
+            disabled={!isConnected}
+            fullWidth
+            rows={2}
+            style={{ paddingRight: '80px' }} // 아이콘 버튼 공간 확보
+          />
+          <Flex
+            gap="xs"
+            align="center"
+            style={{
+              position: 'absolute',
+              bottom: '8px',
+              right: '8px',
+            }}
           >
-            <IconSend />
-          </IconButton>
-        </Flex>
+            {showFileUpload && (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  onChange={onFileSelect}
+                  style={{ display: 'none' }}
+                  multiple
+                  accept="image/*,.xlsx,.xls,.csv,.md,.docx,.doc,.pdf"
+                />
+                <IconButton onClick={() => fileInputRef.current?.click()} color="secondary" size="small">
+                  <IconPaperclip size={18} />
+                </IconButton>
+              </>
+            )}
+            <IconButton
+              onClick={selectedFiles.length > 0 ? onSendFile : onSendMessage}
+              color="primary"
+              disabled={!isConnected || (!input.trim() && selectedFiles.length === 0)}
+              size="small"
+            >
+              <IconSend size={18} />
+            </IconButton>
+          </Flex>
+        </Box>
       </Stack>
     </Paper>
   );

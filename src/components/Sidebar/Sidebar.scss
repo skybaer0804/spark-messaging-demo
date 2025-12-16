@@ -2,7 +2,7 @@
 
 .sidebar {
   display: none;
-  width: 280px;
+  width: 240px;
   background: var(--color-background-primary);
   border-right: 1px solid var(--color-border-default);
   flex-shrink: 0;
@@ -21,7 +21,7 @@
   }
 
   &--expanded {
-    width: 280px;
+    width: 240px;
   }
 
   &__container {
@@ -67,8 +67,7 @@
     flex-shrink: 0;
   }
 
-  &__pin-button,
-  &__collapse-button {
+  &__pin-button {
     opacity: 0.7;
     transition: opacity 0.2s ease;
 
@@ -122,6 +121,11 @@
       }
     }
 
+    // 펼쳐졌을 때 메뉴 타이틀 색상이 축소했을 때와 동일하게
+    .list-item-text__primary {
+      color: var(--color-text-primary);
+    }
+
     &-mini {
       display: flex;
       flex-direction: column;
@@ -152,9 +156,10 @@
     }
   }
 
-  // ListItemText 기본 색상 설정
+  // ListItemText 기본 색상 설정 - 펼쳐졌을 때와 축소했을 때 동일한 색상
   .list-item-text__primary {
     color: var(--color-text-primary);
+    font-weight: var(--primitive-font-weight-regular);
   }
 
   // 미니 모드에서 확장되지 않았을 때

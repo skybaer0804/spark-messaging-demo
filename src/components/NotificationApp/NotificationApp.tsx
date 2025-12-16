@@ -7,7 +7,7 @@ import { Stack } from '@/ui-component/Layout/Stack';
 import { Paper } from '@/ui-component/Paper/Paper';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { Divider } from '@/ui-component/Divider/Divider';
-import { IconBell, IconSend } from '@tabler/icons-react';
+import { IconSend } from '@tabler/icons-react';
 import './NotificationApp.scss';
 
 export function NotificationApp() {
@@ -16,23 +16,6 @@ export function NotificationApp() {
   return (
     <Paper square elevation={0} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <Box padding="lg">
-        <Stack direction="row" align="center" spacing="md" style={{ marginBottom: '16px' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '40px',
-              height: '40px',
-              borderRadius: '8px',
-              backgroundColor: 'var(--primitive-blue-500)',
-              color: 'white',
-            }}
-          >
-            <IconBell size={24} />
-          </div>
-          <Typography variant="h2">Send Notification</Typography>
-        </Stack>
         <Typography variant="body-medium" color="text-secondary" style={{ marginBottom: '24px' }}>
           Send broadcast messages to all connected users.
         </Typography>

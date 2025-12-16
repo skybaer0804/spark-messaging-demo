@@ -2,7 +2,6 @@ import { useChatApp } from './hooks/useChatApp';
 import { formatTimestamp } from '@/utils/messageUtils';
 import { formatFileSize, downloadFile } from '@/utils/fileUtils';
 import { useRef, useEffect, useState } from 'preact/hooks';
-import { Button } from '@/ui-component/Button/Button';
 import { IconButton } from '@/ui-component/Button/IconButton';
 import { Input } from '@/ui-component/Input/Input';
 import { Box } from '@/ui-component/Layout/Box';
@@ -12,7 +11,15 @@ import { Typography } from '@/ui-component/Typography/Typography';
 import { Paper } from '@/ui-component/Paper/Paper';
 import { List, ListItem, ListItemText, ListItemAvatar } from '@/ui-component/List/List';
 import { Avatar } from '@/ui-component/Avatar/Avatar';
-import { IconArrowLeft, IconSend, IconPaperclip, IconX, IconFile, IconDownload } from '@tabler/icons-react';
+import {
+  IconArrowLeft,
+  IconSend,
+  IconPaperclip,
+  IconX,
+  IconFile,
+  IconDownload,
+  IconCirclePlus,
+} from '@tabler/icons-react';
 import './ChatApp.scss';
 
 export function ChatApp() {
@@ -99,11 +106,9 @@ export function ChatApp() {
         display: 'flex',
         flexDirection: 'column',
       }}
+      className="chat-app__sidebar"
     >
       <Box padding="md" style={{ borderBottom: '1px solid var(--color-border-default)' }}>
-        <Typography variant="h3" style={{ marginBottom: '16px' }}>
-          Chats
-        </Typography>
         <Stack direction="row" spacing="sm">
           <Input
             value={roomIdInput}
@@ -113,9 +118,15 @@ export function ChatApp() {
             onKeyPress={(e) => e.key === 'Enter' && handleCreateRoom()}
             fullWidth
           />
-          <Button onClick={handleCreateRoom} disabled={!isConnected || !roomIdInput.trim()} size="sm">
-            +
-          </Button>
+          <IconButton
+            onClick={handleCreateRoom}
+            disabled={!isConnected || !roomIdInput.trim()}
+            size="small"
+            color="primary"
+            title="새 채팅방 생성"
+          >
+            <IconCirclePlus size={20} />
+          </IconButton>
         </Stack>
       </Box>
       <Box style={{ flex: 1, overflowY: 'auto' }}>
@@ -165,25 +176,47 @@ export function ChatApp() {
     </Flex>
   );
 
+  // 모바일에서는 깊이 구조로 뷰 전환
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   if (!currentRoom) {
     return (
-      <Box style={{ display: 'flex', minHeight: '100%' }}>
-        <Box style={{ width: '300px', flexShrink: 0 }}>
+      <Box style={{ display: 'flex', minHeight: '100%' }} className="chat-app__container">
+        <Box
+          style={{
+            width: isMobile ? '100%' : '300px',
+            flexShrink: 0,
+          }}
+          className="chat-app__sidebar-wrapper"
+        >
           <Sidebar />
         </Box>
-        <Box style={{ flex: 1, backgroundColor: 'var(--color-background-default)' }}>
-          <EmptyState />
-        </Box>
+        {!isMobile && (
+          <Box style={{ flex: 1, backgroundColor: 'var(--color-background-default)' }}>
+            <EmptyState />
+          </Box>
+        )}
       </Box>
     );
   }
 
-  // Active Chat Room
+  // Active Chat Room - 모바일에서는 채팅창만 표시
   return (
-    <Box style={{ display: 'flex', minHeight: '100%' }}>
-      <Box style={{ width: '300px', flexShrink: 0 }}>
-        <Sidebar />
-      </Box>
+    <Box style={{ display: 'flex', minHeight: '100%' }} className="chat-app__container">
+      {!isMobile && (
+        <Box style={{ width: '300px', flexShrink: 0 }} className="chat-app__sidebar-wrapper">
+          <Sidebar />
+        </Box>
+      )}
       <Flex
         direction="column"
         style={{ flex: 1, backgroundColor: 'var(--color-background-default)', minHeight: '100%' }}
