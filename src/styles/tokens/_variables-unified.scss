@@ -768,6 +768,25 @@
   --breadcrumbs-collapse-radius: var(--primitive-radius-medium);
   --breadcrumbs-collapse-padding: 0 var(--space-padding-sm);
 
+  // --- Bottom Navigation Component Tokens ---
+  --bottom-navigation-height: calc(var(--primitive-space-base) * 14); // 56px
+  --bottom-navigation-bg: var(--color-background-primary);
+  --bottom-navigation-border-top: 1px solid var(--color-border-default);
+  --bottom-navigation-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  --bottom-navigation-z-index: 1000;
+  --bottom-navigation-padding-x: var(--space-padding-md);
+  --bottom-navigation-item-gap: var(--space-gap-xs);
+  --bottom-navigation-item-padding: var(--space-padding-sm) var(--space-padding-md);
+  --bottom-navigation-item-radius: var(--primitive-radius-medium);
+  --bottom-navigation-item-text: var(--color-text-secondary);
+  --bottom-navigation-item-text-active: var(--color-interactive-primary);
+  --bottom-navigation-item-bg-hover: var(--color-surface-level-1);
+  --bottom-navigation-item-bg-active: var(--color-surface-level-2);
+  --bottom-navigation-item-font-size: var(--typo-label-small-size);
+  --bottom-navigation-item-font-weight: var(--primitive-font-weight-bold);
+  --bottom-navigation-disabled-opacity: 0.5;
+  --bottom-navigation-focus-ring: 2px solid var(--color-border-focus);
+
   // --- Chat Component Tokens ---
   // Chat Window
   --chat-window-background: var(--color-background-secondary); // Main background area

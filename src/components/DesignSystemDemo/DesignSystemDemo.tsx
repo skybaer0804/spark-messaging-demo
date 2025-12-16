@@ -29,6 +29,7 @@ import { Stepper } from '@/ui-component/Stepper/Stepper';
 import { SpeedDial } from '@/ui-component/SpeedDial/SpeedDial';
 import { Pagination } from '@/ui-component/Pagination/Pagination';
 import { Breadcrumbs } from '@/ui-component/Breadcrumbs/Breadcrumbs';
+import { BottomNavigation } from '@/ui-component/BottomNavigation/BottomNavigation';
 import { IconHome, IconUser, IconSettings, IconBell, IconSearch, IconTrash, IconMail, IconPlus, IconX } from '@tabler/icons-react';
 import './DesignSystemDemo.scss';
 
@@ -39,6 +40,7 @@ export function DesignSystemDemo() {
   const [tabValue, setTabValue] = useState<string | number>('overview');
   const [activeStep, setActiveStep] = useState(1);
   const [page, setPage] = useState(3);
+  const [bottomNavValue, setBottomNavValue] = useState<string | number>('home');
 
   return (
     <div
@@ -509,6 +511,18 @@ export function DesignSystemDemo() {
           </Paper>
         </Stack>
       </Container>
+
+      <BottomNavigation
+        ariaLabel="design system bottom navigation demo"
+        position="fixed"
+        value={bottomNavValue}
+        onChange={(next) => setBottomNavValue(next)}
+        items={[
+          { value: 'home', label: 'Home', icon: <IconHome size={20} /> },
+          { value: 'search', label: 'Search', icon: <IconSearch size={20} /> },
+          { value: 'profile', label: 'Profile', icon: <IconUser size={20} /> },
+        ]}
+      />
 
       <SpeedDial
         ariaLabel="speed dial demo"
