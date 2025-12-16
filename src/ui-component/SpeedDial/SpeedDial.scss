@@ -1,0 +1,229 @@
+@use '/src/styles/tokens/index';
+
+.speed-dial {
+  position: relative;
+  width: fit-content;
+
+  &__backdrop {
+    position: fixed;
+    inset: 0;
+    border: 0;
+    background: var(--speed-dial-backdrop);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 900;
+  }
+
+  &--backdrop {
+    .speed-dial__backdrop {
+      opacity: 0.35;
+      pointer-events: auto;
+    }
+  }
+
+  &__fab {
+    width: var(--speed-dial-fab-size);
+    height: var(--speed-dial-fab-size);
+    border-radius: var(--speed-dial-fab-radius);
+    border: 0;
+    background-color: var(--speed-dial-fab-bg);
+    color: var(--speed-dial-fab-text);
+    box-shadow: var(--speed-dial-fab-shadow);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+    z-index: 1001;
+
+    &:hover {
+      opacity: var(--speed-dial-fab-hover-opacity);
+    }
+
+    &:active {
+      opacity: var(--speed-dial-fab-active-opacity);
+      transform: scale(0.98);
+    }
+
+    &:focus-visible {
+      outline: var(--speed-dial-focus-ring);
+      outline-offset: 2px;
+    }
+  }
+
+  &__actions {
+    position: absolute;
+    display: flex;
+    gap: var(--speed-dial-gap);
+    pointer-events: none;
+    opacity: 0;
+    --speed-dial-actions-translate: translate(0, 0);
+    transform: var(--speed-dial-actions-translate) scale(0.98);
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+    z-index: 1000;
+  }
+
+  &--open {
+    .speed-dial__actions {
+      pointer-events: auto;
+      opacity: 1;
+      transform: var(--speed-dial-actions-translate) scale(1);
+    }
+  }
+
+  &__action {
+    width: var(--speed-dial-action-size);
+    height: var(--speed-dial-action-size);
+    border-radius: var(--speed-dial-action-radius);
+    border: 0;
+    background-color: var(--speed-dial-action-bg);
+    color: var(--speed-dial-action-text);
+    box-shadow: var(--speed-dial-action-shadow);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--speed-dial-action-hover-bg);
+    }
+
+    &:focus-visible {
+      outline: var(--speed-dial-focus-ring);
+      outline-offset: 2px;
+    }
+
+    &--disabled {
+      opacity: var(--speed-dial-disabled-opacity);
+      cursor: not-allowed;
+    }
+  }
+
+  &__tooltip {
+    position: absolute;
+    background: var(--speed-dial-tooltip-bg);
+    color: var(--speed-dial-tooltip-text);
+    border-radius: var(--speed-dial-tooltip-radius);
+    padding: var(--speed-dial-tooltip-padding);
+    font-size: var(--speed-dial-tooltip-font-size);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    --speed-dial-tooltip-hidden: translate(0, 2px);
+    --speed-dial-tooltip-shown: translate(0, 0);
+    transform: var(--speed-dial-tooltip-hidden);
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  &__action:hover &__tooltip {
+    opacity: 1;
+    transform: var(--speed-dial-tooltip-shown);
+  }
+
+  &__tooltip--left {
+    right: calc(100% + var(--speed-dial-gap));
+    top: 50%;
+    --speed-dial-tooltip-hidden: translate(2px, -50%);
+    --speed-dial-tooltip-shown: translate(0, -50%);
+  }
+
+  &__tooltip--right {
+    left: calc(100% + var(--speed-dial-gap));
+    top: 50%;
+    --speed-dial-tooltip-hidden: translate(-2px, -50%);
+    --speed-dial-tooltip-shown: translate(0, -50%);
+  }
+
+  &__tooltip--top {
+    bottom: calc(100% + var(--speed-dial-gap));
+    left: 50%;
+    --speed-dial-tooltip-hidden: translate(-50%, 2px);
+    --speed-dial-tooltip-shown: translate(-50%, 0);
+  }
+
+  &__tooltip--bottom {
+    top: calc(100% + var(--speed-dial-gap));
+    left: 50%;
+    --speed-dial-tooltip-hidden: translate(-50%, -2px);
+    --speed-dial-tooltip-shown: translate(-50%, 0);
+  }
+
+  &--up {
+    .speed-dial__actions {
+      bottom: calc(100% + var(--speed-dial-gap));
+      left: 50%;
+      flex-direction: column;
+      transform-origin: bottom center;
+      --speed-dial-actions-translate: translate(-50%, 0);
+    }
+  }
+
+  &--down {
+    .speed-dial__actions {
+      top: calc(100% + var(--speed-dial-gap));
+      left: 50%;
+      flex-direction: column;
+      transform-origin: top center;
+      --speed-dial-actions-translate: translate(-50%, 0);
+    }
+  }
+
+  &--left {
+    .speed-dial__actions {
+      right: calc(100% + var(--speed-dial-gap));
+      top: 50%;
+      flex-direction: row;
+      transform-origin: center right;
+      --speed-dial-actions-translate: translate(0, -50%);
+    }
+  }
+
+  &--right {
+    .speed-dial__actions {
+      left: calc(100% + var(--speed-dial-gap));
+      top: 50%;
+      flex-direction: row;
+      transform-origin: center left;
+      --speed-dial-actions-translate: translate(0, -50%);
+    }
+  }
+
+  &--bottom-right {
+    position: fixed;
+    bottom: var(--speed-dial-offset);
+    right: var(--speed-dial-offset);
+    z-index: 1000;
+  }
+
+  &--bottom-left {
+    position: fixed;
+    bottom: var(--speed-dial-offset);
+    left: var(--speed-dial-offset);
+    z-index: 1000;
+  }
+
+  &--top-right {
+    position: fixed;
+    top: var(--speed-dial-offset);
+    right: var(--speed-dial-offset);
+    z-index: 1000;
+  }
+
+  &--top-left {
+    position: fixed;
+    top: var(--speed-dial-offset);
+    left: var(--speed-dial-offset);
+    z-index: 1000;
+  }
+}
+
+

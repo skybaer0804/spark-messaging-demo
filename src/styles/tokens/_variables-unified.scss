@@ -704,6 +704,37 @@
   --stepper-focus-ring: 2px solid var(--color-border-focus);
   --stepper-content-padding: var(--space-padding-md);
 
+  // --- Speed Dial Component Tokens ---
+  --speed-dial-offset: var(--space-gap-lg);
+  --speed-dial-gap: var(--space-gap-sm);
+  --speed-dial-backdrop: var(--color-background-overlay);
+
+  // FAB
+  --speed-dial-fab-size: calc(var(--primitive-space-base) * 14); // 56px
+  --speed-dial-fab-radius: 9999px;
+  --speed-dial-fab-bg: var(--color-interactive-primary);
+  --speed-dial-fab-text: var(--primitive-gray-0);
+  --speed-dial-fab-shadow: var(--elevation-shadow-2);
+  --speed-dial-fab-hover-opacity: 0.95;
+  --speed-dial-fab-active-opacity: 0.9;
+  --speed-dial-focus-ring: 2px solid var(--color-border-focus);
+
+  // Action
+  --speed-dial-action-size: calc(var(--primitive-space-base) * 10); // 40px
+  --speed-dial-action-radius: 9999px;
+  --speed-dial-action-bg: var(--color-surface-level-3);
+  --speed-dial-action-text: var(--color-text-primary);
+  --speed-dial-action-shadow: var(--elevation-shadow-1);
+  --speed-dial-action-hover-bg: var(--color-surface-level-4);
+  --speed-dial-disabled-opacity: 0.5;
+
+  // Tooltip
+  --speed-dial-tooltip-bg: var(--color-text-primary);
+  --speed-dial-tooltip-text: var(--color-background-primary);
+  --speed-dial-tooltip-radius: var(--primitive-radius-medium);
+  --speed-dial-tooltip-padding: var(--space-padding-sm);
+  --speed-dial-tooltip-font-size: var(--typo-label-small-size);
+
   // --- Chat Component Tokens ---
   // Chat Window
   --chat-window-background: var(--color-background-secondary); // Main background area

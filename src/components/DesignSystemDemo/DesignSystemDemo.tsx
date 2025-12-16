@@ -26,7 +26,8 @@ import { CircularProgress } from '@/ui-component/CircularProgress/CircularProgre
 import { Skeleton } from '@/ui-component/Skeleton/Skeleton';
 import { Tabs } from '@/ui-component/Tabs/Tabs';
 import { Stepper } from '@/ui-component/Stepper/Stepper';
-import { IconHome, IconUser, IconSettings, IconBell, IconSearch, IconTrash, IconMail } from '@tabler/icons-react';
+import { SpeedDial } from '@/ui-component/SpeedDial/SpeedDial';
+import { IconHome, IconUser, IconSettings, IconBell, IconSearch, IconTrash, IconMail, IconPlus, IconX } from '@tabler/icons-react';
 import './DesignSystemDemo.scss';
 
 export function DesignSystemDemo() {
@@ -482,6 +483,20 @@ export function DesignSystemDemo() {
           </Paper>
         </Stack>
       </Container>
+
+      <SpeedDial
+        ariaLabel="speed dial demo"
+        anchor="bottom-right"
+        direction="up"
+        icon={<IconPlus size={22} />}
+        openIcon={<IconX size={22} />}
+        showBackdrop
+        actions={[
+          { name: 'Search', icon: <IconSearch size={18} />, onClick: () => {} },
+          { name: 'Notifications', icon: <IconBell size={18} />, onClick: () => {} },
+          { name: 'Settings', icon: <IconSettings size={18} />, onClick: () => {} },
+        ]}
+      />
     </div>
   );
 }
