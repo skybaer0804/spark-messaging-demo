@@ -36,6 +36,7 @@ import { ButtonGroup } from '@/ui-component/ButtonGroup/ButtonGroup';
 import { FloatingActionButton } from '@/ui-component/FloatingActionButton/FloatingActionButton';
 import { Tooltip } from '@/ui-component/Tooltip/Tooltip';
 import { Dialog } from '@/ui-component/Dialog/Dialog';
+import { Table } from '@/ui-component/Table/Table';
 import {
   IconHome,
   IconUser,
@@ -307,6 +308,28 @@ export function DesignSystemDemo() {
                 <StatusChip variant="default" label="Default" />
               </Flex>
             </Stack>
+            <Box style={{ marginTop: '16px' }}>
+              <Typography variant="h3" style={{ marginBottom: '12px' }}>
+                Table
+              </Typography>
+              <Table
+                caption="최근 활동"
+                stickyHeader
+                striped
+                hover
+                columns={[
+                  { key: 'name', header: 'Name' },
+                  { key: 'role', header: 'Role' },
+                  { key: 'status', header: 'Status', align: 'center' },
+                  { key: 'updatedAt', header: 'Updated', align: 'right' },
+                ]}
+                rows={[
+                  { name: 'WONJAE', role: 'Admin', status: 'Active', updatedAt: '2025-12-16' },
+                  { name: 'Alice', role: 'User', status: 'Pending', updatedAt: '2025-12-15' },
+                  { name: 'Bob', role: 'User', status: 'Active', updatedAt: '2025-12-10' },
+                ]}
+              />
+            </Box>
           </Paper>
 
           {/* Layout */}

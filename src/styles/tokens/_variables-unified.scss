@@ -587,6 +587,22 @@
   --dialog-max-width-lg: 1024px;
   --dialog-focus-ring: 2px solid var(--color-border-focus);
 
+  // --- Table Component Tokens ---
+  --table-border: 1px solid var(--color-border-default);
+  --table-radius: var(--primitive-radius-large);
+  --table-bg: var(--color-background-primary);
+  --table-header-bg: var(--color-surface-level-1);
+  --table-header-text: var(--color-text-primary);
+  --table-body-text: var(--color-text-primary);
+  --table-cell-padding-y: var(--space-padding-sm);
+  --table-cell-padding-x: var(--space-padding-md);
+  --table-cell-font-size: var(--typo-body-small-size);
+  --table-header-font-weight: var(--primitive-font-weight-bold);
+  --table-row-hover-bg: var(--color-surface-level-1);
+  --table-row-striped-bg: var(--color-surface-level-2);
+  --table-caption-text: var(--color-text-secondary);
+  --table-empty-text: var(--color-text-secondary);
+
   // --- Input Component Tokens ---
   // Text Input (Default)
   --input-background: var(--color-background-primary);
