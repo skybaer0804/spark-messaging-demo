@@ -52,13 +52,13 @@ Preact + Vite 웹앱 (로컬)
 
 ### 2.1 컴퓨터 환경
 
-| 항목 | 버전 | 설명 |
-|------|------|------|
-| **Node.js** | 14.0 이상 | npm 패키지 관리자 포함 |
-| **JDK** | 11 이상 | Android 빌드 시스템 (Bubblewrap이 자동 설치 지원) |
-| **Python** | 3.6 이상 | Gradle 빌드 의존성 (선택사항, Bubblewrap 자동 설정) |
-| **Git** | 최신 | 버전 관리 (권장) |
-| **IDE** | Cursor / VS Code | 코드 편집 (권장: Cursor 최신 버전) |
+| 항목        | 버전             | 설명                                                |
+| ----------- | ---------------- | --------------------------------------------------- |
+| **Node.js** | 14.0 이상        | npm 패키지 관리자 포함                              |
+| **JDK**     | 11 이상          | Android 빌드 시스템 (Bubblewrap이 자동 설치 지원)   |
+| **Python**  | 3.6 이상         | Gradle 빌드 의존성 (선택사항, Bubblewrap 자동 설정) |
+| **Git**     | 최신             | 버전 관리 (권장)                                    |
+| **IDE**     | Cursor / VS Code | 코드 편집 (권장: Cursor 최신 버전)                  |
 
 ### 2.2 개발 기기 (테스트용)
 
@@ -117,9 +117,9 @@ npm install workbox-cli workbox-window
 **파일**: `vite.config.ts`
 
 ```typescript
-import { defineConfig } from 'vite'
-import preact from '@preact/preset-vite'
-import { VitePWA } from 'vite-plugin-pwa'
+import { defineConfig } from 'vite';
+import preact from '@preact/preset-vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   plugins: [
@@ -127,7 +127,7 @@ export default defineConfig({
     VitePWA({
       // 기본 PWA 설정
       registerType: 'autoUpdate', // 백그라운드에서 자동 업데이트
-      
+
       // Manifest 설정
       manifest: {
         name: '앱의 전체 이름', // ex. '플레이 하비트 트래커'
@@ -225,12 +225,8 @@ export default defineConfig({
       },
 
       // 앱 별 설정
-      includeAssets: [
-        'favicon.ico',
-        'robots.txt',
-        'apple-touch-icon.png',
-      ],
-      
+      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+
       // Devtools에서 PWA 상태 확인 가능
       devOptions: {
         enabled: true,
@@ -245,7 +241,7 @@ export default defineConfig({
     sourcemap: false, // 프로덕션에서는 false
     chunkSizeWarningLimit: 500,
   },
-})
+});
 ```
 
 ### 1.4 Public 폴더에 아이콘 & 메타 파일 준비
@@ -278,29 +274,29 @@ Sitemap: https://your-domain.com/sitemap.xml
 ```html
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <!-- PWA 메타 태그 -->
-  <meta name="theme-color" content="#2196F3" />
-  <meta name="description" content="앱 설명" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="앱 단축명" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  
-  <!-- Manifest 링크 (vite-plugin-pwa가 자동 생성) -->
-  <link rel="manifest" href="/manifest.webmanifest" />
-  
-  <title>앱 이름</title>
-</head>
-<body>
-  <div id="app"></div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- PWA 메타 태그 -->
+    <meta name="theme-color" content="#2196F3" />
+    <meta name="description" content="앱 설명" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="앱 단축명" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Manifest 링크 (vite-plugin-pwa가 자동 생성) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <title>앱 이름</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
 ```
 
@@ -334,6 +330,7 @@ python3 -m http.server 8080 --directory dist
 Chrome DevTools에 내장된 자동 감사 도구로, PWA, 성능, 접근성, SEO 등을 검사합니다.
 
 **PWA 검증 항목**:
+
 - ✅ Manifest 유효성
 - ✅ Service Worker 등록 및 동작
 - ✅ HTTPS 사용 여부
@@ -345,12 +342,14 @@ Chrome DevTools에 내장된 자동 감사 도구로, PWA, 성능, 접근성, SE
 
 #### 방법 1: Chrome DevTools (권장)
 
-1. **배포된 URL에서 Chrome 열기**  
+1. **배포된 URL에서 Chrome 열기**
+
    ```
    https://your-domain.com
    ```
 
-2. **DevTools 열기**  
+2. **DevTools 열기**
+
    ```
    Windows/Linux: F12
    Mac: Cmd + Option + I
@@ -374,23 +373,23 @@ lighthouse https://your-domain.com --view --output-path=./report.html
 
 ### 2.3 PWA 점수 달성 기준
 
-| 항목 | 목표 점수 | 설명 |
-|------|---------|------|
-| **PWA 최적화** | 90점 이상 | Bubblewrap 진행 필수 조건 |
-| **성능** | 75점 이상 | 로딩 속도 최적화 |
-| **접근성** | 80점 이상 | 색상 대비, ARIA 레이블 |
-| **SEO** | 80점 이상 | 메타 설명, 구조화된 데이터 |
-| **안정성** | 80점 이상 | HTTPS, 404 처리 |
+| 항목           | 목표 점수 | 설명                       |
+| -------------- | --------- | -------------------------- |
+| **PWA 최적화** | 90점 이상 | Bubblewrap 진행 필수 조건  |
+| **성능**       | 75점 이상 | 로딩 속도 최적화           |
+| **접근성**     | 80점 이상 | 색상 대비, ARIA 레이블     |
+| **SEO**        | 80점 이상 | 메타 설명, 구조화된 데이터 |
+| **안정성**     | 80점 이상 | HTTPS, 404 처리            |
 
 ### 2.4 자주하는 실수 & 해결책
 
-| 문제 | 해결책 |
-|------|--------|
-| ❌ "설치 불가능" | manifest.json이 제대로 로드되는지 확인. DevTools → Application → Manifest 확인 |
-| ❌ "Service Worker 등록 안됨" | HTTPS 필수. 로컬에선 `localhost`도 동작. 배포 URL에서 테스트 |
-| ❌ "아이콘 누락" | 192x192, 512x512 PNG 파일 필요. `public/` 폴더에 배치 |
-| ❌ "배경색/테마색 미설정" | manifest.json의 `theme_color`, `background_color` 확인 |
-| ❌ "스플래시 스크린 없음" | 아이콘 + 테마색 + 배경색이 모두 필요 |
+| 문제                          | 해결책                                                                         |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| ❌ "설치 불가능"              | manifest.json이 제대로 로드되는지 확인. DevTools → Application → Manifest 확인 |
+| ❌ "Service Worker 등록 안됨" | HTTPS 필수. 로컬에선 `localhost`도 동작. 배포 URL에서 테스트                   |
+| ❌ "아이콘 누락"              | 192x192, 512x512 PNG 파일 필요. `public/` 폴더에 배치                          |
+| ❌ "배경색/테마색 미설정"     | manifest.json의 `theme_color`, `background_color` 확인                         |
+| ❌ "스플래시 스크린 없음"     | 아이콘 + 테마색 + 배경색이 모두 필요                                           |
 
 ### 2.5 성능 점수 개선 팁
 
@@ -459,6 +458,7 @@ Google Play Store 앱 등록 시 **필수 항목**입니다. 개인 정보 수�
 ## 1. 개인정보 수집 범위
 
 본 앱 ("앱명")은 다음과 같은 개인정보를 수집할 수 있습니다:
+
 - 사용자 이름
 - 이메일 주소
 - 기기 ID
@@ -480,6 +480,7 @@ Google Play Store 앱 등록 시 **필수 항목**입니다. 개인 정보 수�
 ## 4. 제3자 공유
 
 다음 서비스와 정보 공유:
+
 - Google Analytics (분석)
 - Firebase (인증, 데이터베이스)
 - [기타 사용하는 서비스]
@@ -487,6 +488,7 @@ Google Play Store 앱 등록 시 **필수 항목**입니다. 개인 정보 수�
 ## 5. 사용자 권리
 
 사용자는 언제든지 다음을 요청할 수 있습니다:
+
 - 개인정보 열람
 - 수정 또는 삭제
 - 수집 거부
@@ -596,12 +598,13 @@ export ANDROID_SDK_ROOT=~/Library/Android/sdk
 
 #### Cursor에서 Bubblewrap 실행
 
-1. **새 터미널 열기**  
+1. **새 터미널 열기**
+
    ```
    Ctrl + ` (백틱) 또는 View → Terminal
    ```
 
-2. **현재 프로젝트 디렉토리에서 실행**  
+2. **현재 프로젝트 디렉토리에서 실행**
    ```bash
    pwd  # 현재 경로 확인
    bubblewrap doctor  # 환경 검사
@@ -609,12 +612,14 @@ export ANDROID_SDK_ROOT=~/Library/Android/sdk
 
 #### VS Code에서 Bubblewrap 실행
 
-1. **Integrated Terminal 열기**  
+1. **Integrated Terminal 열기**
+
    ```
    Ctrl + ` 또는 Terminal → New Terminal
    ```
 
-2. **터미널 기본값 설정 (선택사항)**  
+2. **터미널 기본값 설정 (선택사항)**
+
    ```
    Settings → Terminal → Default Profile → bash/zsh 선택
    ```
@@ -651,8 +656,11 @@ cd my-pwa-android
 ### 5.2 PWA Init: Manifest 기반 프로젝트 생성
 
 ```bash
-# 배포된 PWA의 manifest.json URL을 사용해 Android 프로젝트 초기화
+# 배포된 PWA의 manifest.webmanifest URL을 사용해 Android 프로젝트 초기화
+# ⚠️ 주의: 도메인 루트(예: https://your-domain.com)는 HTML(index.html)이므로 실패합니다.
+# 반드시 manifest 파일 경로까지 포함하세요.
 bubblewrap init \
+  --manifest=https://your-domain.com/manifest.webmanifest
   --manifest=https://your-domain.com/manifest.webmanifest
 
 # 또는 로컬 manifest.json 사용 (개발 중)
@@ -873,15 +881,11 @@ mkdir -p public/.well-known
 ```json
 [
   {
-    "relation": [
-      "delegate_permission/common.handle_all_urls"
-    ],
+    "relation": ["delegate_permission/common.handle_all_urls"],
     "target": {
       "namespace": "android_app",
       "package_name": "com.yourcompany.appname",
-      "sha256_cert_fingerprints": [
-        "ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890"
-      ]
+      "sha256_cert_fingerprints": ["ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890"]
     }
   }
 ]
@@ -918,11 +922,11 @@ curl -s "https://digitalassetlinks.googleapis.com/v1/assetlinks:check?namespace=
 
 ### 6.6 문제 해결
 
-| 증상 | 원인 | 해결책 |
-|------|------|--------|
-| "linked": false | assetlinks.json 접근 불가 또는 형식 오류 | HTTPS 확인, JSON 유효성 검사 |
-| 404 오류 | 파일 경로 오류 | `.well-known/assetlinks.json` 정확한 경로 확인 |
-| 앱 실행 시 여전히 맞춤탭 | 서명키 SHA256 불일치 | `keytool` 재확인, Play Store 배포 후 다시 테스트 |
+| 증상                     | 원인                                     | 해결책                                           |
+| ------------------------ | ---------------------------------------- | ------------------------------------------------ |
+| "linked": false          | assetlinks.json 접근 불가 또는 형식 오류 | HTTPS 확인, JSON 유효성 검사                     |
+| 404 오류                 | 파일 경로 오류                           | `.well-known/assetlinks.json` 정확한 경로 확인   |
+| 앱 실행 시 여전히 맞춤탭 | 서명키 SHA256 불일치                     | `keytool` 재확인, Play Store 배포 후 다시 테스트 |
 
 ---
 
@@ -1030,7 +1034,7 @@ Play Console → 앱선택 → 설정 → 앱 정보 → 앱 세부정보
 내용:
 - 앱 이름: 습관 트래커
 - 짧은 설명: 일일 습관을 추적하고 관리하세요 (80글자 이하)
-- 상세 설명: 
+- 상세 설명:
   "습관 트래커는 당신의 목표 달성을 돕는 간단하고 효과적한 앱입니다.
    매일의 진행 상황을 시각적으로 확인하고 동기부여를 받을 수 있습니다."
   (4000글자 이하)
@@ -1179,13 +1183,13 @@ Play Console 메인 → 앱 선택
 
 **자주하는 거부 사유**:
 
-| 사유 | 해결책 |
-|------|--------|
-| ❌ 개인정보처리방침 없음 | 프라이버시 정책 URL 추가 후 재신청 |
-| ❌ 앱이 웹사이트 링크만 | 최소한 기본 기능 필요 (PWA 기능 추가) |
-| ❌ 품질 기준 미달 (크래시) | Lighthouse 점수 확인, 오류 수정 |
-| ❌ 광고 정책 위반 | 광고 배치 검토 (권장: 하단, 배너) |
-| ❌ 콘텐츠 정책 위반 | 설명 명확히, 증오/폭력 콘텐츠 제거 |
+| 사유                       | 해결책                                |
+| -------------------------- | ------------------------------------- |
+| ❌ 개인정보처리방침 없음   | 프라이버시 정책 URL 추가 후 재신청    |
+| ❌ 앱이 웹사이트 링크만    | 최소한 기본 기능 필요 (PWA 기능 추가) |
+| ❌ 품질 기준 미달 (크래시) | Lighthouse 점수 확인, 오류 수정       |
+| ❌ 광고 정책 위반          | 광고 배치 검토 (권장: 하단, 배너)     |
+| ❌ 콘텐츠 정책 위반        | 설명 명확히, 증오/폭력 콘텐츠 제거    |
 
 **재신청**:
 

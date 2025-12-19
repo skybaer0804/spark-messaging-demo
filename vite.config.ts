@@ -9,8 +9,11 @@ export default defineConfig({
     preact(),
     VitePWA({
       registerType: 'autoUpdate', // 업데이트 시 자동 새로고침
-      includeAssets: ['favicon.ico', 'icons/spark_icon.png'],
+      // public/ 하위의 정적 파일 경로 기준
+      includeAssets: ['favicon.ico', 'asset/spark_icon.png'],
       manifest: {
+        // DevTools 경고 방지 및 TWA/Bubblewrap에서 식별자 안정화
+        id: '/',
         name: 'Spark Real-time Platform',
         short_name: 'Spark',
         description: 'Chat, notifications, video calls, habits, and flashcards for school',
