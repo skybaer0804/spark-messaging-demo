@@ -4,6 +4,7 @@ import type { RouterOnChangeArgs } from 'preact-router';
 import { appRoutes } from './appRoutes';
 import { useRouterState } from './RouterState';
 import { DesignSystemDemo } from '@/components/DesignSystemDemo/DesignSystemDemo';
+import { PrivacyPolicy } from '@/components/PrivacyPolicy/PrivacyPolicy';
 
 function RouteNotFound() {
   return <div />;
@@ -40,9 +41,9 @@ export function AppRouter() {
       <Route path="/design-system" component={DesignSystemRoute} />
       <Route path="/design-system/:ui" component={DesignSystemRoute} />
 
+      <Route path="/legal/privacy-policy" component={PrivacyPolicy} />
+
       <Route default component={RouteNotFound} />
     </Router>
   );
 }
-
-

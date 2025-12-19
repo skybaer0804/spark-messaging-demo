@@ -11,9 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate', // 업데이트 시 자동 새로고침
       includeAssets: ['favicon.ico', 'icons/spark_icon.png'],
       manifest: {
-        name: 'Spark - Real-time Platform',
+        name: 'Spark Real-time Platform',
         short_name: 'Spark',
-        description: 'Chat, notifications, video calls, habits, and flashcards',
+        description: 'Chat, notifications, video calls, habits, and flashcards for school',
         theme_color: '#1a1a2e',
         background_color: '#0f0f1e',
         display: 'standalone',
@@ -64,6 +64,21 @@ export default defineConfig({
             purpose: 'any maskable',
           },
         ],
+        screenshots: [
+          {
+            src: '/screenshot-1.png',
+            sizes: '540x720',
+            type: 'image/png',
+            form_factor: 'narrow',
+          },
+          {
+            src: '/screenshot-2.png',
+            sizes: '1280x720',
+            type: 'image/png',
+            form_factor: 'wide',
+          },
+        ],
+        categories: ['productivity', 'social', 'education'],
       },
       workbox: {
         // 캐싱할 파일 패턴

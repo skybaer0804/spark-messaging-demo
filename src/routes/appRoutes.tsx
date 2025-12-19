@@ -120,6 +120,11 @@ export const appRoutes: AppRouteNode[] = [
 export function findRouteTitleByPath(pathname: string) {
   const normalized = pathname.split('?')[0].split('#')[0];
 
+  // 개인정보처리방침 페이지
+  if (normalized === '/legal/privacy-policy') {
+    return '개인정보처리방침';
+  }
+
   for (const r of appRoutes) {
     if (normalized === r.path) return r.title;
     if (r.children) {

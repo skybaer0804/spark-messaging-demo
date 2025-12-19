@@ -10,7 +10,8 @@
     "prebuild": "rm -rf node_modules/.vite dist",
     "start": "vite preview --host",
     "clean": "rm -rf node_modules/.vite dist",
-    "generate-icons": "node scripts/generate-icons.js"
+    "generate-icons": "node scripts/generate-icons.js",
+    "generate-screenshots": "node scripts/generate-screenshots.js"
   },
   "dependencies": {
     "@preact/signals": "^2.5.1",
