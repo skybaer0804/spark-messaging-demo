@@ -6,7 +6,16 @@ import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { ThemeCustomization } from '@/components/ThemeCustomization/ThemeCustomization';
 import { Select, SelectOption } from '@/ui-component/Select/Select';
-import { IconMoon, IconSun, IconEye, IconEyeOff, IconWifi, IconWifiOff, IconSettings, IconMenu2 } from '@tabler/icons-react';
+import {
+  IconMoon,
+  IconSun,
+  IconEye,
+  IconEyeOff,
+  IconWifi,
+  IconWifiOff,
+  IconSettings,
+  IconMenu2,
+} from '@tabler/icons-react';
 import { useRouterState } from '@/routes/RouterState';
 import { appRoutes } from '@/routes/appRoutes';
 import { useSidebarLayoutOptional } from '@/layouts/SidebarLayout/SidebarLayoutContext';
@@ -24,7 +33,7 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
   const sidebarLayout = useSidebarLayoutOptional();
 
   const viewOptions: SelectOption[] = appRoutes
-    .filter((r) => r.id !== 'design-system')
+    .filter((r) => r.id !== 'design-system' && r.id !== 'home')
     .map((r) => ({ value: r.path, label: r.title }));
 
   const handleViewSelectChange = (e: Event) => {
@@ -32,12 +41,14 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
     navigate(target.value);
   };
 
-  const mobileSelectValue = viewOptions.some((o) => o.value === pathname) ? pathname : '/chatapp';
+  const mobileSelectValue = viewOptions.some((o) => o.value === pathname)
+    ? pathname
+    : viewOptions[0]?.value || '/chatapp';
 
   return (
     <header className="header">
       <div className="header__left">
-        {/* 모바일: 사이드바 열기 */}
+        {/* 모바일: 사이드바 열기
         {deviceSize === 'mobile' && sidebarLayout && (
           <IconButton
             size="medium"
@@ -48,7 +59,7 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
           >
             <IconMenu2 size={20} />
           </IconButton>
-        )}
+        )} */}
         {/* 모바일: Select로 뷰 전환 */}
         <div className="header__mobile-select">
           <Select
@@ -56,6 +67,8 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
             value={mobileSelectValue}
             onChange={handleViewSelectChange}
             className="header__view-select"
+            style={{ maxWidth: '100px' }}
+            fullWidth={false}
           />
         </div>
         {/* 데스크톱: 타이틀 표시 */}
@@ -93,7 +106,7 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
             >
               {theme === 'light' ? <IconMoon size={20} /> : <IconSun size={20} />}
             </IconButton>
-            <IconButton
+            {/* <IconButton
               size="medium"
               color="default"
               onClick={toggleContrast}
@@ -101,7 +114,7 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
               className="header__icon-button"
             >
               {contrast === 'standard' ? <IconEye size={20} /> : <IconEyeOff size={20} />}
-            </IconButton>
+            </IconButton> */}
             <IconButton
               size="medium"
               color="default"

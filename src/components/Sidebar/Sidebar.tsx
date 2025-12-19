@@ -1,10 +1,6 @@
 import type { ComponentChildren, JSX } from 'preact';
 import { useMemo, useState, useRef, useEffect } from 'preact/hooks';
-import {
-  IconSparkles,
-  IconPlus,
-  IconSettings,
-} from '@tabler/icons-react';
+import { IconSparkles, IconPlus, IconSettings } from '@tabler/icons-react';
 import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { List, ListItem, ListItemText } from '@/ui-component/List/List';
@@ -171,162 +167,170 @@ export function Sidebar() {
         onMouseEnter={() => setIsSidebarHovered(true)}
         onMouseLeave={handleSidebarMouseLeave}
       >
-      <div className="sidebar__container">
-        {/* 상단 헤더 */}
-        <div className="sidebar__header">
-          {isExpanded && (
-            <Flex align="center" gap="sm" style={{ flex: 1 }}>
-              <div className="sidebar__logo">
+        <div className="sidebar__container">
+          {/* 상단 헤더 */}
+          <div className="sidebar__header">
+            {isExpanded && (
+              <Flex align="center" gap="sm" style={{ flex: 1 }}>
+                <div className="sidebar__logo">
+                  <IconSparkles size={24} />
+                </div>
+                <Typography variant="body-large" className="sidebar__header-title">
+                  Spark
+                </Typography>
+              </Flex>
+            )}
+            {!isExpanded && (
+              <div className="sidebar__logo sidebar__logo--centered">
                 <IconSparkles size={24} />
               </div>
-              <Typography variant="body-large" className="sidebar__header-title">
-                Spark
-              </Typography>
-            </Flex>
-          )}
-          {!isExpanded && (
-            <div className="sidebar__logo sidebar__logo--centered">
-              <IconSparkles size={24} />
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* 상단 액션 */}
-        <div className="sidebar__primary">
-          <Button
-            variant="primary"
-            size="sm"
-            fullWidth
-            onClick={handleCreateNewChat}
-            className="sidebar__primary-button"
-          >
-            <span className="sidebar__primary-button-icon">
-              <IconPlus size={18} />
-            </span>
-            <span className="sidebar__primary-button-label">새 대화</span>
-          </Button>
-        </div>
+          {/* 상단 액션 */}
+          <div className="sidebar__primary">
+            <Button
+              variant="primary"
+              size="sm"
+              fullWidth
+              onClick={handleCreateNewChat}
+              className="sidebar__primary-button"
+            >
+              {!isMobile && (
+                <span className="sidebar__primary-button-icon">
+                  <IconPlus size={18} />
+                </span>
+              )}
+              <span className="sidebar__primary-button-label">새 대화</span>
+            </Button>
+          </div>
 
-        {/* 스크롤 섹션: 최근 채팅방 + 메뉴 */}
-        <div className="sidebar__scroll">
-          {/* 최근 채팅방 */}
-          {isExpanded && recentChatRooms.length > 0 && (
+          {/* 스크롤 섹션: 최근 채팅방 + 메뉴 */}
+          <div className="sidebar__scroll">
+            {/* 최근 채팅방 */}
+            {isExpanded && recentChatRooms.length > 0 && (
+              <div className="sidebar__section">
+                <Typography variant="caption" className="sidebar__section-title" color="text-secondary">
+                  최근 채팅방
+                </Typography>
+                <nav className="sidebar__nav">
+                  <List disablePadding>
+                    {recentChatRooms.map((room) => {
+                      const isActive = pathname.startsWith('/chatapp') && currentChatRoom === room;
+                      return (
+                        <button
+                          key={room}
+                          type="button"
+                          className={`sidebar__nav-button ${isActive ? 'sidebar__nav-button--active' : ''}`}
+                          onClick={() => handleJoinRoomFromSidebar(room)}
+                        >
+                          <ListItem
+                            className={`sidebar__nav-item ${isActive ? 'sidebar__nav-item--active' : ''}`}
+                            disableGutters
+                          >
+                            <div className="sidebar__nav-item-icon">
+                              <Avatar variant="rounded" size="sm" className="sidebar__room-avatar">
+                                {room.substring(0, 2).toUpperCase()}
+                              </Avatar>
+                            </div>
+                            <ListItemText primary={room} secondary={isActive ? 'Active' : ''} />
+                          </ListItem>
+                        </button>
+                      );
+                    })}
+                  </List>
+                </nav>
+              </div>
+            )}
+
+            {isExpanded && recentChatRooms.length > 0 && <Divider className="sidebar__divider" />}
+
+            {/* 메인 메뉴 */}
             <div className="sidebar__section">
-              <Typography variant="caption" className="sidebar__section-title" color="text-secondary">
-                최근 채팅방
-              </Typography>
+              {isExpanded && (
+                <Typography variant="caption" className="sidebar__section-title" color="text-secondary">
+                  메뉴
+                </Typography>
+              )}
               <nav className="sidebar__nav">
                 <List disablePadding>
-                  {recentChatRooms.map((room) => {
-                    const isActive = pathname.startsWith('/chatapp') && currentChatRoom === room;
+                  {mainRoutes.map((r) => {
+                    const isActive = activeMainRoute?.id === r.id;
                     return (
-                      <button
-                        key={room}
-                        type="button"
-                        className={`sidebar__nav-button ${isActive ? 'sidebar__nav-button--active' : ''}`}
-                        onClick={() => handleJoinRoomFromSidebar(room)}
+                      <NavLink
+                        key={r.id}
+                        to={r.path}
+                        className={`sidebar__nav-link ${isActive ? 'sidebar__nav-link--active' : ''}`}
+                        onMouseEnter={() => handleMainItemHover(r)}
                       >
-                        <ListItem className={`sidebar__nav-item ${isActive ? 'sidebar__nav-item--active' : ''}`} disableGutters>
-                          <div className="sidebar__nav-item-icon">
-                            <Avatar variant="rounded" size="sm" className="sidebar__room-avatar">
-                              {room.substring(0, 2).toUpperCase()}
-                            </Avatar>
-                          </div>
-                          <ListItemText primary={room} secondary={isActive ? 'Active' : ''} />
+                        <ListItem
+                          className={`sidebar__nav-item ${isActive ? 'sidebar__nav-item--active' : ''}`}
+                          disableGutters
+                        >
+                          {!isExpanded ? (
+                            <div className="sidebar__nav-item-mini">
+                              <div className="sidebar__nav-item-icon">{r.icon}</div>
+                              <Typography variant="body-small" className="sidebar__nav-item-label">
+                                {r.label}
+                              </Typography>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="sidebar__nav-item-icon">{r.icon}</div>
+                              <ListItemText primary={r.label} />
+                            </>
+                          )}
                         </ListItem>
-                      </button>
+                      </NavLink>
                     );
                   })}
                 </List>
               </nav>
             </div>
-          )}
+          </div>
 
-          {isExpanded && recentChatRooms.length > 0 && <Divider className="sidebar__divider" />}
-
-          {/* 메인 메뉴 */}
-          <div className="sidebar__section">
-            {isExpanded && (
-              <Typography variant="caption" className="sidebar__section-title" color="text-secondary">
-                메뉴
+          {/* 하단 고정 */}
+          <div className="sidebar__bottom">
+            <Divider className="sidebar__divider" />
+            <button
+              type="button"
+              className="sidebar__bottom-button"
+              onClick={() => {
+                setSettingsOpen(true);
+                // 모바일 Drawer에서는 클릭 즉시 닫고, 설정 Drawer는 우측에서 열리도록
+                sidebarLayout?.closeMobileSidebar?.();
+              }}
+            >
+              <div className="sidebar__bottom-button-icon">
+                <IconSettings size={18} />
+              </div>
+              <Typography variant="body-small" className="sidebar__bottom-button-label">
+                테마 설정
               </Typography>
-            )}
-            <nav className="sidebar__nav">
-              <List disablePadding>
-                {mainRoutes.map((r) => {
-                  const isActive = activeMainRoute?.id === r.id;
-                  return (
-                    <NavLink
-                      key={r.id}
-                      to={r.path}
-                      className={`sidebar__nav-link ${isActive ? 'sidebar__nav-link--active' : ''}`}
-                      onMouseEnter={() => handleMainItemHover(r)}
-                    >
-                      <ListItem className={`sidebar__nav-item ${isActive ? 'sidebar__nav-item--active' : ''}`} disableGutters>
-                        {!isExpanded ? (
-                          <div className="sidebar__nav-item-mini">
-                            <div className="sidebar__nav-item-icon">{r.icon}</div>
-                            <Typography variant="body-small" className="sidebar__nav-item-label">
-                              {r.label}
-                            </Typography>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="sidebar__nav-item-icon">{r.icon}</div>
-                            <ListItemText primary={r.label} />
-                          </>
-                        )}
-                      </ListItem>
-                    </NavLink>
-                  );
-                })}
-              </List>
-            </nav>
+            </button>
           </div>
         </div>
 
-        {/* 하단 고정 */}
-        <div className="sidebar__bottom">
-          <Divider className="sidebar__divider" />
-          <button
-            type="button"
-            className="sidebar__bottom-button"
-            onClick={() => {
-              setSettingsOpen(true);
-              // 모바일 Drawer에서는 클릭 즉시 닫고, 설정 Drawer는 우측에서 열리도록
-              sidebarLayout?.closeMobileSidebar?.();
+        <ThemeCustomization open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      </aside>
+
+      {/* 2차 사이드메뉴 Drawer */}
+      {secondMenuRoute && (
+        <div
+          style={{ '--current-sidebar-width': sidebarWidth } as JSX.CSSProperties}
+          onMouseEnter={handleSecondMenuMouseEnter}
+          onMouseLeave={handleSecondMenuMouseLeave}
+        >
+          <SecondMenuDrawer
+            open={showSecondMenu}
+            onClose={() => {
+              if (!secondMenuPinned) setHoveredSecondMenuId(null);
             }}
-          >
-            <div className="sidebar__bottom-button-icon">
-              <IconSettings size={18} />
-            </div>
-            <Typography variant="body-small" className="sidebar__bottom-button-label">
-              테마 설정
-            </Typography>
-          </button>
+            title={secondMenuRoute.label}
+            children={secondMenuRoute.children}
+          />
         </div>
-      </div>
-
-      <ThemeCustomization open={settingsOpen} onClose={() => setSettingsOpen(false)} />
-    </aside>
-
-    {/* 2차 사이드메뉴 Drawer */}
-    {secondMenuRoute && (
-      <div 
-        style={{ '--current-sidebar-width': sidebarWidth } as JSX.CSSProperties}
-        onMouseEnter={handleSecondMenuMouseEnter}
-        onMouseLeave={handleSecondMenuMouseLeave}
-      >
-        <SecondMenuDrawer
-          open={showSecondMenu}
-          onClose={() => {
-            if (!secondMenuPinned) setHoveredSecondMenuId(null);
-          }}
-          title={secondMenuRoute.label}
-          children={secondMenuRoute.children}
-        />
-      </div>
-    )}
+      )}
     </>
   );
 }

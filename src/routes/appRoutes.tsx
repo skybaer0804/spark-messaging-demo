@@ -1,11 +1,12 @@
 import type { JSX } from 'preact';
-import { IconBell, IconGavel, IconMessageCircle, IconPalette } from '@tabler/icons-react';
+import { IconBell, IconGavel, IconMessageCircle, IconPalette, IconHome } from '@tabler/icons-react';
 import { ChatApp } from '@/components/ChatApp/ChatApp';
 import { NotificationApp } from '@/components/NotificationApp/NotificationApp';
 import { ReverseAuction } from '@/components/ReverseAuction/ReverseAuction';
 import { DesignSystemDemo } from '@/components/DesignSystemDemo/DesignSystemDemo';
+import { HomePage } from '@/components/HomePage/HomePage';
 
-export type AppRouteId = 'chatapp' | 'notification' | 'reverse-auction' | 'design-system';
+export type AppRouteId = 'home' | 'chatapp' | 'notification' | 'reverse-auction' | 'design-system';
 
 export interface AppRouteNode {
   id: AppRouteId;
@@ -69,6 +70,14 @@ function toTitle(label: string) {
 
 export const appRoutes: AppRouteNode[] = [
   {
+    id: 'home',
+    label: '홈',
+    path: '/',
+    icon: <IconHome size={20} />,
+    title: 'Home',
+    element: <HomePage />,
+  },
+  {
     id: 'chatapp',
     label: '채팅',
     path: '/chatapp',
@@ -119,6 +128,16 @@ export const appRoutes: AppRouteNode[] = [
 
 export function findRouteTitleByPath(pathname: string) {
   const normalized = pathname.split('?')[0].split('#')[0];
+
+  // 개인정보처리방침 페이지
+  if (normalized === '/legal/privacy-policy') {
+    return '개인정보처리방침';
+  }
+
+  // 홈 페이지
+  if (normalized === '/') {
+    return 'Home';
+  }
 
   for (const r of appRoutes) {
     if (normalized === r.path) return r.title;

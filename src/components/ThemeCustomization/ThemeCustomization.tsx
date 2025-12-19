@@ -41,6 +41,7 @@ export function ThemeCustomization({ open, onClose }: ThemeCustomizationProps) {
     sidebarConfig,
     setSidebarConfig,
     resetToDefaults,
+    deviceSize,
   } = useTheme();
 
   const [localBorderRadius, setLocalBorderRadius] = useState(borderRadius);
@@ -50,25 +51,35 @@ export function ThemeCustomization({ open, onClose }: ThemeCustomizationProps) {
     setBorderRadius(value);
   };
 
+  const isMobile = deviceSize === 'mobile';
+  const drawerWidth = isMobile ? '70vw' : '400px';
+
   return (
-    <Drawer open={open} onClose={onClose} anchor="right" title="테마 설정" width="400px">
+    <Drawer
+      open={open}
+      onClose={onClose}
+      anchor="right"
+      title="테마 설정"
+      width={drawerWidth}
+      className="theme-customization__drawer"
+    >
       <Stack spacing="lg">
         {/* 테마 모드 */}
-        <Paper padding="md">
+        <Paper elevation={2} padding="md">
           <Stack spacing="md">
             <Flex align="center" gap="sm">
-              <IconPalette size={20} />
-              <Typography variant="h4">테마 모드</Typography>
+              <IconPalette size={18} />
+              <Typography variant="body-large">테마 모드</Typography>
             </Flex>
             <Flex align="center" justify="space-between">
-              <Typography variant="body-medium">다크 모드</Typography>
+              <Typography variant="body-small">다크 모드</Typography>
               <Switch
                 checked={theme === 'dark'}
                 onChange={(checked) => checked !== (theme === 'dark') && toggleTheme()}
               />
             </Flex>
             <Flex align="center" justify="space-between">
-              <Typography variant="body-medium">고대비 모드</Typography>
+              <Typography variant="body-small">고대비 모드</Typography>
               <Switch
                 checked={contrast === 'high'}
                 onChange={(checked) => checked !== (contrast === 'high') && toggleContrast()}
@@ -77,14 +88,12 @@ export function ThemeCustomization({ open, onClose }: ThemeCustomizationProps) {
           </Stack>
         </Paper>
 
-        <Divider />
-
         {/* 프리셋 색상 */}
-        <Paper padding="md">
+        <Paper elevation={2} padding="md">
           <Stack spacing="md">
             <Flex align="center" gap="sm">
-              <IconColorSwatch size={20} />
-              <Typography variant="h4">프리셋 색상</Typography>
+              <IconColorSwatch size={18} />
+              <Typography variant="body-large">프리셋 색상</Typography>
             </Flex>
             <div className="theme-customization__preset-grid">
               {PRESET_COLORS.map((preset) => (
@@ -95,21 +104,19 @@ export function ThemeCustomization({ open, onClose }: ThemeCustomizationProps) {
                   }`}
                   onClick={() => setPresetColor(preset.value)}
                 >
-                  <Typography variant="body-small">{preset.label}</Typography>
+                  <Typography variant="caption">{preset.label}</Typography>
                 </button>
               ))}
             </div>
           </Stack>
         </Paper>
 
-        <Divider />
-
         {/* Border Radius */}
-        <Paper padding="md">
+        <Paper elevation={2} padding="md">
           <Stack spacing="md">
             <Flex align="center" gap="sm">
-              <IconShape size={20} />
-              <Typography variant="h4">모서리 둥글기</Typography>
+              <IconShape size={18} />
+              <Typography variant="body-large">모서리 둥글기</Typography>
             </Flex>
             <div className="theme-customization__slider-container">
               <input
@@ -121,44 +128,40 @@ export function ThemeCustomization({ open, onClose }: ThemeCustomizationProps) {
                 className="theme-customization__slider"
               />
               <Flex align="center" justify="space-between">
-                <Typography variant="body-small">0px</Typography>
-                <Typography variant="body-medium" className="theme-customization__slider-value">
+                <Typography variant="caption">0px</Typography>
+                <Typography variant="body-small" className="theme-customization__slider-value">
                   {localBorderRadius}px
                 </Typography>
-                <Typography variant="body-small">16px</Typography>
+                <Typography variant="caption">16px</Typography>
               </Flex>
             </div>
             <div className="theme-customization__preview" style={{ borderRadius: `${localBorderRadius}px` }}>
-              <Typography variant="body-small">미리보기</Typography>
+              <Typography variant="caption">미리보기</Typography>
             </div>
           </Stack>
         </Paper>
 
-        <Divider />
-
         {/* Sidebar 설정 */}
-        <Paper padding="md">
+        <Paper elevation={2} padding="md">
           <Stack spacing="md">
-            <Typography variant="h4">사이드바 설정</Typography>
+            <Typography variant="body-large">사이드바 설정</Typography>
             <Flex align="center" justify="space-between">
-              <Typography variant="body-medium">미니 드로우</Typography>
+              <Typography variant="body-small">미니 드로우</Typography>
               <Switch
                 checked={sidebarConfig.miniDrawer}
                 onChange={(checked) => setSidebarConfig({ miniDrawer: checked })}
               />
             </Flex>
             <Flex align="center" justify="space-between">
-              <Typography variant="body-medium">고정</Typography>
+              <Typography variant="body-small">고정</Typography>
               <Switch checked={sidebarConfig.pinned} onChange={(checked) => setSidebarConfig({ pinned: checked })} />
             </Flex>
           </Stack>
         </Paper>
 
-        <Divider />
-
         {/* 초기화 */}
         <Button variant="secondary" fullWidth onClick={resetToDefaults}>
-          기본값으로 복원
+          <Typography variant="body-small">기본값으로 복원</Typography>
         </Button>
       </Stack>
     </Drawer>

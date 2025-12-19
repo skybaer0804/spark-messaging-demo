@@ -11,17 +11,95 @@ import { Typography } from '@/ui-component/Typography/Typography';
 import { Paper } from '@/ui-component/Paper/Paper';
 import { List, ListItem, ListItemText, ListItemAvatar } from '@/ui-component/List/List';
 import { Avatar } from '@/ui-component/Avatar/Avatar';
-import {
-  IconArrowLeft,
-  IconSend,
-  IconPaperclip,
-  IconX,
-  IconFile,
-  IconDownload,
-  IconCirclePlus,
-} from '@tabler/icons-react';
+import { IconArrowLeft, IconSend, IconPaperclip, IconX, IconFile, IconDownload } from '@tabler/icons-react';
+import { Button } from '@/ui-component/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
 import './ChatApp.scss';
+
+interface ChatRoomSidebarProps {
+  isConnected: boolean;
+  roomIdInput: string;
+  setRoomIdInput: (next: string) => void;
+  handleCreateRoom: () => void;
+  roomList: string[];
+  currentRoom: string | null;
+  handleRoomSelect: (roomId: string) => void;
+}
+
+function ChatRoomSidebar({
+  isConnected,
+  roomIdInput,
+  setRoomIdInput,
+  handleCreateRoom,
+  roomList,
+  currentRoom,
+  handleRoomSelect,
+}: ChatRoomSidebarProps) {
+  return (
+    <Paper
+      elevation={0}
+      square
+      style={{
+        height: '100%',
+        borderRight: '1px solid var(--color-border-default)',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+      className="chat-app__sidebar"
+    >
+      <Box padding="md">
+        <Stack direction="row" spacing="sm">
+          <Input
+            value={roomIdInput}
+            onInput={(e) => setRoomIdInput(e.currentTarget.value)}
+            placeholder="New Room Name"
+            disabled={!isConnected}
+            onKeyPress={(e) => e.key === 'Enter' && handleCreateRoom()}
+            fullWidth
+          />
+          <Button
+            onClick={handleCreateRoom}
+            disabled={!isConnected || !roomIdInput.trim()}
+            size="sm"
+            variant="primary"
+            title="새 채팅방 생성"
+          >
+            Create
+          </Button>
+        </Stack>
+      </Box>
+      <Box style={{ flex: 1, overflowY: 'auto' }}>
+        <List>
+          {roomList.length === 0
+            ? !isConnected && (
+                <Box padding="md">
+                  <Typography variant="body-medium" color="text-secondary" align="center">
+                    Connecting...
+                  </Typography>
+                </Box>
+              )
+            : roomList.map((room) => (
+                <ListItem
+                  key={room}
+                  onClick={() => handleRoomSelect(room)}
+                  style={{
+                    cursor: 'pointer',
+                    backgroundColor: currentRoom === room ? 'var(--color-bg-tertiary)' : 'transparent',
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Avatar variant="rounded" style={{ backgroundColor: 'var(--primitive-primary-500)' }}>
+                      {room.substring(0, 2).toUpperCase()}
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary={room} secondary={currentRoom === room ? 'Active' : ''} />
+                </ListItem>
+              ))}
+        </List>
+      </Box>
+    </Paper>
+  );
+}
 
 export function ChatApp() {
   const {
@@ -55,8 +133,10 @@ export function ChatApp() {
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputWrapperRef = useRef<HTMLDivElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imageModal, setImageModal] = useState<{ url: string; fileName: string } | null>(null);
+  const [isComposing, setIsComposing] = useState(false);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -106,72 +186,6 @@ export function ChatApp() {
 
   // --- Components Renderers ---
 
-  // Room List Sidebar
-  const Sidebar = () => (
-    <Paper
-      elevation={0}
-      square
-      style={{
-        height: '100%',
-        borderRight: '1px solid var(--color-border-default)',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-      className="chat-app__sidebar"
-    >
-      <Box padding="md" style={{ borderBottom: '1px solid var(--color-border-default)' }}>
-        <Stack direction="row" spacing="sm">
-          <Input
-            value={roomIdInput}
-            onInput={(e) => setRoomIdInput(e.currentTarget.value)}
-            placeholder="New Room Name"
-            disabled={!isConnected}
-            onKeyPress={(e) => e.key === 'Enter' && handleCreateRoom()}
-            fullWidth
-          />
-          <IconButton
-            onClick={handleCreateRoom}
-            disabled={!isConnected || !roomIdInput.trim()}
-            size="small"
-            color="primary"
-            title="새 채팅방 생성"
-          >
-            <IconCirclePlus size={20} />
-          </IconButton>
-        </Stack>
-      </Box>
-      <Box style={{ flex: 1, overflowY: 'auto' }}>
-        <List>
-          {roomList.length === 0 ? (
-            <Box padding="md">
-              <Typography variant="body-medium" color="text-secondary" align="center">
-                {!isConnected ? 'Connecting...' : 'No rooms yet.'}
-              </Typography>
-            </Box>
-          ) : (
-            roomList.map((room) => (
-              <ListItem
-                key={room}
-                onClick={() => handleRoomSelect(room)}
-                style={{
-                  cursor: 'pointer',
-                  backgroundColor: currentRoom === room ? 'var(--color-bg-tertiary)' : 'transparent',
-                }}
-              >
-                <ListItemAvatar>
-                  <Avatar variant="rounded" style={{ backgroundColor: 'var(--primitive-primary-500)' }}>
-                    {room.substring(0, 2).toUpperCase()}
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText primary={room} secondary={currentRoom === room ? 'Active' : ''} />
-              </ListItem>
-            ))
-          )}
-        </List>
-      </Box>
-    </Paper>
-  );
-
   // Empty State for Chat Area
   const EmptyState = () => (
     <Flex
@@ -209,7 +223,15 @@ export function ChatApp() {
           }}
           className="chat-app__sidebar-wrapper"
         >
-          <Sidebar />
+          <ChatRoomSidebar
+            isConnected={isConnected}
+            roomIdInput={roomIdInput}
+            setRoomIdInput={setRoomIdInput}
+            handleCreateRoom={handleCreateRoom}
+            roomList={roomList}
+            currentRoom={currentRoom}
+            handleRoomSelect={handleRoomSelect}
+          />
         </Box>
         {!isMobile && (
           <Box style={{ flex: 1, backgroundColor: 'var(--color-background-default)', height: '100%', minHeight: 0 }}>
@@ -225,12 +247,26 @@ export function ChatApp() {
     <Box style={{ display: 'flex', height: '100%', minHeight: 0 }} className="chat-app__container">
       {!isMobile && (
         <Box style={{ width: '300px', flexShrink: 0 }} className="chat-app__sidebar-wrapper">
-          <Sidebar />
+          <ChatRoomSidebar
+            isConnected={isConnected}
+            roomIdInput={roomIdInput}
+            setRoomIdInput={setRoomIdInput}
+            handleCreateRoom={handleCreateRoom}
+            roomList={roomList}
+            currentRoom={currentRoom}
+            handleRoomSelect={handleRoomSelect}
+          />
         </Box>
       )}
       <Flex
         direction="column"
-        style={{ flex: 1, backgroundColor: 'var(--color-background-default)', height: '100%', minHeight: 0, overflow: 'hidden' }}
+        style={{
+          flex: 1,
+          backgroundColor: 'var(--color-background-default)',
+          height: '100%',
+          minHeight: 0,
+          overflow: 'hidden',
+        }}
       >
         {/* Chat Header */}
         <Paper square elevation={1} padding="md" style={{ zIndex: 10, flexShrink: 0 }}>
@@ -256,93 +292,81 @@ export function ChatApp() {
           }}
           ref={messagesRef}
         >
-          {messages.length === 0 ? (
-            <Box style={{ textAlign: 'center', marginTop: '40px', flexShrink: 0 }}>
-              <Typography variant="body-medium" color="text-secondary">
-                No messages yet. Say hello!
-              </Typography>
-            </Box>
-          ) : (
-            <Stack spacing="md" style={{ flex: 1, minHeight: 0 }}>
-              {messages.map((msg) => {
-                const isOwnMessage = msg.senderId === socketId || msg.type === 'sent';
-                return (
-                  <Flex
-                    key={msg.id}
-                    direction="column"
-                    align={isOwnMessage ? 'flex-end' : 'flex-start'}
-                    style={{ width: '100%' }}
-                  >
-                    <Flex
-                      direction="column"
-                      align={isOwnMessage ? 'flex-end' : 'flex-start'}
-                      style={{ maxWidth: '70%' }}
-                    >
-                      <Flex align="center" gap="sm" style={{ marginBottom: '4px' }}>
-                        <Typography variant="caption" color="text-secondary">
-                          {msg.senderId || 'Unknown'}
-                        </Typography>
-                        <Typography variant="caption" color="text-tertiary">
-                          {formatTimestamp(msg.timestamp)}
-                        </Typography>
-                      </Flex>
-                      <Paper
-                        elevation={1}
-                        padding="sm"
-                        style={{
-                          borderRadius: isOwnMessage ? '12px 0 12px 12px' : '0 12px 12px 12px',
-                          backgroundColor: isOwnMessage
-                            ? 'var(--color-interactive-primary)'
-                            : 'var(--color-surface-level-1)',
-                          color: isOwnMessage ? 'var(--primitive-gray-0)' : 'inherit',
-                        }}
-                      >
-                        {msg.fileData ? (
-                          <Box>
-                            {msg.fileData.fileType === 'image' ? (
-                              <Box>
-                                <img
-                                  src={msg.fileData.data}
-                                  alt={msg.fileData.fileName}
-                                  style={{
-                                    maxWidth: '100%',
-                                    maxHeight: '200px',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                  }}
-                                  onClick={() => handleImageClick(msg.fileData!.data, msg.fileData!.fileName)}
-                                />
-                              </Box>
-                            ) : (
-                              <Flex align="center" gap="sm">
-                                <IconFile size={24} />
-                                <Box>
-                                  <Typography variant="body-small" style={{ fontWeight: 'bold' }}>
-                                    {msg.fileData.fileName}
-                                  </Typography>
-                                  <Typography variant="caption">{formatFileSize(msg.fileData.size)}</Typography>
-                                </Box>
-                                <IconButton
-                                  size="small"
-                                  onClick={() =>
-                                    downloadFile(msg.fileData!.fileName, msg.fileData!.data, msg.fileData!.mimeType)
-                                  }
-                                >
-                                  <IconDownload size={16} />
-                                </IconButton>
-                              </Flex>
-                            )}
-                          </Box>
-                        ) : (
-                          <Typography variant="body-medium">{msg.content}</Typography>
-                        )}
-                      </Paper>
+          <Stack spacing="md" style={{ flex: 1, minHeight: 0 }}>
+            {messages.map((msg) => {
+              const isOwnMessage = msg.senderId === socketId || msg.type === 'sent';
+              return (
+                <Flex
+                  key={msg.id}
+                  direction="column"
+                  align={isOwnMessage ? 'flex-end' : 'flex-start'}
+                  style={{ width: '100%' }}
+                >
+                  <Flex direction="column" align={isOwnMessage ? 'flex-end' : 'flex-start'} style={{ maxWidth: '70%' }}>
+                    <Flex align="center" gap="sm" style={{ marginBottom: '4px' }}>
+                      <Typography variant="caption" color="text-secondary">
+                        {msg.senderId || 'Unknown'}
+                      </Typography>
+                      <Typography variant="caption" color="text-tertiary">
+                        {formatTimestamp(msg.timestamp)}
+                      </Typography>
                     </Flex>
+                    <Paper
+                      elevation={1}
+                      padding="sm"
+                      style={{
+                        borderRadius: isOwnMessage ? '12px 0 12px 12px' : '0 12px 12px 12px',
+                        backgroundColor: isOwnMessage
+                          ? 'var(--color-interactive-primary)'
+                          : 'var(--color-surface-level-1)',
+                        color: isOwnMessage ? 'var(--primitive-gray-0)' : 'inherit',
+                      }}
+                    >
+                      {msg.fileData ? (
+                        <Box>
+                          {msg.fileData.fileType === 'image' ? (
+                            <Box>
+                              <img
+                                src={msg.fileData.data}
+                                alt={msg.fileData.fileName}
+                                style={{
+                                  maxWidth: '100%',
+                                  maxHeight: '200px',
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                }}
+                                onClick={() => handleImageClick(msg.fileData!.data, msg.fileData!.fileName)}
+                              />
+                            </Box>
+                          ) : (
+                            <Flex align="center" gap="sm">
+                              <IconFile size={24} />
+                              <Box>
+                                <Typography variant="body-small" style={{ fontWeight: 'bold' }}>
+                                  {msg.fileData.fileName}
+                                </Typography>
+                                <Typography variant="caption">{formatFileSize(msg.fileData.size)}</Typography>
+                              </Box>
+                              <IconButton
+                                size="small"
+                                onClick={() =>
+                                  downloadFile(msg.fileData!.fileName, msg.fileData!.data, msg.fileData!.mimeType)
+                                }
+                              >
+                                <IconDownload size={16} />
+                              </IconButton>
+                            </Flex>
+                          )}
+                        </Box>
+                      ) : (
+                        <Typography variant="body-medium">{msg.content}</Typography>
+                      )}
+                    </Paper>
                   </Flex>
-                );
-              })}
-            </Stack>
-          )}
+                </Flex>
+              );
+            })}
+          </Stack>
         </Box>
 
         {/* Input Area */}
@@ -398,14 +422,33 @@ export function ChatApp() {
               <IconButton onClick={() => fileInputRef.current?.click()} color="secondary">
                 <IconPaperclip />
               </IconButton>
-              <Box style={{ flex: 1 }}>
+              <Box style={{ flex: 1 }} ref={inputWrapperRef}>
                 <Input
                   value={input}
-                  onInput={(e) => setInput(e.currentTarget.value)}
-                  onKeyPress={handleKeyPress}
+                  onCompositionStart={() => setIsComposing(true)}
+                  onCompositionEnd={() => setIsComposing(false)}
+                  onInput={(e) => {
+                    const target = e.currentTarget as HTMLInputElement;
+                    setInput(target.value);
+                    // 한글 입력 시 포커스 유지
+                    if (isComposing) {
+                      requestAnimationFrame(() => {
+                        const inputElement = inputWrapperRef.current?.querySelector('input') as HTMLInputElement;
+                        if (inputElement && document.activeElement !== inputElement) {
+                          inputElement.focus();
+                        }
+                      });
+                    }
+                  }}
+                  onKeyPress={(e) => {
+                    if (!isComposing) {
+                      handleKeyPress(e);
+                    }
+                  }}
                   placeholder={!isConnected ? 'Connecting...' : `Message #${currentRoom}`}
                   disabled={!isConnected}
                   fullWidth
+                  className="chat-app__input"
                 />
               </Box>
               <IconButton

@@ -6,6 +6,7 @@ import { AppRouter } from './routes/AppRouter';
 import { RouterStateProvider, useRouterState } from './routes/RouterState';
 import { findRouteTitleByPath } from './routes/appRoutes';
 import { SidebarLayout } from './layouts/SidebarLayout/SidebarLayout';
+import { ensureSparkMessagingConnected } from '@/utils/ensureSparkMessagingConnected';
 import './app.scss';
 import './index.css';
 
@@ -18,10 +19,8 @@ export function App() {
     // SDK 연결 초기화
     const initializeConnection = async () => {
       try {
-        const status = sparkMessagingClient.getConnectionStatus();
-        if (!status.isConnected) {
-          await sparkMessagingClient.connect();
-        } else {
+        const status = await ensureSparkMessagingConnected();
+        if (status.isConnected) {
           setIsConnected(true);
           setSocketId(status.socketId);
           socketIdRef.current = status.socketId;

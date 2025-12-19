@@ -35,4 +35,22 @@
       border-bottom: none !important;
     }
   }
+
+  // Input과 Button height 맞추기
+  &__input {
+    .input {
+      height: var(--button-sm-height); // 40px - Button sm과 동일한 높이
+      min-height: var(--button-sm-height);
+    }
+  }
+
+  // 룸 생성 Input과 Button height 맞추기
+  &__sidebar {
+    .input-group {
+      .input {
+        height: var(--button-sm-height); // 40px
+        min-height: var(--button-sm-height);
+      }
+    }
+  }
 }
