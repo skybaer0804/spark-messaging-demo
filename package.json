@@ -7,9 +7,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "prebuild": "rm -rf node_modules/.vite dist",
+    "prebuild": "rimraf node_modules/.vite dist",
     "start": "vite preview --host",
-    "clean": "rm -rf node_modules/.vite dist",
+    "clean": "rimraf node_modules/.vite dist",
     "generate-icons": "node scripts/generate-icons.js",
     "generate-screenshots": "node scripts/generate-screenshots.js"
   },
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@preact/preset-vite": "^2.8.2",
     "@types/node": "^20.11.5",
+    "rimraf": "^6.0.1",
     "sass": "^1.94.0",
     "sharp": "^0.34.5",
     "typescript": "^5.3.3",

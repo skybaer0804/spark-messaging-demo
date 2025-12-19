@@ -8,7 +8,7 @@ export function PrivacyPolicy() {
   return (
     <Container className="privacy-policy">
       <Paper className="privacy-policy__content">
-        <Stack spacing={4}>
+        <Stack spacing="lg">
           <div className="privacy-policy__header">
             <Typography variant="h1" component="h1">
               개인정보처리방침

@@ -6,7 +6,6 @@ import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { Button } from '@/ui-component/Button/Button';
 import { Switch } from '@/ui-component/Switch/Switch';
-import { Divider } from '@/ui-component/Divider/Divider';
 import { Paper } from '@/ui-component/Paper/Paper';
 import { IconPalette, IconShape, IconColorSwatch } from '@tabler/icons-react';
 import './ThemeCustomization.scss';
