@@ -1018,18 +1018,30 @@ android.keystore
 - 절대 경로는 각 개발자의 환경에 따라 다를 수 있음
 - 상대 경로는 프로젝트 루트 기준으로 동작하여 일관성 유지
 
+#### assetlinks.json과의 연관성
+
+**중요**: Keystore를 변경하면 `assetlinks.json`의 SHA256 핑거프린트도 함께 업데이트해야 합니다.
+
+- 개발용 keystore 사용 시: 개발용 keystore의 SHA256 핑거프린트를 `assetlinks.json`에 추가
+- 프로덕션 keystore 사용 시: 프로덕션 keystore의 SHA256 핑거프린트를 `assetlinks.json`에 추가
+- 여러 keystore 지원: `sha256_cert_fingerprints` 배열에 여러 핑거프린트를 추가하면 모두 인증됨
+
+자세한 내용은 [6.3 assetlinks.json 파일 생성](#63-assetlinksjson-파일-생성) 섹션의 "SHA256 핑거프린트와 Git 관리" 부분을 참고하세요.
+
 #### 문제 해결
 
 **Keystore를 잃어버린 경우**:
 
 - 같은 패키지명으로 업데이트 불가능
 - Play Store에 새 앱으로 등록해야 함
+- `assetlinks.json`의 SHA256 핑거프린트도 새 keystore로 업데이트 필요
 - **해결책**: 항상 백업을 유지하세요!
 
 **비밀번호를 잊은 경우**:
 
 - 복구 불가능
 - 새 keystore 생성 필요
+- `assetlinks.json`의 SHA256 핑거프린트도 새 keystore로 업데이트 필요
 - **해결책**: 비밀번호를 안전한 곳에 기록하세요!
 
 ### 5.6 Android 프로젝트 빌드
@@ -1155,6 +1167,87 @@ mkdir -p public/.well-known
 - namespace: "android_app" - 잘못되면 Android가 링크를 인식하지 못합니다.
 - package_name: "app.koyeb.spark.twa" - 실제 앱 패키지와 일치해야 합니다.
 - sha256_cert_fingerprints: ["AB..."] - 실제 SHA256 지문. 즉, 키스토어의 실제 지문과 일치해야 합니다.
+
+#### ⚠️ SHA256 핑거프린트와 Git 관리
+
+**SHA256 핑거프린트는 공개 정보입니다:**
+
+- Digital Asset Links 검증을 위해 웹사이트의 `.well-known/assetlinks.json` 파일이 공개적으로 접근 가능해야 합니다.
+- 따라서 이 파일은 Git에 커밋되어 웹사이트에 배포되어야 합니다.
+- SHA256 핑거프린트는 keystore의 공개키에서 추출한 것이므로, 이것만으로는 keystore를 복구하거나 악용할 수 없습니다.
+
+**하지만 개발 단계에서는 주의가 필요합니다:**
+
+1. **개발용 vs 프로덕션용 분리**
+
+   - 개발 단계: 각 개발자의 개발용 keystore 핑거프린트 사용
+   - 프로덕션 배포: 프로덕션 keystore 핑거프린트만 사용
+
+2. **Git 관리 전략**
+
+   **옵션 A: 개발용 핑거프린트만 Git에 포함 (권장)**
+
+   ```json
+   // 개발 단계: 개발용 keystore의 핑거프린트
+   "sha256_cert_fingerprints": ["개발용_핑거프린트"]
+   ```
+
+   - 로컬 개발 및 테스트에 사용
+   - Git에 커밋해도 안전
+
+   **옵션 B: 프로덕션 핑거프린트는 배포 시에만 추가**
+
+   ```json
+   // 프로덕션 배포 시: 프로덕션 keystore의 핑거프린트 추가
+   "sha256_cert_fingerprints": [
+     "개발용_핑거프린트",
+     "프로덕션_핑거프린트"  // 배포 시에만 추가
+   ]
+   ```
+
+   - CI/CD 파이프라인에서 프로덕션 빌드 시 자동으로 추가
+   - 또는 배포 전에 수동으로 추가
+
+3. **보안 고려사항**
+
+   - SHA256 핑거프린트 자체는 공개 정보이지만, 프로덕션 keystore의 핑거프린트가 노출되면:
+     - 앱과 웹사이트의 연결 관계가 노출됨
+     - 패키지명과 도메인 연결 정보가 노출됨
+   - 개발 단계에서는 개발용 keystore의 핑거프린트를 사용하는 것을 권장합니다.
+
+4. **환경별 관리 예시**
+
+   **개발 환경** (`public/.well-known/assetlinks.json`):
+
+   ```json
+   [
+     {
+       "relation": ["delegate_permission/common.handle_all_urls"],
+       "target": {
+         "namespace": "android_app",
+         "package_name": "app.koyeb.spark.twa",
+         "sha256_cert_fingerprints": ["개발용_keystore의_SHA256_핑거프린트"]
+       }
+     }
+   ]
+   ```
+
+   **프로덕션 배포 시** (CI/CD 또는 배포 전 수동 수정):
+
+   ```json
+   [
+     {
+       "relation": ["delegate_permission/common.handle_all_urls"],
+       "target": {
+         "namespace": "android_app",
+         "package_name": "app.koyeb.spark.twa",
+         "sha256_cert_fingerprints": ["개발용_keystore의_SHA256_핑거프린트", "프로덕션_keystore의_SHA256_핑거프린트"]
+       }
+     }
+   ]
+   ```
+
+   **참고**: 여러 핑거프린트를 배열로 나열하면, 해당 keystore 중 하나로 서명된 앱이 모두 인증됩니다.
 
 ### 6.4 assetlinks.json 배포
 
