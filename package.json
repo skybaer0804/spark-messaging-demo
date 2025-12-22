@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:watch": "concurrently \"npm run dev:pui\" \"npm run dev\"",
+    "dev:pui": "cd ../pui && npm run build:watch",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "prebuild": "rimraf node_modules/.vite dist",
@@ -15,6 +17,7 @@
   },
   "dependencies": {
     "@preact/signals": "^2.5.1",
+    "@skybaer0804/pui": "file:../pui",
     "@skybaer0804/spark-messaging-client": "^1.0.1",
     "@tabler/icons-react": "^3.35.0",
     "preact": "^10.19.3",
@@ -24,6 +27,7 @@
   "devDependencies": {
     "@preact/preset-vite": "^2.8.2",
     "@types/node": "^20.11.5",
+    "concurrently": "^9.1.0",
     "rimraf": "^6.0.1",
     "sass": "^1.94.0",
     "sharp": "^0.34.5",

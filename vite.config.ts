@@ -128,6 +128,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  optimizeDeps: {
+    include: ['@skybaer0804/pui', '@tabler/icons-react'],
+  },
   css: {
     preprocessorOptions: {
       scss: {

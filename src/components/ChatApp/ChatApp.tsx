@@ -2,18 +2,24 @@ import { useChatApp } from './hooks/useChatApp';
 import { formatTimestamp } from '@/utils/messageUtils';
 import { formatFileSize, downloadFile } from '@/utils/fileUtils';
 import { useRef, useEffect, useState } from 'preact/hooks';
-import { IconButton } from '@/ui-component/Button/IconButton';
-import { Input } from '@/ui-component/Input/Input';
-import { Box } from '@/ui-component/Layout/Box';
-import { Flex } from '@/ui-component/Layout/Flex';
-import { Stack } from '@/ui-component/Layout/Stack';
-import { Typography } from '@/ui-component/Typography/Typography';
-import { Paper } from '@/ui-component/Paper/Paper';
-import { List, ListItem, ListItemText, ListItemAvatar } from '@/ui-component/List/List';
-import { Avatar } from '@/ui-component/Avatar/Avatar';
+import {
+  IconButton,
+  Input,
+  Box,
+  Flex,
+  Stack,
+  Typography,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Button,
+} from '@skybaer0804/pui';
 import { IconArrowLeft, IconSend, IconPaperclip, IconX, IconFile, IconDownload } from '@tabler/icons-react';
-import { Button } from '@/ui-component/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
+import '@skybaer0804/pui/styles.css';
 import './ChatApp.scss';
 
 interface ChatRoomSidebarProps {

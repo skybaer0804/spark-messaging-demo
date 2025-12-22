@@ -1,13 +1,8 @@
 import { useState } from 'preact/hooks';
-import { Box } from '@/ui-component/Layout/Box';
-import { Flex } from '@/ui-component/Layout/Flex';
-import { Stack } from '@/ui-component/Layout/Stack';
-import { Typography } from '@/ui-component/Typography/Typography';
-import { Paper } from '@/ui-component/Paper/Paper';
-import { Tabs, TabsItem } from '@/ui-component/Tabs/Tabs';
-import { Button } from '@/ui-component/Button/Button';
+import { Box, Flex, Stack, Typography, Paper, Tabs, TabsItem, Button } from '@skybaer0804/pui';
 import { IconMessageCircle, IconBell, IconGavel } from '@tabler/icons-react';
 import { useRouterState } from '@/routes/RouterState';
+import '@skybaer0804/pui/styles.css';
 import './HomePage.scss';
 
 export function HomePage() {
