@@ -129,7 +129,8 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['@skybaer0804/pui', '@tabler/icons-react'],
+    include: ['@tabler/icons-react'],
+    exclude: ['@skybaer0804/pui'], // 로컬 패키지는 pre-bundle에서 제외
   },
   css: {
     preprocessorOptions: {
