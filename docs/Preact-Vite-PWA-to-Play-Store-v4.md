@@ -1072,6 +1072,206 @@ Output:
 └── app/build/intermediates/signing_config/release/out
 ```
 
+### 5.6.1 PWA 업데이트 후 Android 앱 재빌드
+
+**질문**: 원본 Preact + Vite 프로젝트의 소스코드를 업데이트했을 때, Bubblewrap으로 만든 Android 앱은 어떻게 업데이트하나요?
+
+**답변**: 네, 맞습니다! **원본 PWA 프로젝트를 업데이트하고 배포한 후, Bubblewrap 프로젝트에서 `bubblewrap build`를 다시 실행하면 됩니다.**
+
+#### 업데이트 프로세스
+
+Bubblewrap은 배포된 PWA의 `manifest.webmanifest`를 읽어서 Android 앱을 생성합니다. 따라서 원본 PWA가 업데이트되고 배포되면, Bubblewrap도 다시 빌드하면 최신 버전이 반영됩니다.
+
+**전체 업데이트 흐름**:
+
+```bash
+# 1. 원본 PWA 프로젝트에서 소스코드 수정
+cd my-pwa-app
+# ... 코드 수정 ...
+
+# 2. PWA 빌드 및 배포
+npm run build
+# dist/ 폴더를 웹 서버에 배포 (예: Koyeb, Vercel, Netlify 등)
+# 결과: https://your-domain.com 에 최신 PWA 배포됨
+
+# 3. Bubblewrap 프로젝트로 이동
+cd ../my-pwa-android
+
+# 4. 버전 코드 증가 (Play Store 업로드를 위해 필수)
+# twa-manifest.json 파일 수정:
+# "appVersionCode": 1 → 2 (또는 원하는 버전)
+# "appVersionName": "1" → "1.0.1" (선택사항, 표시용)
+
+# 5. Bubblewrap 재빌드
+bubblewrap build
+# keystore 비밀번호 2회 입력
+
+# 6. 새 AAB/APK 파일 생성됨
+# app/build/outputs/bundle/release/app-release.aab
+```
+
+#### 주의사항
+
+**1. 버전 코드 증가 필수**
+
+Play Store에 업로드하려면 반드시 버전 코드(`appVersionCode`)를 증가시켜야 합니다. 같은 버전 코드로는 업로드할 수 없습니다.
+
+**`twa-manifest.json` 수정 예시**:
+
+```json
+{
+  "appVersionCode": 2, // 1 → 2로 증가 (필수)
+  "appVersionName": "1.0.1" // 표시용 버전 (선택사항)
+  // ... 기타 설정 ...
+}
+```
+
+**2. PWA 배포 확인**
+
+Bubblewrap은 배포된 PWA의 manifest를 읽으므로, **반드시 원본 PWA를 먼저 배포**해야 합니다.
+
+```bash
+# 배포 확인
+curl https://your-domain.com/manifest.webmanifest
+# 또는 브라우저에서 확인
+```
+
+**3. assetlinks.json 업데이트 (필요한 경우)**
+
+만약 keystore를 변경했다면, `assetlinks.json`의 SHA256 핑거프린트도 업데이트해야 합니다. (자세한 내용은 [6.3 assetlinks.json 파일 생성](#63-assetlinksjson-파일-생성) 참고)
+
+**4. 빠른 업데이트 (로컬 테스트용)**
+
+로컬에서 빠르게 테스트하려면:
+
+```bash
+# 원본 PWA 프로젝트에서 로컬 서버 실행
+cd my-pwa-app
+npm run build
+npx http-server dist -p 8080
+
+# Bubblewrap 프로젝트에서 로컬 manifest 사용
+cd ../my-pwa-android
+# twa-manifest.json의 webManifestUrl을 http://localhost:8080/manifest.webmanifest로 변경
+bubblewrap build
+```
+
+#### 자주 묻는 질문
+
+**Q: Bubblewrap 프로젝트의 소스코드를 직접 수정해야 하나요?**
+
+A: 아니요, 필요 없습니다. Bubblewrap은 배포된 PWA의 manifest를 읽어서 자동으로 Android 앱을 생성합니다. 원본 PWA만 업데이트하고 배포한 후, Bubblewrap에서 `bubblewrap build`만 다시 실행하면 됩니다.
+
+**Q: 매번 버전 코드를 수동으로 수정해야 하나요?**
+
+A: 네, 현재는 수동으로 `twa-manifest.json`의 `appVersionCode`를 증가시켜야 합니다. 자동화하려면 스크립트를 만들 수 있습니다:
+
+```bash
+# 버전 코드 자동 증가 스크립트 예시 (선택사항)
+# update-version.sh
+#!/bin/bash
+VERSION=$(grep -o '"appVersionCode": [0-9]*' twa-manifest.json | grep -o '[0-9]*')
+NEW_VERSION=$((VERSION + 1))
+sed -i "s/\"appVersionCode\": $VERSION/\"appVersionCode\": $NEW_VERSION/" twa-manifest.json
+echo "Version updated: $VERSION → $NEW_VERSION"
+```
+
+**Q: PWA의 manifest.webmanifest만 변경해도 되나요?**
+
+A: 네, 가능합니다. 하지만 일반적으로는 PWA의 기능이나 UI가 변경될 때 함께 업데이트하는 경우가 많습니다.
+
+### 5.6.2 서명된 App Bundle 생성하기 (Gradle 직접 사용)
+
+구글 플레이 콘솔에 앱을 배포하기 위해서는 서명된 Android App Bundle (.aab) 파일이 필요합니다.
+
+#### 문제 상황
+
+- `bubblewrap build` 명령어를 사용하면 서명된 bundle을 생성할 수 있지만, 매번 keystore 비밀번호를 대화형으로 입력해야 합니다.
+- 루트 디렉토리에 있는 `app-release-bundle.aab` 파일은 서명되지 않았거나 잘못된 위치에 있어 구글 플레이 콘솔에 업로드할 수 없습니다.
+- 실제 서명된 bundle은 `app/build/outputs/bundle/release/app-release.aab` 경로에 생성됩니다.
+
+#### 해결 방법
+
+**1. 서명 설정 확인**
+
+`app/build.gradle` 파일에 서명 설정이 추가되어 있어야 합니다:
+
+```gradle
+signingConfigs {
+    release {
+        storeFile file('../android.keystore')
+        storePassword project.findProperty('RELEASE_STORE_PASSWORD') ?: System.getenv('RELEASE_STORE_PASSWORD') ?: ''
+        keyAlias 'android'
+        keyPassword project.findProperty('RELEASE_KEY_PASSWORD') ?: System.getenv('RELEASE_KEY_PASSWORD') ?: ''
+    }
+}
+
+buildTypes {
+    release {
+        minifyEnabled true
+        signingConfig signingConfigs.release
+    }
+}
+```
+
+**2. Keystore 비밀번호 설정**
+
+`gradle.properties` 파일에 keystore 비밀번호를 설정합니다:
+
+```properties
+# Keystore credentials for release signing
+RELEASE_STORE_PASSWORD=your_keystore_password
+RELEASE_KEY_PASSWORD=your_key_password
+```
+
+**⚠️ 주의**: `gradle.properties` 파일은 버전 관리에 포함하지 마세요. `.gitignore`에 추가하는 것을 권장합니다.
+
+**3. 서명된 Bundle 빌드**
+
+다음 명령어를 실행하여 서명된 bundle을 생성합니다:
+
+**Mac/Linux**:
+
+```bash
+./gradlew bundleRelease
+```
+
+**Windows PowerShell**:
+
+```powershell
+.\gradlew.bat bundleRelease
+```
+
+**4. 생성된 파일 확인**
+
+빌드가 성공하면 다음 경로에 서명된 bundle이 생성됩니다:
+
+```
+app/build/outputs/bundle/release/app-release.aab
+```
+
+#### 구글 플레이 콘솔 업로드
+
+1. 구글 플레이 콘솔에 접속합니다.
+2. 내부 테스트 트랙(또는 원하는 트랙)을 선택합니다.
+3. 새 버전 만들기를 클릭합니다.
+4. `app/build/outputs/bundle/release/app-release.aab` 파일을 업로드합니다.
+
+#### 빌드 방법 비교
+
+| 방법                      | 장점                                           | 단점                                   |
+| ------------------------- | ---------------------------------------------- | -------------------------------------- |
+| `bubblewrap build`        | bubblewrap이 자동으로 처리                     | 매번 비밀번호를 대화형으로 입력해야 함 |
+| `./gradlew bundleRelease` | `gradle.properties`의 비밀번호를 자동으로 사용 | 직접 gradle 명령어 실행 필요           |
+
+**권장**: `gradle.properties`에 비밀번호를 설정한 후 `./gradlew bundleRelease`를 사용하는 것이 편리합니다.
+
+#### 주의사항
+
+- 서명되지 않은 bundle은 구글 플레이 콘솔에 업로드할 수 없습니다.
+- keystore 파일과 비밀번호는 안전하게 보관해야 합니다. keystore를 잃어버리면 앱 업데이트가 불가능합니다.
+- `gradle.properties` 파일에 비밀번호를 저장할 때는 반드시 `.gitignore`에 추가하여 버전 관리에 포함되지 않도록 해야 합니다.
+
 ### 5.7 빌드 결과물 확인
 
 ```bash
@@ -1383,6 +1583,146 @@ Play Console → Settings → Account Settings
 - Support Email: 사용자 지원 이메일
 ```
 
+### 7.4 개발자 계정 인증 (필수)
+
+**⚠️ 중요**: 개발자 계정 인증이 완료되지 않으면 내부 테스트 버전을 만들 때 "미리보기 및 확인" 단계에서 더 진행할 수 없습니다. 앱 배포 전에 반드시 완료해야 합니다.
+
+Play Console에 접속하면 "개발자 계정 설정 완료" 섹션에서 다음 3가지 인증을 완료해야 합니다:
+
+#### 1. 주소 인증 (신원 확인)
+
+**목적**: Google에서 개발자 신원을 확인하기 위한 인증입니다.
+
+**필요 서류**:
+
+- **주민등록등본** (가장 빠르게 승인됨, 권장)
+- 또는 신분증 (주민등록증, 운전면허증 등)
+- 또는 사업자등록증 (조직 계정인 경우)
+
+**진행 방법**:
+
+```
+Play Console → Settings → Account Settings
+→ "개발자 계정 설정 완료" 섹션
+→ "Google에서 신원 확인 중입니다" 또는 "신원 확인" 클릭
+→ 문서 업로드 (주민등록등본 권장)
+```
+
+**처리 시간**:
+
+- 주민등록등본: 보통 1~3일
+- 기타 서류: 며칠이 소요될 수 있음
+
+**완료 확인**:
+
+- 인증 완료 시 계정 소유자에게 이메일 발송
+- Play Console에서 "신원 확인 완료" 상태로 변경됨
+
+#### 2. 안드로이드 폰 인증
+
+**목적**: 개발자가 실제 Android 기기를 보유하고 있는지 확인합니다.
+
+**진행 방법**:
+
+```
+Google Play Console App 설치.
+Play Console → Settings → Account Settings
+→ "개발자 계정 설정 완료" 섹션
+→ "안드로이드 폰 인증" 또는 "기기 인증" 클릭
+→ QR 코드 표시됨
+```
+
+**인증 절차**:
+
+1. **Android 기기 준비**
+
+   - Android 6.0 이상 기기 필요
+   - Google Play Store 앱 설치 필요
+
+2. **QR 코드 스캔**
+
+   - Android 기기에서 Google Play Store 앱 실행
+   - 메뉴 → 계정 → 개발자 인증
+   - 또는 Play Console에서 표시된 QR 코드 스캔
+
+3. **인증 완료**
+   - 기기에서 인증 확인 버튼 클릭
+   - Play Console에서 즉시 완료 상태로 변경됨
+
+**주의사항**:
+
+- iOS 기기로는 인증 불가
+- Android 에뮬레이터로는 인증 불가 (실제 기기 필요)
+
+#### 3. 전화번호 인증
+
+**목적**: 연락처 전화번호를 인증하여 계정 보안을 강화합니다.
+
+**진행 방법**:
+
+```
+Play Console → Settings → Account Settings
+→ "개발자 계정 설정 완료" 섹션
+→ "연락처 전화번호 인증" 또는 "세부정보 보기" 클릭
+```
+
+**인증 조건**:
+
+- 다른 인증 작업(신원 확인, 안드로이드 폰 인증)을 먼저 완료해야 함
+- Google에서 신분증을 승인받은 후 진행 가능
+
+**인증 절차**:
+
+1. **전화번호 입력**
+
+   - 계정에 등록된 전화번호 확인
+   - 또는 새 전화번호 입력
+
+2. **인증 코드 수신**
+
+   - SMS 또는 음성 통화로 인증 코드 수신
+   - 코드 입력
+
+3. **인증 완료**
+   - Play Console에서 "전화번호 인증 완료" 상태로 변경됨
+
+#### 인증 상태 확인
+
+```
+Play Console → Settings → Account Settings
+→ "개발자 계정 설정 완료" 섹션
+
+확인 항목:
+✓ Google에서 신원 확인 중입니다 → "완료" 또는 "승인됨"
+✓ 안드로이드 폰 인증 → "완료"
+✓ 연락처 전화번호 인증 → "완료"
+```
+
+**⚠️ 중요**: 모든 인증이 완료되지 않으면:
+
+- 내부 테스트 버전을 만들 때 "미리보기 및 확인" 단계에서 진행 불가
+- 프로덕션 배포 불가
+- 앱 업데이트 제한
+
+#### 인증 완료 전 대응 방법
+
+인증이 완료되지 않은 상태에서 테스트를 진행하려면:
+
+1. **인증 진행 상황 확인**
+
+   - Play Console → Settings → Account Settings
+   - 각 인증 항목의 상태 확인
+
+2. **인증 우선순위**
+
+   - 주소 인증(주민등록등본) → 가장 빠르게 승인됨
+   - 안드로이드 폰 인증 → 즉시 완료 가능
+   - 전화번호 인증 → 다른 인증 완료 후 진행
+
+3. **인증 완료 대기**
+   - 인증 완료까지 대기 (보통 며칠 소요)
+   - 완료 후 내부 테스트 진행
+
 ---
 
 ## Step 8: 앱 스토어 등록 및 배포
@@ -1483,6 +1823,8 @@ Play Console → 앱선택 → 설정 → 앱 정보 → 앱 정보
 
 **⚠️ 중요**: Google Play Console의 최신 정책에 따라, 프로덕션 출시 전에 **반드시 테스트 단계를 거쳐야 합니다**. 내부 테스터를 등록하고 Internal Testing을 통해 앱을 배포한 후, 프로덕션 출시가 가능합니다.
 
+**⚠️ 사전 요구사항**: 내부 테스트 버전을 만들기 전에 [Step 7.4 개발자 계정 인증](#74-개발자-계정-인증-필수)을 완료해야 합니다. 인증이 완료되지 않으면 "새 버전 출시하기" → "미리보기 및 확인" 단계에서 더 진행할 수 없습니다.
+
 #### Step 1: Testing 트랙 접근
 
 ```
@@ -1517,6 +1859,8 @@ Testing → Internal Testing → Testers 탭
 
 #### Step 3: 테스트 앱 번들 업로드
 
+**⚠️ 사전 확인**: 이 단계를 진행하기 전에 [Step 7.4 개발자 계정 인증](#74-개발자-계정-인증-필수)이 완료되었는지 확인하세요. 인증이 완료되지 않으면 "미리보기 및 확인" 단계에서 진행이 막힙니다.
+
 ```
 Testing → Internal Testing → Releases 탭
 
@@ -1528,7 +1872,10 @@ Testing → Internal Testing → Releases 탭
    - 초기 기능 테스트"
 4. "Save" 클릭
 5. "Review release" 클릭
+   ⚠️ 이 단계에서 "미리보기 및 확인" 화면이 나타나는데,
+   개발자 인증이 완료되지 않으면 여기서 더 진행할 수 없습니다.
 6. "Start rollout to Internal Testing" 클릭
+   (인증 완료 후에만 이 버튼이 활성화됨)
 ```
 
 **업로드 완료 후 확인**:
@@ -1573,9 +1920,80 @@ Testing → Internal Testing → Dashboard
 
 **테스트 기간**: 최소 1일 이상 권장 (실제 사용 테스트)
 
+### 8.3.1 사내(내부/기업용) 앱 배포: 테스트 요구사항 면제
+
+**질문**: 사내 안드로이드 앱을 배포할 건데 프로덕션 배포하려면 결국 14일의 12명 테스트를 거쳐야만 배포가 가능한가요?
+
+**답변**: 아니요, 사내(내부/기업용) 안드로이드 앱 배포의 경우 개인 개발자 계정이라도 Google Play의 프로덕션 배포를 위해 12명 이상의 테스터를 14일간 유지할 필요가 없습니다. 이는 Private app(비공개 앱) 또는 Managed Google Play을 통해 조직 내 배포할 때 적용되는 예외 사항입니다.
+
+#### 개인 계정 제한 사항
+
+새로 생성된 개인 계정(2023년 11월 13일 이후)은 공개 프로덕션 배포를 위해 closed testing(최소 12명 테스터, 14일 연속 opt-in)이 필수입니다. 하지만 사내 앱처럼 공개되지 않는 경우 이 요구사항이 면제됩니다.
+
+#### 사내 앱 배포 대안
+
+**1. Private Apps via Play Console**
+
+앱을 조직 전용으로 제한하고 EMM(Enterprise Mobility Management) 도구로 배포합니다. 별도 테스트 요구 없이 배포 가능합니다.
+
+**2. Managed Google Play**
+
+조직 계정(또는 연결된 개인 계정)으로 앱을 업로드해 내부 사용자에게만 배포합니다. 자동 승인 및 즉시 사용 가능합니다.
+
+**3. 조직 계정 전환**
+
+사업자 등록을 통해 조직 계정으로 업그레이드하면 모든 테스트 요구가 면제됩니다.
+
+#### Private App 설정 방법
+
+**Step 1: Play Console 설정 접근**
+
+```
+Play Console에 로그인 후 앱 선택
+→ Release (또는 Test and release)
+→ Setup
+→ Advanced settings 클릭
+```
+
+**Step 2: Managed Google Play 설정**
+
+```
+Managed Google Play 탭 선택
+→ Organizations에서 "Add organization" 클릭
+→ 회사 Organization ID 입력 및 추가
+```
+
+**Organization ID 확인 방법**:
+
+- Google Admin Console (`admin.google.com`)에서 확인
+  - Account → Account settings
+- EMM 도구(Intune, Knox 등)에서 발급받은 ID 사용
+
+**Step 3: 앱 배포**
+
+```
+앱을 Publish하면 해당 조직(사내) 사용자에게만 배포됩니다.
+```
+
+#### 권장 배포 단계
+
+1. **Play Console에서 앱을 Private app으로 설정** (대상 조직 ID 지정)
+2. **EMM(예: Intune, Knox) 또는 Managed Google Play과 연동**
+3. **내부 테스트(Internal testing)로 사내 직원에게 배포 후 프로덕션 전환**
+
+이 방법으로 사내 앱을 빠르게 배포할 수 있으며, 공개 배포가 아닌 한 14일 테스트를 우회할 수 있습니다.
+
+#### 주의사항
+
+- **Organization ID 확인**: Google Admin Console (`admin.google.com`)에서 Account → Account settings 또는 EMM 도구에서 발급받으세요.
+- **개인 계정이라도 이 설정으로 12명 테스트 요구사항 면제됩니다.**
+- **사내 배포 후 EMM (Intune, Knox 등)으로 사용자에게 푸시 배포하세요.**
+
+이 과정을 완료하면 공개 프로덕션 없이 사내 전용 앱으로 배포 가능합니다.
+
 ### 8.4 프로덕션 출시 준비
 
-**⚠️ 중요**: Internal Testing을 완료한 후에만 Production 출시가 가능합니다.
+**⚠️ 중요**: Internal Testing을 완료한 후에만 Production 출시가 가능합니다. (단, 사내 앱의 경우 [8.3.1 사내 앱 배포](#831-사내내부기업용-앱-배포-테스트-요구사항-면제) 섹션 참고)
 
 #### Step 1: Production 트랙 접근
 
@@ -1794,6 +2212,10 @@ Play Console → 앱선택 → Reviews
 - [ ] Google 계정 준비
 - [ ] Google Play Console 개발자 등록 ($25 결제)
 - [ ] 개발자 프로필 완성 (이름, 이메일, 주소)
+- [ ] 개발자 계정 인증 완료 (필수)
+  - [ ] 주소 인증 (주민등록등본 권장, 1~3일 소요)
+  - [ ] 안드로이드 폰 인증 (즉시 완료 가능)
+  - [ ] 전화번호 인증 (다른 인증 완료 후 진행)
 - [ ] 앱 새로 만들기 (앱 이름, 카테고리 선택)
 
 ### ✅ 앱 정보 입력
@@ -1809,12 +2231,17 @@ Play Console → 앱선택 → Reviews
 
 ### ✅ 테스트 단계 (필수)
 
+- [ ] **사전 확인**: 개발자 계정 인증 완료 확인 (Step 7.4)
+  - [ ] 주소 인증 완료
+  - [ ] 안드로이드 폰 인증 완료
+  - [ ] 전화번호 인증 완료
 - [ ] Play Console → Testing → Internal Testing 진입
 - [ ] 내부 테스터 등록 (이메일 주소 또는 Google 그룹)
   - 최소 1명 이상 등록 (본인 계정 포함 가능)
 - [ ] 테스트용 AAB 파일 업로드
   - app/build/outputs/bundle/release/app-release.aab
 - [ ] 테스트 Release notes 입력 (선택사항)
+- [ ] "Review release" → "미리보기 및 확인" 단계 통과 확인
 - [ ] "Start rollout to Internal Testing" 클릭
 - [ ] 테스터에게 테스트 링크 공유
 - [ ] 테스터가 앱 설치 및 테스트 완료 확인
