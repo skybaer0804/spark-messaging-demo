@@ -11,12 +11,24 @@ import { Typography } from '@/ui-component/Typography/Typography';
 import { Paper } from '@/ui-component/Paper/Paper';
 import { List, ListItem, ListItemText, ListItemAvatar } from '@/ui-component/List/List';
 import { Avatar } from '@/ui-component/Avatar/Avatar';
-import { IconArrowLeft, IconSend, IconPaperclip, IconX, IconFile, IconDownload, IconBug, IconBugOff, IconUsers } from '@tabler/icons-react';
+import {
+  IconArrowLeft,
+  IconSend,
+  IconPaperclip,
+  IconX,
+  IconFile,
+  IconDownload,
+  IconBug,
+  IconBugOff,
+  IconUsers,
+  IconSettings,
+} from '@tabler/icons-react';
 import { Button } from '@/ui-component/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
 import './ChatApp.scss';
 
 import type { Message, ChatRoom, ChatUser } from './types';
+import type { Organization } from './hooks/useChatApp';
 
 interface ChatRoomSidebarProps {
   isConnected: boolean;
@@ -25,8 +37,11 @@ interface ChatRoomSidebarProps {
   handleCreateRoom: () => void;
   roomList: ChatRoom[];
   userList: ChatUser[];
+  orgList: Organization[];
   selectedUserIds: string[];
+  selectedOrgIds: string[];
   toggleUserSelection: (userId: string) => void;
+  toggleOrgSelection: (orgId: string) => void;
   currentRoom: ChatRoom | null;
   handleRoomSelect: (roomId: string) => void;
   leaveRoom: () => void;
@@ -39,14 +54,18 @@ function ChatRoomSidebar({
   handleCreateRoom,
   roomList,
   userList,
+  orgList,
   selectedUserIds,
+  selectedOrgIds,
   toggleUserSelection,
+  toggleOrgSelection,
   currentRoom,
   handleRoomSelect,
   leaveRoom,
 }: ChatRoomSidebarProps) {
   const [showInviteList, setShowInviteList] = useState(false);
-  const [contextMenu, setContextMenu] = useState<{ x: number, y: number, roomId: string } | null>(null);
+  const [inviteTab, setInviteTab] = useState<'user' | 'org'>('user');
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; roomId: string } | null>(null);
 
   const handleContextMenu = (e: MouseEvent, roomId: string) => {
     e.preventDefault();
@@ -86,7 +105,7 @@ function ChatRoomSidebar({
               onKeyPress={(e) => e.key === 'Enter' && handleCreateRoom()}
               fullWidth
             />
-            <IconButton 
+            <IconButton
               onClick={() => setShowInviteList(!showInviteList)}
               color={showInviteList ? 'primary' : 'secondary'}
               title="초대할 유저 목록"
@@ -94,25 +113,87 @@ function ChatRoomSidebar({
               <IconUsers size={20} />
             </IconButton>
           </Flex>
-          
+
           {showInviteList && (
-            <Paper variant="outlined" style={{ maxHeight: '200px', overflowY: 'auto', backgroundColor: 'var(--color-bg-tertiary)' }}>
-              <List size="small">
-                {userList.map((user) => (
-                  <ListItem key={user._id} onClick={() => toggleUserSelection(user._id)} style={{ cursor: 'pointer' }}>
-                    <ListItemAvatar>
-                      <Avatar src={user.avatar} size="small">{user.username.substring(0, 1)}</Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={user.username} primaryTypographyProps={{ variant: 'body-small' }} />
-                    <input 
-                      type="checkbox" 
-                      checked={selectedUserIds.includes(user._id)} 
-                      onChange={() => {}} 
+            <Paper
+              variant="outlined"
+              style={{ maxHeight: '300px', overflowY: 'auto', backgroundColor: 'var(--color-bg-tertiary)' }}
+            >
+              <Flex style={{ borderBottom: '1px solid var(--color-border-default)' }}>
+                <Button
+                  variant="ghost"
+                  fullWidth
+                  size="sm"
+                  onClick={() => setInviteTab('user')}
+                  style={{
+                    borderRadius: 0,
+                    borderBottom: inviteTab === 'user' ? '2px solid var(--color-interactive-primary)' : 'none',
+                  }}
+                >
+                  Users
+                </Button>
+                <Button
+                  variant="ghost"
+                  fullWidth
+                  size="sm"
+                  onClick={() => setInviteTab('org')}
+                  style={{
+                    borderRadius: 0,
+                    borderBottom: inviteTab === 'org' ? '2px solid var(--color-interactive-primary)' : 'none',
+                  }}
+                >
+                  Orgs
+                </Button>
+              </Flex>
+
+              {inviteTab === 'user' ? (
+                <List size="small">
+                  {userList.map((user) => (
+                    <ListItem
+                      key={user._id}
+                      onClick={() => toggleUserSelection(user._id)}
                       style={{ cursor: 'pointer' }}
-                    />
-                  </ListItem>
-                ))}
-              </List>
+                    >
+                      <ListItemAvatar>
+                        <Avatar src={user.avatar} size="small">
+                          {user.username.substring(0, 1)}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText primary={user.username} primaryTypographyProps={{ variant: 'body-small' }} />
+                      <input
+                        type="checkbox"
+                        checked={selectedUserIds.includes(user._id)}
+                        readOnly
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <List size="small">
+                  {orgList.map((org) => (
+                    <ListItem key={org._id} onClick={() => toggleOrgSelection(org._id)} style={{ cursor: 'pointer' }}>
+                      <ListItemAvatar>
+                        <Avatar variant="rounded" size="small">
+                          {org.name.substring(0, 1)}
+                        </Avatar>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={org.name}
+                        secondary={`${org.dept1}${org.dept2 ? ' > ' + org.dept2 : ''}`}
+                        primaryTypographyProps={{ variant: 'body-small', fontWeight: 600 }}
+                        secondaryTypographyProps={{ variant: 'caption' }}
+                      />
+                      <input
+                        type="checkbox"
+                        checked={selectedOrgIds.includes(org._id)}
+                        readOnly
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              )}
             </Paper>
           )}
 
@@ -123,7 +204,9 @@ function ChatRoomSidebar({
             variant="primary"
             fullWidth
           >
-            Create Room {selectedUserIds.length > 0 && `(${selectedUserIds.length} invited)`}
+            Create Room{' '}
+            {(selectedUserIds.length > 0 || selectedOrgIds.length > 0) &&
+              `(${selectedUserIds.length}U, ${selectedOrgIds.length}O)`}
           </Button>
         </Stack>
       </Box>
@@ -173,7 +256,7 @@ function ChatRoomSidebar({
           }}
         >
           <List size="small" style={{ padding: 0 }}>
-            <ListItem 
+            <ListItem
               onClick={() => {
                 if (currentRoom?._id === contextMenu.roomId) {
                   leaveRoom();
@@ -184,10 +267,7 @@ function ChatRoomSidebar({
               }}
               style={{ cursor: 'pointer', '&:hover': { backgroundColor: 'var(--color-bg-tertiary)' } }}
             >
-              <ListItemText 
-                primary="방 나가기" 
-                primaryTypographyProps={{ variant: 'body-small', color: 'error' }} 
-              />
+              <ListItemText primary="방 나가기" primaryTypographyProps={{ variant: 'body-small', color: 'error' }} />
             </ListItem>
           </List>
         </Paper>
@@ -207,8 +287,11 @@ export function ChatApp() {
     currentRoom,
     roomList,
     userList,
+    orgList,
     selectedUserIds,
+    selectedOrgIds,
     toggleUserSelection,
+    toggleOrgSelection,
     sendMessage,
     handleRoomSelect,
     handleCreateRoom,
@@ -238,6 +321,17 @@ export function ChatApp() {
   const [imageModal, setImageModal] = useState<{ url: string; fileName: string } | null>(null);
   const [isComposing, setIsComposing] = useState(false);
   const [showUserList, setShowUserList] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const { user } = useAuth();
+
+  const toggleGlobalNotifications = async (enabled: boolean) => {
+    try {
+      await authApi.updateNotificationSettings({ globalEnabled: enabled });
+      toast.success(`Notifications ${enabled ? 'enabled' : 'disabled'}`);
+    } catch (err) {
+      console.error('Failed to update settings:', err);
+    }
+  };
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -331,8 +425,11 @@ export function ChatApp() {
             handleCreateRoom={handleCreateRoom}
             roomList={roomList}
             userList={userList}
+            orgList={orgList}
             selectedUserIds={selectedUserIds}
+            selectedOrgIds={selectedOrgIds}
             toggleUserSelection={toggleUserSelection}
+            toggleOrgSelection={toggleOrgSelection}
             currentRoom={currentRoom}
             handleRoomSelect={handleRoomSelect}
             leaveRoom={leaveRoom}
@@ -359,8 +456,11 @@ export function ChatApp() {
             handleCreateRoom={handleCreateRoom}
             roomList={roomList}
             userList={userList}
+            orgList={orgList}
             selectedUserIds={selectedUserIds}
+            selectedOrgIds={selectedOrgIds}
             toggleUserSelection={toggleUserSelection}
+            toggleOrgSelection={toggleOrgSelection}
             currentRoom={currentRoom}
             handleRoomSelect={handleRoomSelect}
             leaveRoom={leaveRoom}
@@ -393,6 +493,9 @@ export function ChatApp() {
               title="참여자 목록"
             >
               <IconUsers size={20} />
+            </IconButton>
+            <IconButton onClick={() => setShowSettings(true)} color="secondary" title="설정">
+              <IconSettings size={20} />
             </IconButton>
             <IconButton onClick={toggleDebug} color={debugEnabled ? 'primary' : 'secondary'} title="디버그 모드 토글">
               {debugEnabled ? <IconBug size={20} /> : <IconBugOff size={20} />}
@@ -654,6 +757,53 @@ export function ChatApp() {
             onClick={handleCloseImageModal}
           >
             <img src={imageModal.url} alt={imageModal.fileName} style={{ maxWidth: '90%', maxHeight: '90%' }} />
+          </div>
+        )}
+
+        {/* Settings Modal */}
+        {showSettings && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              zIndex: 3000,
+              display: 'flex',
+              alignItems: 'center',
+              justify: 'center',
+            }}
+            onClick={() => setShowSettings(false)}
+          >
+            <Paper
+              padding="lg"
+              style={{ width: '400px', backgroundColor: 'var(--color-bg-default)' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Typography variant="h3" style={{ marginBottom: '16px' }}>
+                Notification Settings
+              </Typography>
+              <Stack spacing="md">
+                <Flex justify="space-between" align="center">
+                  <Typography variant="body-medium">Global Notifications</Typography>
+                  {/* Switch component usage depends on implementation, assuming common props */}
+                  <input
+                    type="checkbox"
+                    checked={user.value?.notificationSettings?.globalEnabled !== false}
+                    onChange={(e) => toggleGlobalNotifications(e.currentTarget.checked)}
+                  />
+                </Flex>
+                <Divider />
+                <Typography variant="caption" color="text-secondary">
+                  More detailed per-room settings coming soon...
+                </Typography>
+                <Button fullWidth onClick={() => setShowSettings(false)}>
+                  Close
+                </Button>
+              </Stack>
+            </Paper>
           </div>
         )}
       </Flex>

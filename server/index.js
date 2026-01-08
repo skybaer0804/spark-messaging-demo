@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 const { connectRedis } = require('./config/redis');
 const socketService = require('./services/socketService');
 const configureWebPush = require('./config/push');
+const schedulerService = require('./services/schedulerService');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,6 +19,7 @@ connectRedis();
 // Initialize Services
 socketService.initialize();
 configureWebPush();
+schedulerService.initialize();
 
 // Middleware
 app.use(cors());
@@ -31,6 +33,9 @@ app.use('/uploads', express.static('C:/project/file'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/chat', require('./routes/chat'));
 app.use('/api/push', require('./routes/push'));
+app.use('/api/org', require('./routes/org'));
+app.use('/api/notification', require('./routes/notification'));
+app.use('/api/video-meeting', require('./routes/videoMeeting'));
 
 // Global Error Handler
 app.use((err, req, res, next) => {

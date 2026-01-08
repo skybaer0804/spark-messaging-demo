@@ -1,9 +1,9 @@
-// ReverseAuctionCore는 reverse-auction 클래스를 사용하므로
-// ReverseAuction.scss의 스타일을 그대로 사용
+// VideoMeetingCore는 video-meeting 클래스를 사용하므로
+// VideoMeeting.scss의 스타일을 그대로 사용
 // 여기서는 reverse-auction-core 클래스도 reverse-auction과 동일하게 처리
 
 .reverse-auction-core {
-  // ReverseAuction.scss의 모든 스타일을 상속
+  // VideoMeeting.scss의 모든 스타일을 상속
   @extend .reverse-auction;
 
   &__header {

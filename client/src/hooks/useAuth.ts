@@ -5,6 +5,7 @@ export interface User {
   id: string;
   email: string;
   username: string;
+  role: 'Admin' | 'Normal' | 'Guest';
 }
 
 const user = signal<User | null>(null);

@@ -1,27 +1,27 @@
 import type { ChatAdapter, ChatMessage } from '../../Chat/types';
-import type { useReverseAuction } from '../hooks/useReverseAuction';
+import type { useVideoMeeting } from '../hooks/useVideoMeeting';
 
-export class ReverseAuctionAdapter implements ChatAdapter {
-  private reverseAuctionHook: ReturnType<typeof useReverseAuction>;
+export class VideoMeetingAdapter implements ChatAdapter {
+  private videoMeetingHook: ReturnType<typeof useVideoMeeting>;
 
-  constructor(reverseAuctionHook: ReturnType<typeof useReverseAuction>) {
-    this.reverseAuctionHook = reverseAuctionHook;
+  constructor(videoMeetingHook: ReturnType<typeof useVideoMeeting>) {
+    this.videoMeetingHook = videoMeetingHook;
   }
 
   getMessages(): ChatMessage[] {
-    // ReverseAuction의 ChatMessage를 ChatMessage로 변환
+    // VideoMeeting의 ChatMessage를 ChatMessage로 변환
     return this.reverseAuctionHook.chatMessages.map((msg: any) => ({
       id: msg.id,
       content: msg.content,
       timestamp: msg.timestamp,
       type: msg.type,
       senderId: msg.senderId,
-      // ReverseAuction은 fileData 없음
+      // VideoMeeting은 fileData 없음
     }));
   }
 
   async sendMessage(content: string): Promise<void> {
-    // useReverseAuction의 handleSendChat은 내부 chatInput을 사용
+    // useVideoMeeting의 handleSendChat은 내부 chatInput을 사용
     // 직접 메시지를 전송하도록 수정
     const chatService = (this.reverseAuctionHook as any).chatServiceRef?.current;
     const currentRoom = this.reverseAuctionHook.currentRoom;
@@ -69,15 +69,15 @@ export class ReverseAuctionAdapter implements ChatAdapter {
   }
 
   showRoomList(): boolean {
-    return false; // ReverseAuction은 룸 목록 UI 없음
+    return false; // VideoMeeting은 룸 목록 UI 없음
   }
 
   showSidebar(): boolean {
-    return false; // ReverseAuction은 사이드바 없음
+    return false; // VideoMeeting은 사이드바 없음
   }
 
   showFileUpload(): boolean {
-    return true; // ReverseAuction도 파일 전송 지원
+    return true; // VideoMeeting도 파일 전송 지원
   }
 
   getPlaceholder(): string {
@@ -88,5 +88,5 @@ export class ReverseAuctionAdapter implements ChatAdapter {
     return '메시지가 없습니다.';
   }
 
-  // ReverseAuction은 룸 관리를 외부에서 하므로 이벤트 핸들러 없음
+  // VideoMeeting은 룸 관리를 외부에서 하므로 이벤트 핸들러 없음
 }

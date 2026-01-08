@@ -10,7 +10,7 @@ import { WebRTCService } from '../services/WebRTCService';
 import type { Room, ChatMessage, Participant, UserRole, Category } from '../types';
 import type { RoomMessageData } from '@skybaer0804/spark-messaging-client';
 
-export function useReverseAuction() {
+export function useVideoMeeting() {
   const [isConnected, setIsConnected] = useState(false);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [currentRoom, setCurrentRoom] = useState<Room | null>(null);

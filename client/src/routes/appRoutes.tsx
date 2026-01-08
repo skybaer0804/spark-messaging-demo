@@ -2,7 +2,7 @@ import type { JSX } from 'preact';
 import { IconBell, IconGavel, IconMessageCircle, IconPalette, IconHome } from '@tabler/icons-react';
 import { ChatApp } from '@/components/ChatApp/ChatApp';
 import { NotificationApp } from '@/components/NotificationApp/NotificationApp';
-import { ReverseAuction } from '@/components/ReverseAuction/ReverseAuction';
+import { VideoMeeting } from '@/components/VideoMeeting/VideoMeeting';
 import { DesignSystemDemo } from '@/components/DesignSystemDemo/DesignSystemDemo';
 import { HomePage } from '@/components/HomePage/HomePage';
 import { AuthPage } from '@/components/Auth/AuthPage';
@@ -108,7 +108,7 @@ export const appRoutes: AppRouteNode[] = [
     path: '/reverse-auction',
     icon: <IconGavel size={20} />,
     title: 'Reverse Auction',
-    element: <ReverseAuction />,
+    element: <VideoMeeting />,
   },
   {
     id: 'design-system',

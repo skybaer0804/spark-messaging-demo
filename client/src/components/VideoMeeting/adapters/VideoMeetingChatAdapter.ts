@@ -1,24 +1,24 @@
 import type { ChatAdapter, ChatMessage } from '../../Chat/types';
 import type { ChatStore } from '../stores/ChatStore';
-import type { ReverseAuctionStore } from '../stores/ReverseAuctionStore';
+import type { VideoMeetingStore } from '../stores/VideoMeetingStore';
 import { ChatService } from '../../../services/ChatService';
 import { FileTransferService } from '../../../services/FileTransferService';
 import type { Signal } from '@preact/signals';
 
-export class ReverseAuctionChatAdapter implements ChatAdapter {
+export class VideoMeetingChatAdapter implements ChatAdapter {
   private chatStore: ChatStore;
-  private reverseAuctionStore: ReverseAuctionStore;
+  private videoMeetingStore: VideoMeetingStore;
   private chatService: ChatService;
   private fileTransferService: FileTransferService | null;
 
   constructor(
     chatStore: ChatStore,
-    reverseAuctionStore: ReverseAuctionStore,
+    videoMeetingStore: VideoMeetingStore,
     chatService: ChatService,
     fileTransferService: FileTransferService | null = null,
   ) {
     this.chatStore = chatStore;
-    this.reverseAuctionStore = reverseAuctionStore;
+    this.videoMeetingStore = videoMeetingStore;
     this.chatService = chatService;
     this.fileTransferService = fileTransferService;
   }
@@ -42,8 +42,8 @@ export class ReverseAuctionChatAdapter implements ChatAdapter {
   }
 
   async sendMessage(content: string): Promise<void> {
-    const currentRoom = this.reverseAuctionStore.currentRoom.value;
-    if (!content.trim() || !currentRoom || !this.reverseAuctionStore.isConnected.value) {
+    const currentRoom = this.videoMeetingStore.currentRoom.value;
+    if (!content.trim() || !currentRoom || !this.videoMeetingStore.isConnected.value) {
       console.warn('[DEBUG] 메시지 전송 실패:', {
         content: content.trim(),
         currentRoom,
@@ -78,8 +78,8 @@ export class ReverseAuctionChatAdapter implements ChatAdapter {
   }
 
   async sendFile(file: File, onProgress?: (progress: number) => void): Promise<void> {
-    const currentRoom = this.reverseAuctionStore.currentRoom.value;
-    if (!this.reverseAuctionStore.isConnected.value || !this.fileTransferService || !currentRoom) {
+    const currentRoom = this.videoMeetingStore.currentRoom.value;
+    if (!this.videoMeetingStore.isConnected.value || !this.fileTransferService || !currentRoom) {
       throw new Error('파일 전송을 할 수 없습니다.');
     }
 
@@ -109,11 +109,11 @@ export class ReverseAuctionChatAdapter implements ChatAdapter {
 
   // 상태 관리
   isConnected(): boolean {
-    return this.reverseAuctionStore.isConnected.value;
+    return this.videoMeetingStore.isConnected.value;
   }
 
   getCurrentRoom(): string | null {
-    return this.reverseAuctionStore.currentRoom.value?.roomId || null;
+    return this.videoMeetingStore.currentRoom.value?.roomId || null;
   }
 
   // 파일 전송 상태
@@ -127,7 +127,7 @@ export class ReverseAuctionChatAdapter implements ChatAdapter {
 
   // UI 커스터마이징
   showFileUpload(): boolean {
-    return true; // ReverseAuction에서는 항상 파일 업로드 가능
+    return true; // VideoMeeting에서는 항상 파일 업로드 가능
   }
 
   getPlaceholder(): string {

@@ -1,0 +1,41 @@
+.video-meeting {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+
+  &__main-content {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  &__video-section {
+    flex: 1;
+    min-height: 0;
+    border-right: 1px solid var(--color-border-default);
+    @media (max-width: 768px) {
+      flex: 0 0 40%;
+      border-right: none;
+      border-bottom: 1px solid var(--color-border-default);
+    }
+  }
+
+  &__chat-section {
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-secondary);
+    @media (max-width: 768px) {
+      width: 100%;
+      flex: 1;
+    }
+  }
+
+  &__chat {
+    height: 100%;
+  }
+}

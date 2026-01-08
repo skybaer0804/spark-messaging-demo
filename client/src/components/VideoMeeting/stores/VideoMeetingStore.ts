@@ -7,11 +7,26 @@ import { FileTransferService } from '../../../services/FileTransferService';
 import { RoomService } from '../services/RoomService';
 import { ParticipantService } from '../services/ParticipantService';
 import { WebRTCService } from '../services/WebRTCService';
+import { videoMeetingApi } from '@/services/ApiService';
 import type { Room, Participant, UserRole, Category, ChatMessage } from '../types';
 
-export class ReverseAuctionStore {
+export interface ScheduledMeeting {
+  _id: string;
+  title: string;
+  description?: string;
+  scheduledAt: string;
+  status: 'scheduled' | 'ongoing' | 'completed' | 'cancelled';
+  hostId: { _id: string; username: string };
+  roomId?: string;
+}
+
+export class VideoMeetingStore {
   // 연결 상태
   public readonly isConnected: Signal<boolean> = signal(false);
+
+  // 예약된 회의 리스트
+  public readonly scheduledMeetings: Signal<ScheduledMeeting[]> = signal([]);
+  public readonly showScheduleModal: Signal<boolean> = signal(false);
 
   // 사용자 역할
   public readonly userRole: Signal<UserRole | null> = signal(null);
@@ -90,6 +105,7 @@ export class ReverseAuctionStore {
     this.webRTCService = new WebRTCService(sparkMessagingClient, this.connectionService);
 
     this.setupEventListeners();
+    this.refreshScheduledMeetings();
 
     // 초기 연결 상태 확인
     const status = this.connectionService.getConnectionStatus();
@@ -399,6 +415,33 @@ export class ReverseAuctionStore {
       this.requestedRoomId.value = null;
     } catch (error) {
       console.error('[ERROR] 룸 나가기 실패:', error);
+    }
+  }
+
+  public async refreshScheduledMeetings() {
+    try {
+      const res = await videoMeetingApi.getMeetings();
+      this.scheduledMeetings.value = res.data;
+    } catch (error) {
+      console.error('Failed to fetch meetings:', error);
+    }
+  }
+
+  public async scheduleMeeting(data: {
+    title: string;
+    description?: string;
+    scheduledAt: string;
+    invitedUsers?: string[];
+    invitedOrgs?: string[];
+  }) {
+    try {
+      await videoMeetingApi.createMeeting(data);
+      await this.refreshScheduledMeetings();
+      this.showScheduleModal.value = false;
+      toast.success('Meeting scheduled successfully');
+    } catch (error) {
+      console.error('Failed to schedule meeting:', error);
+      toast.error('Failed to schedule meeting');
     }
   }
 

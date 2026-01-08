@@ -9,7 +9,14 @@ import type { Message, ChatRoom, ChatUser } from '../types';
 import { SparkMessagingError } from '@skybaer0804/spark-messaging-client';
 import { setChatCurrentRoom, setChatRoomList } from '@/stores/chatRoomsStore';
 import { useAuth } from '@/hooks/useAuth';
-import { authApi } from '@/services/ApiService';
+import { authApi, orgApi } from '@/services/ApiService';
+
+export interface Organization {
+  _id: string;
+  name: string;
+  dept1: string;
+  dept2?: string;
+}
 
 export function useChatApp() {
   const { user } = useAuth();
@@ -20,7 +27,9 @@ export function useChatApp() {
   const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
   const [roomList, setRoomList] = useState<ChatRoom[]>([]);
   const [userList, setUserList] = useState<ChatUser[]>([]);
+  const [orgList, setOrgList] = useState<Organization[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
   const [uploadingFile, setUploadingFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [socketId, setSocketId] = useState<string | null>(null);
@@ -48,6 +57,15 @@ export function useChatApp() {
       setUserList(response.data);
     } catch (error) {
       console.error('Failed to load users:', error);
+    }
+  };
+
+  const refreshOrgList = async () => {
+    try {
+      const response = await orgApi.getOrganizations();
+      setOrgList(response.data);
+    } catch (error) {
+      console.error('Failed to load organizations:', error);
     }
   };
 
@@ -133,7 +151,7 @@ export function useChatApp() {
     // 초기 연결 상태 확인 및 데이터 로드
     const initData = async () => {
       if (chatServiceRef.current) {
-        await Promise.all([refreshRoomList(), refreshUserList()]);
+        await Promise.all([refreshRoomList(), refreshUserList(), refreshOrgList()]);
       }
     };
 
@@ -264,8 +282,13 @@ export function useChatApp() {
 
     const roomName = roomIdInput.trim();
     try {
-      // 1. 백엔드에 방 생성 요청 (멤버 포함)
-      const newRoom = await chatServiceRef.current.createRoom(roomName, selectedUserIds);
+      // 1. 백엔드에 방 생성 요청 (멤버 및 조직 포함)
+      const newRoom = await chatServiceRef.current.createRoom({
+        name: roomName,
+        members: selectedUserIds,
+        invitedOrgs: selectedOrgIds,
+        isGroup: true,
+      });
 
       // 2. 목록 갱신
       await refreshRoomList();
@@ -275,6 +298,7 @@ export function useChatApp() {
 
       setRoomIdInput('');
       setSelectedUserIds([]);
+      setSelectedOrgIds([]);
       toast.success('채팅방이 생성되었습니다.');
     } catch (error) {
       console.error('Failed to create room:', error);
@@ -284,6 +308,10 @@ export function useChatApp() {
 
   const toggleUserSelection = (userId: string) => {
     setSelectedUserIds((prev) => (prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]));
+  };
+
+  const toggleOrgSelection = (orgId: string) => {
+    setSelectedOrgIds((prev) => (prev.includes(orgId) ? prev.filter((id) => id !== orgId) : [...prev, orgId]));
   };
 
   const leaveRoom = async () => {
@@ -297,7 +325,6 @@ export function useChatApp() {
       if (chatServiceRef.current) {
         await chatServiceRef.current.setCurrentRoom(null);
       }
-      toast.info('채팅방을 나갔습니다.');
     } catch (error) {
       console.error('Failed to leave room:', error);
       toast.error('Room 나가기 실패');
@@ -322,8 +349,11 @@ export function useChatApp() {
     currentRoom,
     roomList,
     userList,
+    orgList,
     selectedUserIds,
+    selectedOrgIds,
     toggleUserSelection,
+    toggleOrgSelection,
     sendMessage,
     handleRoomSelect,
     handleCreateRoom,

@@ -3,11 +3,16 @@ import { toast } from 'react-toastify';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { NotificationService } from '../../../services/NotificationService';
-import type { ScheduleOption } from '../types';
+import { orgApi, notificationApi } from '@/services/ApiService';
+import type { Organization } from '../../ChatApp/hooks/useChatApp';
 
 export function useNotificationApp() {
+  const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
-  const [scheduleOption, setScheduleOption] = useState<ScheduleOption>('immediate');
+  const [scheduledDate, setScheduledAt] = useState('');
+  const [targetType, setTargetType] = useState<'all' | 'organization'>('all');
+  const [targetId, setTargetId] = useState('');
+  const [orgList, setOrgList] = useState<Organization[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
   const notificationServiceRef = useRef<NotificationService | null>(null);
@@ -25,30 +30,50 @@ export function useNotificationApp() {
       setIsConnected(connected);
     });
 
+    const fetchOrgs = async () => {
+      try {
+        const res = await orgApi.getOrganizations();
+        setOrgList(res.data);
+        if (res.data.length > 0) setTargetId(res.data[0]._id);
+      } catch (err) {
+        console.error('Failed to fetch orgs:', err);
+      }
+    };
+
+    fetchOrgs();
+
     return () => {
       connectionService.cleanup();
     };
   }, []);
 
   const handleSend = async () => {
-    if (!notificationServiceRef.current) return;
-
     try {
-      await notificationServiceRef.current.sendNotification(message, scheduleOption);
+      await notificationApi.createNotification({
+        title,
+        content: message,
+        scheduledAt: scheduledDate || undefined,
+        targetType,
+        targetId: targetType === 'organization' ? targetId : undefined,
+      });
+      
+      setTitle('');
       setMessage('');
-      setScheduleOption('immediate');
-      toast.success('알림이 전송되었습니다.');
+      setScheduledAt('');
+      toast.success('Notification created/sent successfully');
     } catch (error) {
-      console.error('알림 전송 실패:', error);
-      toast.error(`알림 전송에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+      console.error('Notification creation failed:', error);
+      toast.error('Failed to create notification');
     }
   };
 
   return {
-    message,
-    setMessage,
-    scheduleOption,
-    setScheduleOption,
+    title, setTitle,
+    message, setMessage,
+    scheduledDate, setScheduledAt,
+    targetType, setTargetType,
+    targetId, setTargetId,
+    orgList,
     isConnected,
     handleSend,
   };
