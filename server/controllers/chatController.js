@@ -6,7 +6,50 @@ const notificationService = require('../services/notificationService');
 const userService = require('../services/userService');
 const imageService = require('../services/imageService');
 
-// ... (existing code for createRoom and getRooms)
+// 채팅방 생성
+exports.createRoom = async (req, res) => {
+  try {
+    const { name, members, isGroup } = req.body;
+    const currentUserId = req.user.id;
+
+    // 멤버 목록에 현재 사용자 추가 (중복 방지)
+    const roomMembers = [...new Set([...(members || []), currentUserId])];
+
+    const newRoom = new ChatRoom({
+      name: name || (isGroup ? 'Group Chat' : 'Direct Message'),
+      members: roomMembers,
+      isGroup: !!isGroup,
+    });
+
+    await newRoom.save();
+
+    // 생성된 방 정보를 멤버들과 함께 리턴
+    const populatedRoom = await ChatRoom.findById(newRoom._id).populate('members', 'username avatar status');
+
+    res.status(201).json(populatedRoom);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to create room', error: error.message });
+  }
+};
+
+// 사용자가 속한 채팅방 목록 조회
+exports.getRooms = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const rooms = await ChatRoom.find({ members: userId })
+      .populate('members', 'username avatar status')
+      .populate({
+        path: 'lastMessage',
+        populate: { path: 'senderId', select: 'username' },
+      })
+      .sort({ updatedAt: -1 });
+
+    res.json(rooms);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch rooms', error: error.message });
+  }
+};
 
 // 파일 업로드 처리
 exports.uploadFile = async (req, res) => {
@@ -38,7 +81,7 @@ exports.uploadFile = async (req, res) => {
       thumbnailUrl: thumbnailUrl,
       fileName: file.originalname,
       fileSize: file.size,
-      mimeType: file.mimetype
+      mimeType: file.mimetype,
     });
     await newMessage.save();
 
@@ -50,13 +93,18 @@ exports.uploadFile = async (req, res) => {
     }
 
     // 3. Socket 브로드캐스트 (파일 정보 포함)
-    await socketService.sendRoomMessage(roomId, type, {
-      content: newMessage.content,
-      fileUrl: newMessage.fileUrl,
-      thumbnailUrl: newMessage.thumbnailUrl,
-      fileName: newMessage.fileName,
-      fileSize: newMessage.fileSize
-    }, senderId);
+    await socketService.sendRoomMessage(
+      roomId,
+      type,
+      {
+        content: newMessage.content,
+        fileUrl: newMessage.fileUrl,
+        thumbnailUrl: newMessage.thumbnailUrl,
+        fileName: newMessage.fileName,
+        fileSize: newMessage.fileSize,
+      },
+      senderId,
+    );
 
     res.status(201).json(newMessage);
   } catch (error) {
@@ -75,7 +123,7 @@ exports.sendMessage = async (req, res) => {
       roomId,
       senderId,
       content,
-      type: type || 'text'
+      type: type || 'text',
     });
     await newMessage.save();
 
@@ -93,25 +141,23 @@ exports.sendMessage = async (req, res) => {
     await socketService.sendRoomMessage(roomId, type || 'chat', content, senderId);
 
     // 5. 푸시 알림 전송 (오프라인인 유저에게만)
-    const sender = room.members.find(m => m._id.toString() === senderId);
+    const sender = room.members.find((m) => m._id.toString() === senderId);
     const potentialRecipientIds = room.members
-      .filter(m => m._id.toString() !== senderId)
-      .map(m => m._id.toString());
+      .filter((m) => m._id.toString() !== senderId)
+      .map((m) => m._id.toString());
 
     if (potentialRecipientIds.length > 0) {
       // Redis에서 유저들의 상태를 확인
       const userStatuses = await userService.getUsersStatus(potentialRecipientIds);
-      
-      const offlineRecipientIds = potentialRecipientIds.filter(
-        id => userStatuses[id] === 'offline'
-      );
+
+      const offlineRecipientIds = potentialRecipientIds.filter((id) => userStatuses[id] === 'offline');
 
       if (offlineRecipientIds.length > 0) {
         notificationService.notifyNewMessage(
-          offlineRecipientIds, 
-          sender ? sender.username : 'Unknown', 
-          content, 
-          roomId
+          offlineRecipientIds,
+          sender ? sender.username : 'Unknown',
+          content,
+          roomId,
         );
       }
     }
@@ -126,12 +172,9 @@ exports.sendMessage = async (req, res) => {
 exports.getMessages = async (req, res) => {
   try {
     const { roomId } = req.params;
-    const messages = await Message.find({ roomId })
-      .populate('senderId', 'username avatar')
-      .sort({ timestamp: 1 });
+    const messages = await Message.find({ roomId }).populate('senderId', 'username avatar').sort({ timestamp: 1 });
     res.json(messages);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch messages', error: error.message });
   }
 };
-
