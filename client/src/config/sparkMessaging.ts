@@ -1,7 +1,7 @@
 import SparkMessaging from '@skybaer0804/spark-messaging-client';
 
-const serverUrl = import.meta.env.VITE_SERVER_URL || 'http://localhost:3000';
-const projectKey = import.meta.env.VITE_PROJECT_KEY || 'default-project-key-12345';
+const serverUrl = import.meta.env.VITE_SPARK_SERVER_URL || 'http://localhost:5000';
+const projectKey = import.meta.env.VITE_SPARK_PROJECT_KEY || 'default-project-key-12345';
 
 // SDK 생성자 호출 (생성자 오버로드 사용)
 const sparkMessagingClient = new SparkMessaging(serverUrl, projectKey);

@@ -10,24 +10,16 @@ const userSchema = new mongoose.Schema({
     endpoint: String,
     keys: {
       p256dh: String,
-      auth: String
-    }
+      auth: String,
+    },
   },
   status: { type: String, enum: ['online', 'offline'], default: 'offline' },
-  createdAt: { type: Date, default: Date.now }
-});
-
-// Password hashing before saving
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
+  createdAt: { type: Date, default: Date.now },
 });
 
 // Password comparison method
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);
-

@@ -2,10 +2,20 @@ const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 
+const fs = require('fs');
+
+const UPLOAD_BASE_PATH = 'C:/project/file';
+const ORIGINAL_PATH = path.join(UPLOAD_BASE_PATH, 'original');
+
+// 디렉토리가 없으면 생성
+if (!fs.existsSync(ORIGINAL_PATH)) {
+  fs.mkdirSync(ORIGINAL_PATH, { recursive: true });
+}
+
 // 저장 위치 및 파일명 설정
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/original/');
+    cb(null, ORIGINAL_PATH);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = crypto.randomBytes(16).toString('hex');
