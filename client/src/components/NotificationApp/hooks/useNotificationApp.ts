@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { toast } from 'react-toastify';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { NotificationService } from '../../../services/NotificationService';
@@ -36,10 +37,10 @@ export function useNotificationApp() {
       await notificationServiceRef.current.sendNotification(message, scheduleOption);
       setMessage('');
       setScheduleOption('immediate');
-      alert('알림이 전송되었습니다.');
+      toast.success('알림이 전송되었습니다.');
     } catch (error) {
       console.error('알림 전송 실패:', error);
-      alert(`알림 전송에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
+      toast.error(`알림 전송에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   };
 

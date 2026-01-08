@@ -16,13 +16,15 @@ import { Button } from '@/ui-component/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
 import './ChatApp.scss';
 
+import type { Message, ChatRoom } from './types';
+
 interface ChatRoomSidebarProps {
   isConnected: boolean;
   roomIdInput: string;
   setRoomIdInput: (next: string) => void;
   handleCreateRoom: () => void;
-  roomList: string[];
-  currentRoom: string | null;
+  roomList: ChatRoom[];
+  currentRoom: ChatRoom | null;
   handleRoomSelect: (roomId: string) => void;
 }
 
@@ -80,19 +82,19 @@ function ChatRoomSidebar({
               )
             : roomList.map((room) => (
                 <ListItem
-                  key={room}
-                  onClick={() => handleRoomSelect(room)}
+                  key={room._id}
+                  onClick={() => handleRoomSelect(room._id)}
                   style={{
                     cursor: 'pointer',
-                    backgroundColor: currentRoom === room ? 'var(--color-bg-tertiary)' : 'transparent',
+                    backgroundColor: currentRoom?._id === room._id ? 'var(--color-bg-tertiary)' : 'transparent',
                   }}
                 >
                   <ListItemAvatar>
                     <Avatar variant="rounded" style={{ backgroundColor: 'var(--primitive-primary-500)' }}>
-                      {room.substring(0, 2).toUpperCase()}
+                      {room.name.substring(0, 2).toUpperCase()}
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary={room} secondary={currentRoom === room ? 'Active' : ''} />
+                  <ListItemText primary={room.name} secondary={currentRoom?._id === room._id ? 'Active' : ''} />
                 </ListItem>
               ))}
         </List>
@@ -274,8 +276,8 @@ export function ChatApp() {
             <IconButton onClick={leaveRoom}>
               <IconArrowLeft />
             </IconButton>
-            <Avatar variant="rounded">{currentRoom.substring(0, 2)}</Avatar>
-            <Typography variant="h3">{currentRoom}</Typography>
+            <Avatar variant="rounded">{currentRoom.name.substring(0, 2)}</Avatar>
+            <Typography variant="h3">{currentRoom.name}</Typography>
           </Stack>
         </Paper>
 
@@ -445,7 +447,7 @@ export function ChatApp() {
                       handleKeyPress(e);
                     }
                   }}
-                  placeholder={!isConnected ? 'Connecting...' : `Message #${currentRoom}`}
+                  placeholder={!isConnected ? 'Connecting...' : `Message #${currentRoom.name}`}
                   disabled={!isConnected}
                   fullWidth
                   className="chat-app__input"

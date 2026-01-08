@@ -1,5 +1,6 @@
 import type SparkMessaging from '@skybaer0804/spark-messaging-client';
 import { ConnectionService } from '../../../services/ConnectionService';
+import { chatApi } from '../../../services/ApiService';
 import type { Room, Category } from '../types';
 
 export type RoomCreatedCallback = (room: Room) => void;
@@ -94,7 +95,15 @@ export class RoomService {
       throw new Error('서버에 연결되어 있지 않습니다.');
     }
 
-    const roomId = `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // v2.0.0: 백엔드 API를 통해 DB에 방 생성
+    const response = await chatApi.createRoom({
+      name: title.trim(),
+      isGroup: true,
+    });
+
+    const dbRoom = response.data;
+    const roomId = dbRoom._id;
+
     const roomData: Room = {
       roomId,
       category,

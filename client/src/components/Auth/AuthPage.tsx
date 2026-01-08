@@ -45,7 +45,7 @@ export function AuthPage() {
         backgroundColor: 'var(--color-bg-default)',
       }}
     >
-      <Paper elevation={3} padding="xl" style={{ width: '100%', maxWidth: '400px' }}>
+      <Paper elevation={0} padding="xl" style={{ width: '100%', maxWidth: '400px' }}>
         <Typography variant="h2" align="center" style={{ marginBottom: '24px' }}>
           {isLogin ? 'Login' : 'Sign Up'}
         </Typography>

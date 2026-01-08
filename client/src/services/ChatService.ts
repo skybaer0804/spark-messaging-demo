@@ -56,7 +56,12 @@ export class ChatService {
         return;
       }
 
-      const isOwnMessage = this.isOwnMessage(msg);
+      // 메시지 타입 검증
+      const msgType = (msg as any).type || (msg as any).msgType;
+      const validMessageTypes = ['text', 'image', 'file', 'chat', 'file-transfer'];
+      if (msgType && !validMessageTypes.includes(msgType)) {
+        return;
+      }
       const content = typeof msg.content === 'object' && (msg.content as any).content 
         ? (msg.content as any).content 
         : msg.content;
@@ -97,9 +102,10 @@ export class ChatService {
         return;
       }
 
-      // chat 및 file-transfer 타입만 채팅 메시지로 처리
+      // text, image, file, chat 및 file-transfer 타입만 채팅 메시지로 처리
       const msgType = (msg as any).type || msg.type;
-      if (msgType !== 'chat' && msgType !== 'file-transfer') {
+      const validMessageTypes = ['text', 'image', 'file', 'chat', 'file-transfer'];
+      if (!validMessageTypes.includes(msgType)) {
         return; // 시스템 메시지(join-request, join-approved, webrtc-offer 등)는 무시
       }
 

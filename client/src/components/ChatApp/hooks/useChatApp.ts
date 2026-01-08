@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { toast } from 'react-toastify';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { ChatService } from '../../../services/ChatService';
 import { FileTransferService } from '../../../services/FileTransferService';
 import { RoomService } from '../services/RoomService';
-import type { Message } from '../types';
+import type { Message, ChatRoom } from '../types';
 import { SparkMessagingError } from '@skybaer0804/spark-messaging-client';
 import { setChatCurrentRoom, setChatRoomList } from '@/stores/chatRoomsStore';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,8 +16,8 @@ export function useChatApp() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [roomIdInput, setRoomIdInput] = useState('chat');
-  const [currentRoom, setCurrentRoom] = useState<string | null>(null);
-  const [roomList, setRoomList] = useState<string[]>([]);
+  const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
+  const [roomList, setRoomList] = useState<ChatRoom[]>([]);
   const [uploadingFile, setUploadingFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [socketId, setSocketId] = useState<string | null>(null);
@@ -25,6 +26,17 @@ export function useChatApp() {
   const chatServiceRef = useRef<ChatService | null>(null);
   const roomServiceRef = useRef<RoomService | null>(null);
   const fileTransferServiceRef = useRef<FileTransferService | null>(null);
+
+  const refreshRoomList = async () => {
+    if (chatServiceRef.current) {
+      try {
+        const rooms = await chatServiceRef.current.getRooms();
+        setRoomList(rooms);
+      } catch (error) {
+        console.error('Failed to load rooms:', error);
+      }
+    }
+  };
 
   useEffect(() => {
     // 서비스 초기화
@@ -67,32 +79,32 @@ export function useChatApp() {
       setIsConnected(false);
     });
 
-    // Room 리스트 업데이트 (룸 생성 메시지 수신)
-    roomService.onMessage((_roomId) => {
-      setRoomList(roomService.getRoomList());
+    // Room 리스트 업데이트 (룸 생성 메시지 수신 시 리스트 갱신)
+    roomService.onMessage(() => {
+      refreshRoomList();
     });
 
     // Room 관리
     roomService.onRoomJoined((roomId) => {
-      setCurrentRoom(roomId);
-      setRoomList(roomService.getRoomList());
-      setMessages([]);
+      // roomId는 소켓의 roomId (여기서는 name일 수도 있고 ID일 수도 있음)
+      // 하지만 우리는 DB 기반으로 동작하므로 refreshRoomList를 통해 상태 동기화
+      refreshRoomList();
       chatService.setCurrentRoom(roomId);
     });
 
     roomService.onRoomLeft((roomId) => {
-      if (currentRoom === roomId) {
+      if (currentRoom && (currentRoom._id === roomId || currentRoom.name === roomId)) {
         setCurrentRoom(null);
         setMessages([]);
         chatService.setCurrentRoom(null);
       }
-      setRoomList(roomService.getRoomList());
+      refreshRoomList();
     });
 
     // 메시지 수신
     chatService.onMessage((message) => {
       setMessages((prev) => [...prev, message]);
-    }, true); // Room에 있으면 일반 메시지 무시
+    }, true); // Room에 있으면 일반 메시지는 onRoomMessage에서 처리
 
     chatService.onRoomMessage((message) => {
       setMessages((prev) => [...prev, message]);
@@ -101,12 +113,7 @@ export function useChatApp() {
     // 초기 연결 상태 확인 및 데이터 로드
     const initData = async () => {
       if (chatServiceRef.current) {
-        try {
-          const rooms = await chatServiceRef.current.getRooms();
-          setRoomList(rooms.map((r: any) => r.name || r._id));
-        } catch (error) {
-          console.error('Failed to load initial rooms:', error);
-        }
+        await refreshRoomList();
       }
     };
 
@@ -126,13 +133,13 @@ export function useChatApp() {
     };
   }, []);
 
-  // 전역 사이드바에서 사용할 수 있도록 roomList/currentRoom을 스토어에 동기화
+  // 전역 사이드바 호환성을 위해 이름을 문자열 배열로 변환하여 동기화
   useEffect(() => {
-    setChatRoomList(roomList);
+    setChatRoomList(roomList.map((r) => r.name));
   }, [roomList]);
 
   useEffect(() => {
-    setChatCurrentRoom(currentRoom);
+    setChatCurrentRoom(currentRoom?.name || null);
   }, [currentRoom]);
 
   const sendFile = async (file: File) => {
@@ -140,9 +147,9 @@ export function useChatApp() {
       return;
     }
 
-    const room = roomServiceRef.current.getCurrentRoom();
+    const room = currentRoom;
     if (!room) {
-      alert('채팅방에 참여해주세요.');
+      toast.warning('채팅방에 참여해주세요.');
       return;
     }
 
@@ -150,20 +157,19 @@ export function useChatApp() {
     setUploadProgress(0);
 
     try {
-      await fileTransferServiceRef.current.sendFile(room, file, (progress) => {
+      // 소켓 통신을 위해서는 room.name 또는 room._id 중 소켓이 사용하는 값을 사용해야 함
+      // 현재 RoomService는 roomId를 그대로 사용함.
+      await fileTransferServiceRef.current.sendFile(room._id, file, (progress) => {
         setUploadProgress(progress);
       });
       setUploadingFile(null);
       setUploadProgress(0);
+      toast.success('파일 전송 완료');
     } catch (error) {
       console.error('Failed to send file:', error);
       setUploadingFile(null);
       setUploadProgress(0);
-      if (error instanceof Error) {
-        alert(`파일 전송 실패: ${error.message}`);
-      } else {
-        alert('파일 전송 실패');
-      }
+      toast.error(error instanceof Error ? `파일 전송 실패: ${error.message}` : '파일 전송 실패');
     }
   };
 
@@ -171,48 +177,64 @@ export function useChatApp() {
     if (!input.trim() || !isConnected || !chatServiceRef.current) return;
 
     const messageContent = input.trim();
-    const room = roomServiceRef.current?.getCurrentRoom();
+    const room = currentRoom;
 
     try {
       if (room) {
-        await chatServiceRef.current.sendRoomMessage(room, 'chat', messageContent);
+        // 백엔드 API 호출 시 _id 사용, type은 백엔드 enum 규격에 맞춰 'text'로 전송
+        await chatServiceRef.current.sendRoomMessage(room._id, 'text', messageContent);
       } else {
-        await chatServiceRef.current.sendMessage('chat', messageContent);
+        await chatServiceRef.current.sendMessage('text', messageContent);
       }
       setInput('');
     } catch (error) {
       console.error('Failed to send message:', error);
-      if (error instanceof SparkMessagingError) {
-        alert(`메시지 전송 실패: ${error.message} (코드: ${error.code})`);
-      } else {
-        alert('메시지 전송 실패');
-      }
+      toast.error(error instanceof SparkMessagingError ? `메시지 전송 실패: ${error.message}` : '메시지 전송 실패');
     }
   };
 
-  const handleRoomSelect = async (roomId: string) => {
+  const handleRoomSelect = async (roomIdOrRoom: string | ChatRoom) => {
     if (!roomServiceRef.current || !chatServiceRef.current) return;
 
+    let targetRoom: ChatRoom | undefined;
+    if (typeof roomIdOrRoom === 'string') {
+      targetRoom = roomList.find((r) => r._id === roomIdOrRoom || r.name === roomIdOrRoom);
+    } else {
+      targetRoom = roomIdOrRoom;
+    }
+
+    if (!targetRoom) return;
+
     try {
-      // 1. 소켓 방 참여 (실시간 수신을 위해)
-      await roomServiceRef.current.joinRoom(roomId);
-      
-      // 2. 백엔드에서 이전 메시지 이력 가져오기
-      const history = await chatServiceRef.current.getMessages(roomId);
+      // 1. 소켓 방 참여 (실시간 수신을 위해 _id 사용)
+      await roomServiceRef.current.joinRoom(targetRoom._id);
+
+      // 2. 백엔드에서 이전 메시지 이력 가져오기 (_id 사용)
+      const history = await chatServiceRef.current.getMessages(targetRoom._id);
       const formattedMessages = history.map((msg: any) => ({
         id: msg._id,
         content: msg.content,
         timestamp: new Date(msg.timestamp),
         type: msg.senderId?._id === user.value?.id ? 'sent' : 'received',
         senderId: msg.senderId?.username || 'Unknown',
+        fileData: msg.fileUrl
+          ? {
+              fileName: msg.fileName,
+              fileType: msg.type === 'image' ? 'image' : 'document',
+              mimeType: msg.mimeType,
+              size: msg.fileSize,
+              data: msg.fileUrl,
+              thumbnail: msg.thumbnailUrl,
+            }
+          : undefined,
       }));
-      
+
       setMessages(formattedMessages);
-      setCurrentRoom(roomId);
-      chatServiceRef.current.setCurrentRoom(roomId);
+      setCurrentRoom(targetRoom);
+      chatServiceRef.current.setCurrentRoom(targetRoom._id);
     } catch (error) {
       console.error('Failed to join room or fetch history:', error);
-      alert('Room 입장 실패');
+      toast.error('Room 입장 실패');
     }
   };
 
@@ -222,41 +244,37 @@ export function useChatApp() {
     const roomName = roomIdInput.trim();
     try {
       // 1. 백엔드에 방 생성 요청
-      await chatServiceRef.current.createRoom(roomName);
-      
-      // 2. 소켓 방 참여 및 목록 업데이트
-      await handleRoomSelect(roomName);
-      
-      // 3. 목록 새로고침
-      const rooms = await chatServiceRef.current.getRooms();
-      setRoomList(rooms.map((r: any) => r.name || r._id));
-      
+      const newRoom = await chatServiceRef.current.createRoom(roomName);
+
+      // 2. 목록 갱신
+      await refreshRoomList();
+
+      // 3. 생성된 방으로 입장 (newRoom에는 _id가 있음)
+      await handleRoomSelect(newRoom);
+
       setRoomIdInput('');
+      toast.success('채팅방이 생성되었습니다.');
     } catch (error) {
       console.error('Failed to create room:', error);
-      alert('Room 생성 실패');
+      toast.error('Room 생성 실패');
     }
   };
 
   const leaveRoom = async () => {
     if (!currentRoom || !isConnected || !roomServiceRef.current) return;
 
-    const roomToLeave = currentRoom;
+    const roomId = currentRoom._id;
     try {
-      await roomServiceRef.current.leaveRoom(roomToLeave);
-      // 명시적으로 currentRoom을 null로 설정하여 목록 화면으로 이동
+      await roomServiceRef.current.leaveRoom(roomId);
       setCurrentRoom(null);
       setMessages([]);
       if (chatServiceRef.current) {
         chatServiceRef.current.setCurrentRoom(null);
       }
+      toast.info('채팅방을 나갔습니다.');
     } catch (error) {
       console.error('Failed to leave room:', error);
-      if (error instanceof SparkMessagingError) {
-        alert(`Room 나가기 실패: ${error.message} (코드: ${error.code})`);
-      } else {
-        alert('Room 나가기 실패');
-      }
+      toast.error('Room 나가기 실패');
     }
   };
 

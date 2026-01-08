@@ -1,4 +1,5 @@
 import { signal, type Signal } from '@preact/signals';
+import { toast } from 'react-toastify';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { ChatService } from '../../../services/ChatService';
@@ -194,7 +195,7 @@ export class ReverseAuctionStore {
         if (socketId === status.socketId) {
           console.log('[DEBUG] 참가 승인됨 - 룸 입장 시작:', roomId);
           this.joinRequestStatus.value = 'approved';
-          alert('참가 요청이 승인되었습니다!');
+          toast.success('참가 요청이 승인되었습니다!');
 
           const targetRoomId = roomId || this.requestedRoomId.value;
           if (targetRoomId) {
@@ -220,7 +221,7 @@ export class ReverseAuctionStore {
         if (socketId === status.socketId) {
           this.joinRequestStatus.value = 'rejected';
           this.requestedRoomId.value = null;
-          alert('참가 요청이 거부되었습니다.');
+          toast.error('참가 요청이 거부되었습니다.');
           if (this.currentRoom.value) {
             this.roomService.leaveRoom(this.currentRoom.value.roomId);
           }
@@ -290,7 +291,7 @@ export class ReverseAuctionStore {
       return room;
     } catch (error) {
       console.error('Failed to create room:', error);
-      alert('룸 생성에 실패했습니다.');
+      toast.error('룸 생성에 실패했습니다.');
       return null;
     }
   }
@@ -329,7 +330,7 @@ export class ReverseAuctionStore {
         this.joinRequestStatus.value = 'idle';
       } catch (error) {
         console.error('[ERROR] 룸 참가 실패:', error);
-        alert('룸 참가에 실패했습니다.');
+        toast.error('룸 참가에 실패했습니다.');
       }
     } else {
       // 공급자는 참가 요청만 보내고 룸에 입장하지 않음
@@ -341,7 +342,7 @@ export class ReverseAuctionStore {
           this.userRole.value = 'supplier';
         } catch (error) {
           console.error('[ERROR] 참가 요청 실패:', error);
-          alert('참가 요청에 실패했습니다.');
+          toast.error('참가 요청에 실패했습니다.');
           this.joinRequestStatus.value = 'idle';
           this.requestedRoomId.value = null;
         }

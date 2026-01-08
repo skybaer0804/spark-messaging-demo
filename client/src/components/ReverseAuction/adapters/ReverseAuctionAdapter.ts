@@ -29,7 +29,7 @@ export class ReverseAuctionAdapter implements ChatAdapter {
     if (!content.trim() || !this.reverseAuctionHook.isConnected || !chatService || !currentRoom) return;
 
     try {
-      await chatService.sendRoomMessage(currentRoom.roomId, 'chat', content.trim());
+      await chatService.sendRoomMessage(currentRoom.roomId, 'text', content.trim());
     } catch (error) {
       console.error('Failed to send message:', error);
       throw error;

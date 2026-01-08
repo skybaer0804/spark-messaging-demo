@@ -123,7 +123,7 @@ exports.sendMessage = async (req, res) => {
       roomId,
       senderId,
       content,
-      type: type || 'text',
+      type: type === 'chat' ? 'text' : type || 'text',
     });
     await newMessage.save();
 
@@ -138,7 +138,7 @@ exports.sendMessage = async (req, res) => {
     await room.save();
 
     // 4. Socket SDK를 통해 실시간 브로드캐스트
-    await socketService.sendRoomMessage(roomId, type || 'chat', content, senderId);
+    await socketService.sendRoomMessage(roomId, newMessage.type, content, senderId);
 
     // 5. 푸시 알림 전송 (오프라인인 유저에게만)
     const sender = room.members.find((m) => m._id.toString() === senderId);

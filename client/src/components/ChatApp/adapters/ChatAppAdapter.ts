@@ -24,9 +24,9 @@ export class ChatAppAdapter implements ChatAdapter {
 
     try {
       if (room) {
-        await chatService.sendRoomMessage(room, 'chat', content.trim());
+        await chatService.sendRoomMessage(room, 'text', content.trim());
       } else {
-        await chatService.sendMessage('chat', content.trim());
+        await chatService.sendMessage('text', content.trim());
       }
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -44,7 +44,7 @@ export class ChatAppAdapter implements ChatAdapter {
   }
 
   getCurrentRoom(): string | null {
-    return this.chatAppHook.currentRoom;
+    return this.chatAppHook.currentRoom?.name || null;
   }
 
   getUploadingFile(): File | null {

@@ -1,7 +1,7 @@
 import type SparkMessaging from '@skybaer0804/spark-messaging-client';
 import { ConnectionService } from './ConnectionService';
 import { ChatService } from './ChatService';
-import type { FileData } from './ChatService';
+import { chatApi } from './ApiService';
 
 export class FileTransferService {
   private chatService: ChatService;
@@ -130,63 +130,31 @@ export class FileTransferService {
     });
   }
 
-  // 파일 전송
+  // 파일 전송 (v2.0.0 DB-First 방식)
   public async sendFile(roomId: string, file: File, onProgress?: (progress: number) => void): Promise<void> {
-    // 파일 검증
+    // 1. 파일 검증
     const validation = this.validateFile(file);
     if (!validation.valid) {
       throw new Error(validation.error);
     }
 
-    // 파일 읽기 (0-50%)
-    const base64Data = await this.readFileAsBase64(file, onProgress);
+    if (onProgress) onProgress(10);
 
-    // 데이터 준비 (50-80%)
-    if (onProgress) {
-      onProgress(75);
-    }
+    // 2. FormData 생성
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('roomId', roomId);
 
-    const fileType = this.detectFileType(file.type || '', file.name);
+    try {
+      if (onProgress) onProgress(30);
 
-    // MIME 타입이 없으면 확장자 기반으로 설정
-    let mimeType = file.type;
-    if (!mimeType || mimeType === '') {
-      const extension = file.name.toLowerCase().split('.').pop() || '';
-      if (extension === 'md') {
-        mimeType = 'text/markdown';
-      } else if (extension === 'csv') {
-        mimeType = 'text/csv';
-      }
-    }
+      // 3. 백엔드 API를 통해 파일 업로드 (DB 저장 및 소켓 브로드캐스트 포함)
+      await chatApi.uploadFile(formData);
 
-    const fileData: FileData = {
-      fileName: file.name,
-      fileType: fileType as 'image' | 'document' | 'video' | 'audio',
-      mimeType: mimeType || 'application/octet-stream',
-      size: file.size,
-      data: base64Data,
-    };
-
-    // 이미지 썸네일 생성 (선택사항)
-    if (fileType === 'image') {
-      try {
-        const thumbnail = await this.generateThumbnail(file, 200, 200);
-        fileData.thumbnail = thumbnail;
-      } catch (error) {
-        console.warn('썸네일 생성 실패:', error);
-      }
-    }
-
-    // 소켓 전송 (80-100%)
-    if (onProgress) {
-      onProgress(90);
-    }
-
-    const content = JSON.stringify({ fileData });
-    await this.chatService.sendRoomMessage(roomId, 'file-transfer', content);
-
-    if (onProgress) {
-      onProgress(100);
+      if (onProgress) onProgress(100);
+    } catch (error) {
+      console.error('File upload failed:', error);
+      throw error;
     }
   }
 

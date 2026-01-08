@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
+import { toast } from 'react-toastify';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { ChatService } from '../../../services/ChatService';
@@ -143,7 +144,7 @@ export function useReverseAuction() {
         if (socketId === status.socketId) {
           console.log('[DEBUG] 참가 승인됨 - 룸 입장 시작:', roomId);
           setJoinRequestStatus('approved');
-          alert('참가 요청이 승인되었습니다!');
+          toast.success('참가 요청이 승인되었습니다!');
 
           const targetRoomId = roomId || requestedRoomId;
           if (targetRoomId) {
@@ -183,7 +184,7 @@ export function useReverseAuction() {
         if (socketId === status.socketId) {
           setJoinRequestStatus('rejected');
           setRequestedRoomId(null);
-          alert('참가 요청이 거부되었습니다.');
+          toast.error('참가 요청이 거부되었습니다.');
           if (currentRoom) {
             roomService.leaveRoom(currentRoom.roomId);
           }
@@ -315,7 +316,7 @@ export function useReverseAuction() {
       setCurrentRoom(room);
     } catch (error) {
       console.error('Failed to create room:', error);
-      alert('룸 생성에 실패했습니다.');
+      toast.error('룸 생성에 실패했습니다.');
     }
   };
 
@@ -358,7 +359,7 @@ export function useReverseAuction() {
         setJoinRequestStatus('idle');
       } catch (error) {
         console.error('[ERROR] 룸 참가 실패:', error);
-        alert('룸 참가에 실패했습니다.');
+        toast.error('룸 참가에 실패했습니다.');
       }
     } else {
       // 공급자는 참가 요청만 보내고 룸에 입장하지 않음
@@ -371,7 +372,7 @@ export function useReverseAuction() {
           // 참가 요청만 보내고 룸에 입장하지 않음 (승인 대기)
         } catch (error) {
           console.error('[ERROR] 참가 요청 실패:', error);
-          alert('참가 요청에 실패했습니다.');
+          toast.error('참가 요청에 실패했습니다.');
           setJoinRequestStatus('idle');
           setRequestedRoomId(null);
         }
@@ -449,7 +450,7 @@ export function useReverseAuction() {
     if (!chatInput.trim() || !currentRoom || !isConnected || !chatServiceRef.current) return;
 
     try {
-      await chatServiceRef.current.sendRoomMessage(currentRoom.roomId, 'chat', chatInput.trim());
+      await chatServiceRef.current.sendRoomMessage(currentRoom.roomId, 'text', chatInput.trim());
       setChatInput('');
     } catch (error) {
       console.error('Failed to send chat:', error);
@@ -476,9 +477,9 @@ export function useReverseAuction() {
       setUploadingFile(null);
       setUploadProgress(0);
       if (error instanceof Error) {
-        alert(`파일 전송 실패: ${error.message}`);
+        toast.error(`파일 전송 실패: ${error.message}`);
       } else {
-        alert('파일 전송 실패');
+        toast.error('파일 전송 실패');
       }
     }
   };
@@ -563,7 +564,7 @@ export function useReverseAuction() {
       }
     } catch (error) {
       console.error('[ERROR] 로컬 스트림 획득 실패:', error);
-      alert('웹캠 접근에 실패했습니다.');
+      toast.error('웹캠 접근에 실패했습니다.');
     }
   };
 
