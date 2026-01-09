@@ -208,8 +208,8 @@ export class ChatService {
     return response.data;
   }
 
-  public async createRoom(name: string, members: string[] = []) {
-    const response = await chatApi.createRoom({ name, members });
+  public async createRoom(data: { name: string; members?: string[]; invitedOrgs?: string[]; isGroup?: boolean }) {
+    const response = await chatApi.createRoom(data);
     return response.data;
   }
 

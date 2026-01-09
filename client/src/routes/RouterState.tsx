@@ -1,12 +1,10 @@
 import type { ComponentChildren } from 'preact';
 import { createContext } from 'preact';
-import { useContext, useMemo, useState } from 'preact/hooks';
-import { route as navigateTo } from 'preact-router';
+import { useContext, useMemo } from 'preact/hooks';
 
 interface RouterState {
   pathname: string;
   navigate: (to: string) => void;
-  setPathname: (next: string) => void;
 }
 
 const RouterStateContext = createContext<RouterState | undefined>(undefined);
@@ -17,16 +15,19 @@ export const useRouterState = () => {
   return ctx;
 };
 
-export function RouterStateProvider({ children }: { children: ComponentChildren }) {
-  const [pathname, setPathname] = useState('/chatapp');
+interface RouterStateProviderProps {
+  children: ComponentChildren;
+  pathname: string;
+  onNavigate: (to: string) => void;
+}
 
+export function RouterStateProvider({ children, pathname, onNavigate }: RouterStateProviderProps) {
   const value = useMemo<RouterState>(
     () => ({
       pathname,
-      navigate: (to) => navigateTo(to),
-      setPathname,
+      navigate: onNavigate,
     }),
-    [pathname],
+    [pathname, onNavigate],
   );
 
   return <RouterStateContext.Provider value={value}>{children}</RouterStateContext.Provider>;

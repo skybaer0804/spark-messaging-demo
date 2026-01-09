@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { toast } from 'react-toastify';
+import { useToast } from '@/context/ToastContext';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { ChatService } from '../../../services/ChatService';
@@ -28,7 +28,7 @@ export function useVideoMeeting() {
   const [isVideoEnabled, setIsVideoEnabled] = useState(false);
   const [uploadingFile, setUploadingFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-
+  const { showSuccess, showError } = useToast();
   const connectionServiceRef = useRef<ConnectionService | null>(null);
   const chatServiceRef = useRef<ChatService | null>(null);
   const fileTransferServiceRef = useRef<FileTransferService | null>(null);
@@ -144,7 +144,7 @@ export function useVideoMeeting() {
         if (socketId === status.socketId) {
           console.log('[DEBUG] 참가 승인됨 - 룸 입장 시작:', roomId);
           setJoinRequestStatus('approved');
-          toast.success('참가 요청이 승인되었습니다!');
+          showSuccess('참가 요청이 승인되었습니다!');
 
           const targetRoomId = roomId || requestedRoomId;
           if (targetRoomId) {
@@ -184,7 +184,7 @@ export function useVideoMeeting() {
         if (socketId === status.socketId) {
           setJoinRequestStatus('rejected');
           setRequestedRoomId(null);
-          toast.error('참가 요청이 거부되었습니다.');
+          showError('참가 요청이 거부되었습니다.');
           if (currentRoom) {
             roomService.leaveRoom(currentRoom.roomId);
           }
@@ -316,7 +316,7 @@ export function useVideoMeeting() {
       setCurrentRoom(room);
     } catch (error) {
       console.error('Failed to create room:', error);
-      toast.error('룸 생성에 실패했습니다.');
+      showError('룸 생성에 실패했습니다.');
     }
   };
 
@@ -359,7 +359,7 @@ export function useVideoMeeting() {
         setJoinRequestStatus('idle');
       } catch (error) {
         console.error('[ERROR] 룸 참가 실패:', error);
-        toast.error('룸 참가에 실패했습니다.');
+        showError('룸 참가에 실패했습니다.');
       }
     } else {
       // 공급자는 참가 요청만 보내고 룸에 입장하지 않음
@@ -372,7 +372,7 @@ export function useVideoMeeting() {
           // 참가 요청만 보내고 룸에 입장하지 않음 (승인 대기)
         } catch (error) {
           console.error('[ERROR] 참가 요청 실패:', error);
-          toast.error('참가 요청에 실패했습니다.');
+          showError('참가 요청에 실패했습니다.');
           setJoinRequestStatus('idle');
           setRequestedRoomId(null);
         }
@@ -477,9 +477,9 @@ export function useVideoMeeting() {
       setUploadingFile(null);
       setUploadProgress(0);
       if (error instanceof Error) {
-        toast.error(`파일 전송 실패: ${error.message}`);
+        showError(`파일 전송 실패: ${error.message}`);
       } else {
-        toast.error('파일 전송 실패');
+        showError('파일 전송 실패');
       }
     }
   };
@@ -564,7 +564,7 @@ export function useVideoMeeting() {
       }
     } catch (error) {
       console.error('[ERROR] 로컬 스트림 획득 실패:', error);
-      toast.error('웹캠 접근에 실패했습니다.');
+      showError('웹캠 접근에 실패했습니다.');
     }
   };
 

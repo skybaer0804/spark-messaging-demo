@@ -13,11 +13,11 @@ export function Profile() {
         <Flex direction="column" gap="md">
           <div className="profile__field">
             <Typography variant="label-medium" color="secondary">이름</Typography>
-            <Typography variant="body-large">{user.value?.username || 'GUEST'}</Typography>
+            <Typography variant="body-large">{user?.username || 'GUEST'}</Typography>
           </div>
           <div className="profile__field">
             <Typography variant="label-medium" color="secondary">이메일</Typography>
-            <Typography variant="body-large">{user.value?.email || 'guest@example.com'}</Typography>
+            <Typography variant="body-large">{user?.email || 'guest@example.com'}</Typography>
           </div>
           {/* 서버 로직 참고: notification settings 등 추가 가능 */}
         </Flex>

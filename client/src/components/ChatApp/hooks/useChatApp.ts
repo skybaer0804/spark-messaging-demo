@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { toast } from 'react-toastify';
+import { useToast } from '@/context/ToastContext';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { ChatService } from '../../../services/ChatService';
@@ -34,7 +34,7 @@ export function useChatApp() {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [socketId, setSocketId] = useState<string | null>(null);
   const [debugEnabled, setDebugEnabled] = useState(localStorage.getItem('chat_debug_mode') === 'true');
-
+  const { showWarning, showSuccess, showError } = useToast();
   const connectionServiceRef = useRef<ConnectionService | null>(null);
   const chatServiceRef = useRef<ChatService | null>(null);
   const roomServiceRef = useRef<RoomService | null>(null);
@@ -73,8 +73,8 @@ export function useChatApp() {
     // 서비스 초기화
     const connectionService = new ConnectionService(sparkMessagingClient);
     const chatService = new ChatService(sparkMessagingClient, connectionService);
-    if (user.value) {
-      chatService.setUserId(user.value.id);
+    if (user) {
+      chatService.setUserId(user.id);
     }
     const roomService = new RoomService(sparkMessagingClient, connectionService);
     const fileTransferService = new FileTransferService(sparkMessagingClient, connectionService, chatService);
@@ -187,7 +187,7 @@ export function useChatApp() {
 
     const room = currentRoom;
     if (!room) {
-      toast.warning('채팅방에 참여해주세요.');
+      showWarning('채팅방에 참여해주세요.');
       return;
     }
 
@@ -202,12 +202,12 @@ export function useChatApp() {
       });
       setUploadingFile(null);
       setUploadProgress(0);
-      toast.success('파일 전송 완료');
+      showSuccess('파일 전송 완료');
     } catch (error) {
       console.error('Failed to send file:', error);
       setUploadingFile(null);
       setUploadProgress(0);
-      toast.error(error instanceof Error ? `파일 전송 실패: ${error.message}` : '파일 전송 실패');
+      showError(error instanceof Error ? `파일 전송 실패: ${error.message}` : '파일 전송 실패');
     }
   };
 
@@ -227,7 +227,7 @@ export function useChatApp() {
       setInput('');
     } catch (error) {
       console.error('Failed to send message:', error);
-      toast.error(error instanceof SparkMessagingError ? `메시지 전송 실패: ${error.message}` : '메시지 전송 실패');
+      showError(error instanceof SparkMessagingError ? `메시지 전송 실패: ${error.message}` : '메시지 전송 실패');
     }
   };
 
@@ -253,7 +253,7 @@ export function useChatApp() {
         id: msg._id,
         content: msg.content,
         timestamp: new Date(msg.timestamp),
-        type: msg.senderId?._id === user.value?.id ? 'sent' : 'received',
+        type: msg.senderId?._id === user?.id ? 'sent' : 'received',
         senderId: msg.senderId?._id || 'Unknown',
         senderName: msg.senderId?.username || 'Unknown',
         fileData: msg.fileUrl
@@ -273,7 +273,7 @@ export function useChatApp() {
       await chatServiceRef.current.setCurrentRoom(targetRoom._id);
     } catch (error) {
       console.error('Failed to join room or fetch history:', error);
-      toast.error('Room 입장 실패');
+      showError('Room 입장 실패');
     }
   };
 
@@ -285,8 +285,8 @@ export function useChatApp() {
       // 1. 백엔드에 방 생성 요청 (멤버 및 조직 포함)
       const newRoom = await chatServiceRef.current.createRoom({
         name: roomName,
-        members: selectedUserIds,
-        invitedOrgs: selectedOrgIds,
+        members: selectedUserIds.length > 0 ? selectedUserIds : undefined,
+        invitedOrgs: selectedOrgIds.length > 0 ? selectedOrgIds : undefined,
         isGroup: true,
       });
 
@@ -299,10 +299,10 @@ export function useChatApp() {
       setRoomIdInput('');
       setSelectedUserIds([]);
       setSelectedOrgIds([]);
-      toast.success('채팅방이 생성되었습니다.');
+      showSuccess('채팅방이 생성되었습니다.');
     } catch (error) {
       console.error('Failed to create room:', error);
-      toast.error('Room 생성 실패');
+      showError('Room 생성 실패');
     }
   };
 
@@ -327,7 +327,7 @@ export function useChatApp() {
       }
     } catch (error) {
       console.error('Failed to leave room:', error);
-      toast.error('Room 나가기 실패');
+      showError('Room 나가기 실패');
     }
   };
 

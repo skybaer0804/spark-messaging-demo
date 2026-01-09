@@ -6,6 +6,7 @@ import { VideoMeetingCore } from './VideoMeetingCore/VideoMeetingCore';
 import { ChatStore } from './stores/ChatStore';
 import { VideoMeetingStore } from './stores/VideoMeetingStore';
 import { VideoStore } from './stores/VideoStore';
+import { useToast } from '@/context/ToastContext';
 import './VideoMeeting.scss';
 
 // Store와 Adapter를 컴포넌트 외부에서 생성하여 한 번만 생성되도록 보장
@@ -15,11 +16,12 @@ let videoStoreInstance: VideoStore | null = null;
 let chatAdapterInstance: VideoMeetingChatAdapter | null = null;
 let videoConferenceAdapterInstance: VideoMeetingVideoConferenceAdapter | null = null;
 
-function initializeStores() {
+function initializeStores(toast: { showSuccess: (m: string) => void; showError: (m: string) => void }) {
   if (!videoMeetingStoreInstance) {
     try {
       console.log('[DEBUG] Store 초기화 시작');
       videoMeetingStoreInstance = new VideoMeetingStore();
+      videoMeetingStoreInstance.setToast(toast);
       chatStoreInstance = new ChatStore();
       videoStoreInstance = new VideoStore();
 
@@ -59,12 +61,16 @@ function initializeStores() {
       console.error('[ERROR] Store 초기화 실패:', error);
       throw error;
     }
+  } else {
+    // 인스턴스가 이미 있으면 toast 함수만 업데이트
+    videoMeetingStoreInstance.setToast(toast);
   }
 }
 
 export function VideoMeeting() {
+  const toast = useToast();
   // Store 초기화 (한 번만 실행)
-  initializeStores();
+  initializeStores(toast);
 
   const videoMeetingStore = videoMeetingStoreInstance!;
   const videoConferenceAdapter = videoConferenceAdapterInstance;

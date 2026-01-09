@@ -16,11 +16,11 @@
   "dependencies": {
     "@preact/signals": "^2.5.1",
     "@skybaer0804/spark-messaging-client": "^1.0.1",
+    "@tabler/icons-preact": "^3.36.1",
     "@tabler/icons-react": "^3.35.0",
     "axios": "^1.13.2",
     "preact": "^10.19.3",
-    "preact-router": "^4.1.2",
-    "react-toastify": "^11.0.5"
+    "preact-router": "^4.1.2"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.8.2",

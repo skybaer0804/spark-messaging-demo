@@ -266,7 +266,7 @@ export function Sidebar() {
                 <List disablePadding>
                   {mainRoutes
                     .filter((r) => r.id !== 'home')
-                    .filter((r) => r.id !== 'notification' || user.value?.role === 'Admin')
+                    .filter((r) => r.id !== 'notification' || user?.role === 'Admin')
                     .map((r) => {
                       const isActive = activeMainRoute?.id === r.id;
                       return (

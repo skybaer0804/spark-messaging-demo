@@ -1,5 +1,4 @@
 import { signal, type Signal } from '@preact/signals';
-import { toast } from 'react-toastify';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { ChatService } from '../../../services/ChatService';
@@ -20,7 +19,13 @@ export interface ScheduledMeeting {
   roomId?: string;
 }
 
+interface ToastFunctions {
+  showSuccess: (message: string) => void;
+  showError: (message: string) => void;
+}
+
 export class VideoMeetingStore {
+  // ... existing signals ...
   // 연결 상태
   public readonly isConnected: Signal<boolean> = signal(false);
 
@@ -56,6 +61,23 @@ export class VideoMeetingStore {
   // ChatStore 참조 (메시지 수신 시 업데이트)
   private chatStore: { addMessage: (message: ChatMessage) => void; clearMessages: () => void } | null = null;
   private chatUnsubscribe: (() => void) | null = null;
+
+  // Toast 기능 참조
+  private toast: ToastFunctions | null = null;
+
+  public setToast(toast: ToastFunctions) {
+    this.toast = toast;
+  }
+
+  private showSuccess(message: string) {
+    if (this.toast) this.toast.showSuccess(message);
+    else console.log('SUCCESS:', message);
+  }
+
+  private showError(message: string) {
+    if (this.toast) this.toast.showError(message);
+    else console.error('ERROR:', message);
+  }
 
   // ChatStore 설정
   public setChatStore(chatStore: { addMessage: (message: ChatMessage) => void; clearMessages: () => void }): void {
@@ -211,7 +233,7 @@ export class VideoMeetingStore {
         if (socketId === status.socketId) {
           console.log('[DEBUG] 참가 승인됨 - 룸 입장 시작:', roomId);
           this.joinRequestStatus.value = 'approved';
-          toast.success('참가 요청이 승인되었습니다!');
+          this.showSuccess('참가 요청이 승인되었습니다!');
 
           const targetRoomId = roomId || this.requestedRoomId.value;
           if (targetRoomId) {
@@ -237,7 +259,7 @@ export class VideoMeetingStore {
         if (socketId === status.socketId) {
           this.joinRequestStatus.value = 'rejected';
           this.requestedRoomId.value = null;
-          toast.error('참가 요청이 거부되었습니다.');
+          this.showError('참가 요청이 거부되었습니다.');
           if (this.currentRoom.value) {
             this.roomService.leaveRoom(this.currentRoom.value.roomId);
           }
@@ -307,7 +329,7 @@ export class VideoMeetingStore {
       return room;
     } catch (error) {
       console.error('Failed to create room:', error);
-      toast.error('룸 생성에 실패했습니다.');
+      this.showError('룸 생성에 실패했습니다.');
       return null;
     }
   }
@@ -346,7 +368,7 @@ export class VideoMeetingStore {
         this.joinRequestStatus.value = 'idle';
       } catch (error) {
         console.error('[ERROR] 룸 참가 실패:', error);
-        toast.error('룸 참가에 실패했습니다.');
+        this.showError('룸 참가에 실패했습니다.');
       }
     } else {
       // 공급자는 참가 요청만 보내고 룸에 입장하지 않음
@@ -358,7 +380,7 @@ export class VideoMeetingStore {
           this.userRole.value = 'supplier';
         } catch (error) {
           console.error('[ERROR] 참가 요청 실패:', error);
-          toast.error('참가 요청에 실패했습니다.');
+          this.showError('참가 요청에 실패했습니다.');
           this.joinRequestStatus.value = 'idle';
           this.requestedRoomId.value = null;
         }
@@ -438,10 +460,10 @@ export class VideoMeetingStore {
       await videoMeetingApi.createMeeting(data);
       await this.refreshScheduledMeetings();
       this.showScheduleModal.value = false;
-      toast.success('Meeting scheduled successfully');
+      this.showSuccess('Meeting scheduled successfully');
     } catch (error) {
       console.error('Failed to schedule meeting:', error);
-      toast.error('Failed to schedule meeting');
+      this.showError('Failed to schedule meeting');
     }
   }
 

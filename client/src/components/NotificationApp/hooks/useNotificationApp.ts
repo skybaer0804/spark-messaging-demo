@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { toast } from 'react-toastify';
+import { useToast } from '@/context/ToastContext';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '../../../services/ConnectionService';
 import { NotificationService } from '../../../services/NotificationService';
@@ -14,7 +14,7 @@ export function useNotificationApp() {
   const [targetId, setTargetId] = useState('');
   const [orgList, setOrgList] = useState<Organization[]>([]);
   const [isConnected, setIsConnected] = useState(false);
-
+  const { showSuccess, showError } = useToast();
   const notificationServiceRef = useRef<NotificationService | null>(null);
 
   useEffect(() => {
@@ -56,23 +56,28 @@ export function useNotificationApp() {
         targetType,
         targetId: targetType === 'organization' ? targetId : undefined,
       });
-      
+
       setTitle('');
       setMessage('');
       setScheduledAt('');
-      toast.success('Notification created/sent successfully');
+      showSuccess('Notification created/sent successfully');
     } catch (error) {
       console.error('Notification creation failed:', error);
-      toast.error('Failed to create notification');
+      showError('Failed to create notification');
     }
   };
 
   return {
-    title, setTitle,
-    message, setMessage,
-    scheduledDate, setScheduledAt,
-    targetType, setTargetType,
-    targetId, setTargetId,
+    title,
+    setTitle,
+    message,
+    setMessage,
+    scheduledDate,
+    setScheduledAt,
+    targetType,
+    setTargetType,
+    targetId,
+    setTargetId,
     orgList,
     isConnected,
     handleSend,

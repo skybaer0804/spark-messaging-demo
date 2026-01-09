@@ -14,7 +14,7 @@ import './NotificationApp.scss';
 
 export function NotificationApp() {
   const { user } = useAuth();
-  const isAdmin = user.value?.role === 'Admin';
+  const isAdmin = user?.role === 'Admin';
 
   const { 
     title, setTitle,

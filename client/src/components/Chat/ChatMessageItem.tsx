@@ -19,7 +19,7 @@ interface ChatMessageItemProps {
 
 function ChatMessageItemComponent({ message, onImageClick }: ChatMessageItemProps) {
   const { user } = useAuth();
-  const isOwnMessage = message.senderId === user.value?.id;
+  const isOwnMessage = message.senderId === user?.id;
 
   return (
     <Flex direction="column" align={isOwnMessage ? 'flex-end' : 'flex-start'} style={{ width: '100%' }}>

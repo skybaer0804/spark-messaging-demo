@@ -27,7 +27,7 @@ import { Button } from '@/ui-component/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
 import { useAuth } from '@/hooks/useAuth';
 import { authApi } from '@/services/authService';
-import { toast } from 'react-toastify';
+import { useToast } from '@/context/ToastContext';
 import './ChatApp.scss';
 
 import type { Message, ChatRoom, ChatUser } from './types';
@@ -794,7 +794,7 @@ export function ChatApp() {
                   {/* Switch component usage depends on implementation, assuming common props */}
                   <input
                     type="checkbox"
-                    checked={user.value?.notificationSettings?.globalEnabled !== false}
+                    checked={(user as any)?.notificationSettings?.globalEnabled !== false}
                     onChange={(e) => toggleGlobalNotifications(e.currentTarget.checked)}
                   />
                 </Flex>

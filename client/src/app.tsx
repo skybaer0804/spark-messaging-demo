@@ -1,30 +1,88 @@
-import { useState, useEffect, useRef } from 'preact/hooks';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
 import sparkMessagingClient from './config/sparkMessaging';
-import { AppRouter } from './routes/AppRouter';
-import { RouterStateProvider, useRouterState } from './routes/RouterState';
-import { findRouteTitleByPath } from './routes/appRoutes';
+import { appRoutes, findRouteTitleByPath, getDesignSystemComponentFromPath } from './routes/appRoutes';
 import { SidebarLayout } from './layouts/SidebarLayout/SidebarLayout';
+import { RouterStateProvider } from './routes/RouterState';
 import { ensureSparkMessagingConnected } from '@/utils/ensureSparkMessagingConnected';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { PushService } from '@/services/PushService';
+import { AuthPage } from '@/components/Auth/AuthPage';
+import { DesignSystemDemo } from '@/components/DesignSystemDemo/DesignSystemDemo';
+import { PrivacyPolicy } from '@/components/PrivacyPolicy/PrivacyPolicy';
 import './app.scss';
 import './index.css';
 
+/**
+ * SPA 구조의 App 컴포넌트
+ * 상태 기반 네비게이션 적용 (Docs 아키텍처)
+ */
 export function App() {
-  const { checkMe, isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+  const { showInfo } = useToast();
+
   const [isConnected, setIsConnected] = useState(false);
   const [socketId, setSocketId] = useState<string | null>(null);
   const socketIdRef = useRef<string | null>(null);
 
+  // 초기 경로 가져오기
+  const getInitialRoute = () => {
+    if (typeof window !== 'undefined') {
+      return window.location.pathname === '/' ? '/' : window.location.pathname;
+    }
+    return '/';
+  };
+
+  const [currentRoute, setCurrentRoute] = useState(getInitialRoute());
+
+  // 브라우저 히스토리와 동기화
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({ route: currentRoute }, '', currentRoute);
+    }
+  }, []);
+
+  // 브라우저 뒤로가기/앞으로가기 지원
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state && e.state.route) {
+        setCurrentRoute(e.state.route);
+      } else {
+        const path = window.location.pathname;
+        setCurrentRoute(path || '/');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleNavigate = useCallback(
+    (path: string, options: { force?: boolean; animate?: boolean; direction?: string } = {}) => {
+      if (path === currentRoute && !options.force) {
+        return;
+      }
+
+      setCurrentRoute(path);
+      if (typeof window !== 'undefined') {
+        window.history.pushState({ route: path }, '', path);
+      }
+    },
+    [currentRoute],
+  );
+
   useEffect(() => {
     // 인증 상태 확인 및 푸시 등록
     const init = async () => {
-      await checkMe();
-      if (isAuthenticated.value) {
-        await PushService.registerServiceWorker();
-        await PushService.subscribeToPush();
+      if (isAuthenticated) {
+        try {
+          await PushService.registerServiceWorker();
+          await PushService.subscribeToPush();
+        } catch (error) {
+          console.error('Push registration failed:', error);
+        }
       }
     };
     init();
@@ -45,7 +103,7 @@ export function App() {
 
     initializeConnection();
 
-    // 연결 상태 핸들러 (이미 연결되어 있으면 즉시 호출됨)
+    // 연결 상태 핸들러
     const handleConnected = (data: any) => {
       setIsConnected(true);
       setSocketId(data.socketId);
@@ -68,7 +126,6 @@ export function App() {
     // 알림 메시지 수신 핸들러
     const handleNotification = (data: any) => {
       try {
-        // notification 타입 메시지 처리
         if (data.type === 'notification') {
           let notificationData;
           try {
@@ -80,36 +137,23 @@ export function App() {
           const notificationMessage = notificationData.content || data.content || '알림이 도착했습니다.';
           const scheduledTime = notificationData.scheduledTime;
 
-          // 발송 시간이 설정되어 있고 미래인 경우 스케줄링
           if (scheduledTime) {
             const scheduledDate = new Date(scheduledTime);
             const now = new Date();
             if (scheduledDate > now) {
               const delay = scheduledDate.getTime() - now.getTime();
               setTimeout(() => {
-                showNotification(notificationMessage);
+                showInfo(notificationMessage);
               }, delay);
               return;
             }
           }
 
-          // 즉시 표시
-          showNotification(notificationMessage);
+          showInfo(notificationMessage);
         }
       } catch (error) {
         console.error('알림 처리 오류:', error);
       }
-    };
-
-    const showNotification = (message: string) => {
-      toast.info(message, {
-        position: 'top-center',
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
     };
 
     const unsubscribeConnected = sparkMessagingClient.onConnected(handleConnected);
@@ -120,41 +164,54 @@ export function App() {
       unsubscribeConnected();
       unsubscribeStateChange();
       unsubscribeMessage();
-      // 앱이 언마운트될 때만 연결 해제
-      // sparkMessagingClient.disconnect();
     };
-  }, []);
+  }, [isAuthenticated, showInfo]);
+
+  // 경로에 따라 컴포넌트 렌더링
+  const renderContent = () => {
+    if (loading) return <div>Loading...</div>;
+
+    // 비로그인 상태에서 허용되는 경로
+    if (!isAuthenticated) {
+      if (currentRoute === '/register') {
+        // RegisterPage가 따로 있다면 여기에 추가 (현재 demo엔 AuthPage가 통합)
+        return <AuthPage />;
+      }
+      return <AuthPage />;
+    }
+
+    // 디자인 시스템 경로 처리
+    if (currentRoute.startsWith('/design-system')) {
+      const focusSection = getDesignSystemComponentFromPath(currentRoute);
+      return <DesignSystemDemo focusSection={focusSection || undefined} />;
+    }
+
+    // 개인정보처리방침
+    if (currentRoute === '/legal/privacy-policy') {
+      return <PrivacyPolicy />;
+    }
+
+    // 등록된 앱 라우트 매칭
+    const route = appRoutes.find((r) => r.path === currentRoute);
+    if (route) {
+      return route.element;
+    }
+
+    // 기본값 홈
+    return appRoutes.find((r) => r.id === 'home')?.element || <div />;
+  };
+
+  const headerTitle = findRouteTitleByPath(currentRoute);
 
   return (
     <div className="app">
-      <RouterStateProvider>
-        <AppShell isConnected={isConnected} socketId={socketId} />
+      <RouterStateProvider pathname={currentRoute} onNavigate={handleNavigate}>
+        <div className="app__main">
+          <SidebarLayout headerTitle={headerTitle} isConnected={isConnected} socketId={socketId}>
+            {renderContent()}
+          </SidebarLayout>
+        </div>
       </RouterStateProvider>
-      <ToastContainer
-        position="top-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        aria-label="알림"
-      />
-    </div>
-  );
-}
-
-function AppShell(props: { isConnected: boolean; socketId: string | null }) {
-  const { pathname } = useRouterState();
-  const headerTitle = findRouteTitleByPath(pathname);
-
-  return (
-    <div className="app__main">
-      <SidebarLayout headerTitle={headerTitle} isConnected={props.isConnected} socketId={props.socketId}>
-        <AppRouter />
-      </SidebarLayout>
     </div>
   );
 }

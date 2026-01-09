@@ -1,6 +1,6 @@
 import { useState } from 'preact/hooks';
 import { useAuth } from '@/hooks/useAuth';
-import { route } from 'preact-router';
+import { useRouterState } from '@/routes/RouterState';
 import { Box } from '@/ui-component/Layout/Box';
 import { Paper } from '@/ui-component/Paper/Paper';
 import { Typography } from '@/ui-component/Typography/Typography';
@@ -15,18 +15,20 @@ export function AuthPage() {
     password: '',
     username: '',
   });
-  const { login, register, loading } = useAuth();
+  const { signIn, signUp, loading } = useAuth();
+  const { navigate } = useRouterState();
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
-    let success = false;
-    if (isLogin) {
-      success = await login({ email: formData.email, password: formData.password });
-    } else {
-      success = await register(formData);
-    }
-    if (success) {
-      route('/chatapp');
+    try {
+      if (isLogin) {
+        await signIn({ email: formData.email, password: formData.password });
+      } else {
+        await signUp(formData);
+      }
+      navigate('/chatapp');
+    } catch (error) {
+      console.error('Authentication failed:', error);
     }
   };
 
@@ -79,10 +81,10 @@ export function AuthPage() {
               required
               fullWidth
             />
-            <Button type="submit" variant="primary" fullWidth disabled={loading.value}>
-              {loading.value ? 'Processing...' : isLogin ? 'Login' : 'Register'}
+            <Button type="submit" variant="primary" fullWidth disabled={loading}>
+              {loading ? 'Processing...' : isLogin ? 'Login' : 'Register'}
             </Button>
-            <Button variant="text" fullWidth onClick={() => setIsLogin(!isLogin)} disabled={loading.value}>
+            <Button variant="text" fullWidth onClick={() => setIsLogin(!isLogin)} disabled={loading}>
               {isLogin ? "Don't have an account? Register" : 'Already have an account? Login'}
             </Button>
           </Stack>
@@ -91,4 +93,3 @@ export function AuthPage() {
     </Box>
   );
 }
-
