@@ -3,26 +3,40 @@ import { pushApi } from './ApiService';
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 export class PushService {
-  static async registerServiceWorker() {
-    if ('serviceWorker' in navigator) {
-      try {
-        // 이미 등록된 워커가 있는지 확인
-        const existingReg = await navigator.serviceWorker.getRegistration('/');
-        if (existingReg) {
-          return existingReg;
-        }
+  private static registrationInProgress = false;
 
-        const registration = await navigator.serviceWorker.register('/sw.js', {
-          scope: '/',
-        });
-        console.log('Service Worker registered with scope:', registration.scope);
-        return registration;
-      } catch (error) {
-        console.error('Service Worker registration failed:', error);
-        return null;
-      }
+  static async registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return null;
+
+    if (this.registrationInProgress) {
+      console.log('Service Worker registration already in progress...');
+      return null;
     }
-    return null;
+
+    try {
+      this.registrationInProgress = true;
+
+      // 이미 등록된 워커가 있는지 확인
+      let registration = await navigator.serviceWorker.getRegistration('/');
+
+      if (!registration) {
+        console.log('No Service Worker found, waiting for ready...');
+        // vite-plugin-pwa가 등록할 때까지 대기
+        registration = await navigator.serviceWorker.ready;
+      }
+
+      if (registration) {
+        console.log('Service Worker is ready:', registration.scope);
+        return registration;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Service Worker registration check failed:', error);
+      return null;
+    } finally {
+      this.registrationInProgress = false;
+    }
   }
 
   static async subscribeToPush() {

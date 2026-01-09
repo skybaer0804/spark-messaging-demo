@@ -78,6 +78,7 @@ export function App() {
     const init = async () => {
       if (isAuthenticated) {
         try {
+          // PushService.registerServiceWorker 내부에서 중복 및 개발모드 체크함
           await PushService.registerServiceWorker();
           await PushService.subscribeToPush();
         } catch (error) {

@@ -62,16 +62,24 @@ export class ChatService {
       }
 
       // v2.2.0: 메시지 포맷팅 (서버에서 보낸 필드 반영)
-      const content = msg.content as any;
+      // 서버에서 socketService.sendRoomMessage를 통해 { content, senderId, timestamp } 구조로 한 번 더 감싸서 보냄
+      const payload = msg.content as any;
+      const contentData = payload.content || {};
+
       const message: Message = {
-        _id: content._id || `${msg.timestamp}-${Math.random()}`,
+        _id: contentData._id || `${msg.timestamp}-${Math.random()}`,
         roomId: msg.room,
-        senderId: content.senderId || msg.senderId,
-        senderName: content.senderName,
-        content: content.content || (typeof msg.content === 'string' ? msg.content : ''),
+        senderId: contentData.senderId || payload.senderId || msg.senderId,
+        senderName: contentData.senderName,
+        content:
+          typeof contentData.content === 'string'
+            ? contentData.content
+            : typeof msg.content === 'string'
+            ? msg.content
+            : '',
         type: (msg.type as MessageType) || 'text',
-        sequenceNumber: content.sequenceNumber || 0,
-        tempId: content.tempId,
+        sequenceNumber: contentData.sequenceNumber || 0,
+        tempId: contentData.tempId,
         readBy: [],
         timestamp: new Date(msg.timestamp || Date.now()),
         status: 'sent',

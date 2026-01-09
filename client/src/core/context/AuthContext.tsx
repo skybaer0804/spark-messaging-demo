@@ -76,10 +76,25 @@ export function AuthProvider({ children }: { children: any }) {
     }
   };
 
-  const signOut = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    showSuccess('로그아웃되었습니다');
+  const signOut = async () => {
+    try {
+      await authApi.logout();
+      
+      // 로그아웃 시 서비스 워커 해제 (푸시 알림 등 중단)
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          await registration.unregister();
+        }
+        console.log('All Service Workers unregistered on logout');
+      }
+    } catch (error) {
+      console.error('Logout API failed:', error);
+    } finally {
+      localStorage.removeItem('token');
+      setUser(null);
+      showSuccess('로그아웃되었습니다');
+    }
   };
 
   const updateUser = (updatedUser: User) => {

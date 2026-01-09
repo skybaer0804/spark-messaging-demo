@@ -120,6 +120,10 @@ export default defineConfig({
           },
         ],
       },
+      devOptions: {
+        enabled: true, // 개발 모드에서도 서비스 워커 활성화
+        type: 'module',
+      },
     }),
   ],
   publicDir: 'public', // public 폴더의 파일들을 빌드 시 자동 복사

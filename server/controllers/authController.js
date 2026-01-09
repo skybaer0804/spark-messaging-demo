@@ -73,6 +73,19 @@ exports.login = async (req, res) => {
   }
 };
 
+exports.logout = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Redis에 오프라인 상태 저장
+    await userService.setUserStatus(userId, 'offline');
+    console.log('Logout successful for user:', userId);
+    res.json({ message: 'Logged out successfully' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');

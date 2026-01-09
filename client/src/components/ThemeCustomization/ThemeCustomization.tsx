@@ -56,8 +56,8 @@ export function ThemeCustomization({ open, onClose }: ThemeCustomizationProps) {
     setBorderRadius(value);
   };
 
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = async () => {
+    await signOut();
     onClose();
     navigate('/login');
   };

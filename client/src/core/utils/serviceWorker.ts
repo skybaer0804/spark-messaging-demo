@@ -4,6 +4,12 @@
 
 export function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
+    // 개발 모드에서는 수동 등록 스킵 (Vite PWA 또는 PushService에서 관리)
+    if (import.meta.env.DEV) {
+      console.log('Service Worker registration skipped in DEV');
+      return;
+    }
+
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/sw.js')

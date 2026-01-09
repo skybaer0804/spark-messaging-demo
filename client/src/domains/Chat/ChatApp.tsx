@@ -306,16 +306,22 @@ function ChatAppContent() {
     toggleUserSelection,
     toggleOrgSelection,
     sendMessage,
-    handleRoomSelect,
+    handleRoomSelect: handleRoomSelectRaw,
     handleCreateRoom,
     leaveRoom,
     sendFile,
     uploadingFile,
     uploadProgress,
-    socketId,
     debugEnabled,
     toggleDebug,
   } = useChatApp();
+
+  const onRoomSelect = (roomId: string) => {
+    const room = roomList.find((r) => r._id === roomId);
+    if (room) {
+      handleRoomSelectRaw(room);
+    }
+  };
 
   // Sidebar에서 "이 룸으로 들어가기" 요청을 보내면 여기서 실제 join을 수행
   const pendingJoinRoom = chatPendingJoinRoom.value;
@@ -323,9 +329,9 @@ function ChatAppContent() {
     if (!pendingJoinRoom) return;
     if (!isConnected) return;
 
-    handleRoomSelect(pendingJoinRoom);
+    onRoomSelect(pendingJoinRoom);
     clearPendingJoinChatRoom();
-  }, [handleRoomSelect, isConnected, pendingJoinRoom]);
+  }, [handleRoomSelectRaw, isConnected, pendingJoinRoom, roomList]);
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -445,7 +451,7 @@ function ChatAppContent() {
             toggleUserSelection={toggleUserSelection}
             toggleOrgSelection={toggleOrgSelection}
             currentRoom={currentRoom}
-            handleRoomSelect={handleRoomSelect}
+            handleRoomSelect={onRoomSelect}
             leaveRoom={leaveRoom}
           />
         </Box>
@@ -476,7 +482,7 @@ function ChatAppContent() {
             toggleUserSelection={toggleUserSelection}
             toggleOrgSelection={toggleOrgSelection}
             currentRoom={currentRoom}
-            handleRoomSelect={handleRoomSelect}
+            handleRoomSelect={onRoomSelect}
             leaveRoom={leaveRoom}
           />
         </Box>
@@ -542,7 +548,7 @@ function ChatAppContent() {
           >
             <Stack spacing="md" style={{ flex: 1, minHeight: 0 }}>
               {messages.map((msg) => {
-                const isOwnMessage = msg.senderId === user?.id || msg.type === 'sent';
+                const isOwnMessage = msg.senderId === user?.id || msg.status === 'sending';
                 return (
                   <Flex
                     key={msg._id}
@@ -579,7 +585,7 @@ function ChatAppContent() {
                       >
                         {msg.fileData ? (
                           <Box>
-                            {msg.fileData.fileType === 'image' ? (
+                            {msg.fileData.fileType === 'image' && msg.fileData.data ? (
                               <Box>
                                 <img
                                   src={msg.fileData.data}
@@ -590,7 +596,7 @@ function ChatAppContent() {
                                     borderRadius: '4px',
                                     cursor: 'pointer',
                                   }}
-                                  onClick={() => handleImageClick(msg.fileData!.data, msg.fileData!.fileName)}
+                                  onClick={() => handleImageClick(msg.fileData!.data!, msg.fileData!.fileName)}
                                 />
                               </Box>
                             ) : (
@@ -605,7 +611,11 @@ function ChatAppContent() {
                                 <IconButton
                                   size="small"
                                   onClick={() =>
-                                    downloadFile(msg.fileData!.fileName, msg.fileData!.data, msg.fileData!.mimeType)
+                                    downloadFile(
+                                      msg.fileData!.fileName,
+                                      msg.fileData!.data || '',
+                                      msg.fileData!.mimeType,
+                                    )
                                   }
                                 >
                                   <IconDownload size={16} />

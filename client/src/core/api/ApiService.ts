@@ -48,6 +48,7 @@ api.interceptors.response.use(
 export const authApi = {
   register: (data: any) => api.post('/auth/register', data),
   login: (data: any) => api.post('/auth/login', data),
+  logout: () => api.post('/auth/logout'),
   getMe: () => api.get('/auth/me'),
   getUsers: () => api.get('/auth/users'),
   updateNotificationSettings: (data: { globalEnabled?: boolean; roomPreferences?: Record<string, boolean> }) =>
