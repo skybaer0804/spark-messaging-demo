@@ -36,7 +36,7 @@ exports.getWorkspacePrivateKey = async (req, res) => {
 // 워크스페이스 생성
 exports.createWorkspace = async (req, res) => {
   try {
-    const { name, initials, color, projectUrl } = req.body;
+    const { name, initials, color, projectUrl, allowPublicJoin } = req.body;
     const ownerId = req.user?.id;
 
     const projectPublicKey = `pk_${crypto.randomBytes(16).toString('hex')}`;
@@ -53,6 +53,7 @@ exports.createWorkspace = async (req, res) => {
       projectPrivateKey,
       projectUrl,
       ownerId,
+      allowPublicJoin: allowPublicJoin || false,
     });
 
     await newWorkspace.save();
@@ -70,6 +71,63 @@ exports.createWorkspace = async (req, res) => {
     res.status(201).json(responseData);
   } catch (error) {
     res.status(500).json({ message: 'Failed to create workspace', error: error.message });
+  }
+};
+
+// 워크스페이스 참여
+exports.joinWorkspace = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const userId = req.user.id;
+
+    const workspace = await Workspace.findById(workspaceId);
+    if (!workspace) {
+      return res.status(404).json({ message: 'Workspace not found' });
+    }
+
+    // 누구나 참여 가능하거나, 초대받은 경우(초대 로직은 아직 없음) 참여 허용
+    if (!workspace.allowPublicJoin) {
+      return res.status(403).json({ message: 'This workspace is private and requires an invitation' });
+    }
+
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { workspaces: workspace._id },
+    });
+
+    res.json({ message: 'Successfully joined the workspace', workspaceId });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to join workspace', error: error.message });
+  }
+};
+
+// 워크스페이스 정보 수정
+exports.updateWorkspace = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+    const { name, initials, color, allowPublicJoin } = req.body;
+    const userId = req.user.id;
+
+    const workspace = await Workspace.findById(workspaceId);
+    if (!workspace) {
+      return res.status(404).json({ message: 'Workspace not found' });
+    }
+
+    // 소유자 확인
+    if (workspace.ownerId && workspace.ownerId.toString() !== userId) {
+      return res.status(403).json({ message: 'Not authorized to update this workspace' });
+    }
+
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (initials) updateData.initials = initials;
+    if (color) updateData.color = color;
+    if (allowPublicJoin !== undefined) updateData.allowPublicJoin = allowPublicJoin;
+
+    const updatedWorkspace = await Workspace.findByIdAndUpdate(workspaceId, { $set: updateData }, { new: true });
+
+    res.json(updatedWorkspace);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update workspace', error: error.message });
   }
 };
 

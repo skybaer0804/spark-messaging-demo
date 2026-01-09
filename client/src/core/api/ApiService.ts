@@ -87,8 +87,11 @@ export const chatApi = {
 export const workspaceApi = {
   getWorkspaces: () => api.get('/workspace'),
   getPrivateKey: (workspaceId: string) => api.get(`/workspace/${workspaceId}/private-key`),
-  createWorkspace: (data: { name: string; initials?: string; color?: string; projectUrl?: string }) =>
+  createWorkspace: (data: { name: string; initials?: string; color?: string; projectUrl?: string; allowPublicJoin?: boolean }) =>
     api.post('/workspace', data),
+  joinWorkspace: (workspaceId: string) => api.post(`/workspace/${workspaceId}/join`),
+  updateWorkspace: (workspaceId: string, data: { name?: string; initials?: string; color?: string; allowPublicJoin?: boolean }) =>
+    api.patch(`/workspace/${workspaceId}`, data),
   createCompany: (data: { name: string; workspaceId: string }) => api.post('/workspace/company', data),
   createDept: (data: { name: string; companyId: string; workspaceId: string; parentId?: string }) =>
     api.post('/workspace/dept', data),

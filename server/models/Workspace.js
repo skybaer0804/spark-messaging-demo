@@ -11,6 +11,7 @@ const workspaceSchema = new mongoose.Schema({
   projectUrl: { type: String },
 
   ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  allowPublicJoin: { type: Boolean, default: false },
   isArchived: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });

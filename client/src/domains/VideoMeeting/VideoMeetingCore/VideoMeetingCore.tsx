@@ -185,7 +185,7 @@ function VideoMeetingCoreComponent({ store }: VideoMeetingCoreProps) {
                   </Stack>
                 </Grid>
                 <Flex justify="flex-end" gap="md">
-                  <Button variant="ghost" onClick={() => setShowScheduleForm(false)}>
+                  <Button variant="secondary" onClick={() => setShowScheduleForm(false)}>
                     Cancel
                   </Button>
                   <Button
@@ -225,7 +225,7 @@ function VideoMeetingCoreComponent({ store }: VideoMeetingCoreProps) {
                   fullWidth
                 />
                 <Flex justify="flex-end" gap="md">
-                  <Button variant="ghost" onClick={() => store.setShowCreateForm(false)}>
+                  <Button variant="secondary" onClick={() => store.setShowCreateForm(false)}>
                     Cancel
                   </Button>
                   <Button variant="primary" onClick={handleCreateRoom} disabled={!roomTitle.trim()}>
@@ -249,7 +249,7 @@ function VideoMeetingCoreComponent({ store }: VideoMeetingCoreProps) {
                 </Paper>
               ) : (
                 scheduledMeetings.map((m) => (
-                  <Card key={m._id} variant="outlined">
+                  <Card key={m._id}>
                     <CardHeader>
                       <Flex justify="space-between">
                         <Typography variant="h4">{m.title}</Typography>
@@ -290,7 +290,7 @@ function VideoMeetingCoreComponent({ store }: VideoMeetingCoreProps) {
                 </Paper>
               ) : (
                 roomList.map((room) => (
-                  <Card key={room.roomId} variant="outlined">
+                  <Card key={room.roomId}>
                     <CardHeader>
                       <Flex justify="space-between">
                         <StatusChip label={room.category} variant="badge" />

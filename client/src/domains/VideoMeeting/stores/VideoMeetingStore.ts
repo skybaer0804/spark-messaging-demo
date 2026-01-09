@@ -454,7 +454,7 @@ export class VideoMeetingStore {
     description?: string;
     scheduledAt: string;
     invitedUsers?: string[];
-    invitedOrgs?: string[];
+    invitedWorkspaces?: string[];
   }) {
     try {
       await videoMeetingApi.createMeeting(data);

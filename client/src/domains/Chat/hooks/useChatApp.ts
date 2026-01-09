@@ -6,8 +6,17 @@ import { useChatRoom } from './useChatRoom';
 import { ChatRoom } from '../types';
 
 export function useChatApp() {
-  const { isConnected, socketId, roomList, userList, workspaceList, services, refreshRoomList, debugEnabled, toggleDebug } =
-    useChat();
+  const {
+    isConnected,
+    socketId,
+    roomList,
+    userList,
+    workspaceList,
+    services,
+    refreshRoomList,
+    debugEnabled,
+    toggleDebug,
+  } = useChat();
 
   const { currentRoom, messages, sendMessage, handleRoomSelect, setCurrentRoom, setMessages } = useChatRoom();
 
@@ -92,7 +101,9 @@ export function useChatApp() {
   };
 
   const toggleWorkspaceSelection = (workspaceId: string) => {
-    setSelectedWorkspaceIds((prev) => (prev.includes(workspaceId) ? prev.filter((id) => id !== workspaceId) : [...prev, workspaceId]));
+    setSelectedWorkspaceIds((prev) =>
+      prev.includes(workspaceId) ? prev.filter((id) => id !== workspaceId) : [...prev, workspaceId],
+    );
   };
 
   const leaveRoom = async () => {
