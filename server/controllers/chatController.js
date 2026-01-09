@@ -16,11 +16,15 @@ exports.createRoom = async (req, res) => {
     // 멤버 목록에 현재 사용자 추가 (중복 방지)
     const roomMembers = [...new Set([...(members || []), currentUserId])];
 
-    // 1:1 대화방(direct)인 경우 중복 체크
+    let roomIdentifier = null;
+
+    // 1:1 대화방(direct)인 경우 고유 식별자 생성 및 중복 체크
     if (type === 'direct' && roomMembers.length === 2) {
+      // 두 유저 ID를 정렬하여 고유한 식별자 생성 (A_B 형태)
+      roomIdentifier = roomMembers.sort().join('_');
+
       const existingRoom = await ChatRoom.findOne({
-        type: 'direct',
-        members: { $all: roomMembers, $size: 2 },
+        identifier: roomIdentifier,
         workspaceId,
       });
 
@@ -34,6 +38,7 @@ exports.createRoom = async (req, res) => {
     }
 
     const newRoom = new ChatRoom({
+      identifier: roomIdentifier,
       name: type === 'direct' ? null : name || 'New Room',
       description,
       members: roomMembers,
@@ -66,6 +71,7 @@ exports.createRoom = async (req, res) => {
 
     res.status(201).json(populatedRoom);
   } catch (error) {
+    console.error('Error creating room:', error);
     res.status(500).json({ message: 'Failed to create room', error: error.message });
   }
 };
@@ -82,7 +88,7 @@ exports.getRooms = async (req, res) => {
     let userRooms = await UserChatRoom.find(query).populate({
       path: 'roomId',
       populate: [
-        { path: 'members', select: 'username profileImage status' },
+        { path: 'members', select: 'username profileImage status statusText' },
         {
           path: 'lastMessage',
           populate: { path: 'senderId', select: 'username' },
@@ -95,6 +101,18 @@ exports.getRooms = async (req, res) => {
       .filter((ur) => ur.roomId && (!workspaceId || ur.roomId.workspaceId.toString() === workspaceId))
       .map((ur) => {
         const room = ur.roomId.toObject();
+
+        // 1:1 대화방의 경우 상대적 이름 처리
+        if (room.type === 'direct') {
+          const otherMember = room.members.find((m) => m._id.toString() !== userId.toString());
+          room.displayName = otherMember ? otherMember.username : 'Unknown User';
+          room.displayAvatar = otherMember ? otherMember.profileImage || otherMember.avatar : null;
+          room.displayStatus = otherMember ? otherMember.status : 'offline';
+          room.displayStatusText = otherMember ? otherMember.statusText : '';
+        } else {
+          room.displayName = room.name;
+        }
+
         return {
           ...room,
           unreadCount: ur.unreadCount,
@@ -184,23 +202,21 @@ exports.uploadFile = async (req, res) => {
     // 4. Socket 브로드캐스트 (파일 정보 포함)
     const sender = room.members.find((m) => m._id.toString() === senderId);
 
-    await socketService.sendRoomMessage(
+    const messageData = {
+      _id: newMessage._id,
       roomId,
-      type,
-      {
-        _id: newMessage._id,
-        content: newMessage.content,
-        fileUrl: newMessage.fileUrl,
-        thumbnailUrl: newMessage.thumbnailUrl,
-        fileName: newMessage.fileName,
-        fileSize: newMessage.fileSize,
-        senderId,
-        senderName: sender ? sender.username : 'Unknown',
-        sequenceNumber,
-        timestamp: newMessage.timestamp,
-      },
+      content: newMessage.content,
+      fileUrl: newMessage.fileUrl,
+      thumbnailUrl: newMessage.thumbnailUrl,
+      fileName: newMessage.fileName,
+      fileSize: newMessage.fileSize,
       senderId,
-    );
+      senderName: sender ? sender.username : 'Unknown',
+      sequenceNumber,
+      timestamp: newMessage.timestamp,
+    };
+
+    await socketService.sendRoomMessage(roomId, type, messageData, senderId);
 
     res.status(201).json(newMessage);
   } catch (error) {
@@ -255,23 +271,21 @@ exports.sendMessage = async (req, res) => {
       }
     });
 
+    // 5. Socket SDK를 통해 실시간 브로드캐스트 (MESSAGE_ADDED)
     const sender = room.members.find((m) => m._id.toString() === senderId);
 
-    // 5. Socket SDK를 통해 실시간 브로드캐스트 (MESSAGE_ADDED)
-    await socketService.sendRoomMessage(
+    const messageData = {
+      _id: newMessage._id,
       roomId,
-      newMessage.type,
-      {
-        _id: newMessage._id,
-        content,
-        senderId,
-        senderName: sender ? sender.username : 'Unknown',
-        sequenceNumber,
-        tempId,
-        timestamp: newMessage.timestamp,
-      },
+      content,
       senderId,
-    );
+      senderName: sender ? sender.username : 'Unknown',
+      sequenceNumber,
+      tempId,
+      timestamp: newMessage.timestamp,
+    };
+
+    await socketService.sendRoomMessage(roomId, newMessage.type, messageData, senderId);
 
     // 6. 푸시 알림 전송 (오프라인이거나 현재 방에 있지 않은 유저에게만)
     if (recipientIds.length > 0) {

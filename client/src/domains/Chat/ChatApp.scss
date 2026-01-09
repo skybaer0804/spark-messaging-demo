@@ -146,4 +146,59 @@
       }
     }
   }
+
+  // Profile Menu Dropdown
+  &__profile-menu {
+    position: absolute;
+    top: 50px;
+    left: 16px;
+    z-index: 1000;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 8px 0;
+    min-width: 240px;
+
+    &-header {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      
+      .typography {
+        color: #1e293b;
+      }
+    }
+
+    &-section {
+      padding: 8px 0;
+
+      &-title {
+        display: block;
+        padding: 4px 16px;
+        font-weight: bold;
+        color: #64748b;
+        font-size: 11px;
+        text-transform: uppercase;
+      }
+    }
+
+    &-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      color: #1e293b;
+      transition: background-color 0.2s;
+
+      &:hover {
+        background-color: #f8fafc;
+      }
+
+      .list-item-text__primary {
+        font-size: 14px;
+        color: #334155;
+      }
+    }
+
+    .divider {
+      margin: 4px 0;
+    }
+  }
 }

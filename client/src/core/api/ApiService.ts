@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { currentWorkspaceId } from '@/stores/chatRoomsStore';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -9,13 +10,22 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add JWT token
+// Request interceptor to add JWT token and Workspace ID
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // v2.2.0: 현재 워크스페이스 ID가 있으면 헤더에 포함 (인증/워크스페이스 목록 조회 제외)
+    const isAuthRequest = config.url?.includes('/auth/login') || config.url?.includes('/auth/register');
+    const isWorkspaceListRequest = config.url === '/workspace' && config.method === 'get';
+
+    if (currentWorkspaceId.value && !isAuthRequest && !isWorkspaceListRequest) {
+      config.headers['x-workspace-id'] = currentWorkspaceId.value;
+    }
+
     return config;
   },
   (error) => Promise.reject(error),
@@ -87,11 +97,18 @@ export const chatApi = {
 export const workspaceApi = {
   getWorkspaces: () => api.get('/workspace'),
   getPrivateKey: (workspaceId: string) => api.get(`/workspace/${workspaceId}/private-key`),
-  createWorkspace: (data: { name: string; initials?: string; color?: string; projectUrl?: string; allowPublicJoin?: boolean }) =>
-    api.post('/workspace', data),
+  createWorkspace: (data: {
+    name: string;
+    initials?: string;
+    color?: string;
+    projectUrl?: string;
+    allowPublicJoin?: boolean;
+  }) => api.post('/workspace', data),
   joinWorkspace: (workspaceId: string) => api.post(`/workspace/${workspaceId}/join`),
-  updateWorkspace: (workspaceId: string, data: { name?: string; initials?: string; color?: string; allowPublicJoin?: boolean }) =>
-    api.patch(`/workspace/${workspaceId}`, data),
+  updateWorkspace: (
+    workspaceId: string,
+    data: { name?: string; initials?: string; color?: string; allowPublicJoin?: boolean },
+  ) => api.patch(`/workspace/${workspaceId}`, data),
   createCompany: (data: { name: string; workspaceId: string }) => api.post('/workspace/company', data),
   createDept: (data: { name: string; companyId: string; workspaceId: string; parentId?: string }) =>
     api.post('/workspace/dept', data),

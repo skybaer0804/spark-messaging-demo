@@ -117,6 +117,14 @@ export function ChatProvider({ children }: { children: any }) {
       refreshRoomList();
     });
 
+    // v2.2.0: 실시간 유저 상태 변경 감지
+    const unsubStatusChange = connectionServiceRef.current['client'].onMessage((msg: any) => {
+      if (msg.type === 'USER_STATUS_CHANGED') {
+        const { userId, status } = msg.content;
+        setUserList((prev) => prev.map((user) => (user._id === userId ? { ...user, status } : user)));
+      }
+    });
+
     // Initial load
     const init = async () => {
       setIsLoading(true);
@@ -137,6 +145,7 @@ export function ChatProvider({ children }: { children: any }) {
       unsubStateChange();
       unsubError();
       unsubRoomMessage();
+      unsubStatusChange();
     };
   }, [user]);
 

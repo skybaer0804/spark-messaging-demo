@@ -1,4 +1,5 @@
 const { client } = require('../config/redis');
+const socketService = require('./socketService');
 
 class UserService {
   // 유저 상태 설정 (Online/Offline)
@@ -7,11 +8,14 @@ class UserService {
       // Redis에 유저 상태 저장 (key: user:status:id)
       // 상태는 'online' 또는 'offline'
       await client.set(`user:status:${userId}`, status);
-      
+
       // 만약 'online'이면 마지막 활동 시간도 저장 (TTL 설정 가능)
       if (status === 'online') {
         await client.set(`user:lastSeen:${userId}`, Date.now().toString());
       }
+
+      // v2.2.0: 유저 상태 변경 이벤트 브로드캐스트
+      socketService.broadcastEvent('USER_STATUS_CHANGED', { userId, status });
     } catch (error) {
       console.error('Error setting user status in Redis:', error);
     }
@@ -32,7 +36,7 @@ class UserService {
   async getUsersStatus(userIds) {
     try {
       const pipeline = client.multi();
-      userIds.forEach(id => {
+      userIds.forEach((id) => {
         pipeline.get(`user:status:${id}`);
       });
       const results = await pipeline.exec();
@@ -90,4 +94,3 @@ class UserService {
 }
 
 module.exports = new UserService();
-

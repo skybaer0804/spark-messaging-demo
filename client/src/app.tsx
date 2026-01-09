@@ -202,8 +202,11 @@ export function App() {
       return <PrivacyPolicy />;
     }
 
-    // 등록된 앱 라우트 매칭
-    const route = appRoutes.find((r) => r.path === currentRoute);
+    // 등록된 앱 라우트 매칭 (서브 경로 포함)
+    const route = appRoutes.find((r) => {
+      if (r.path === '/') return currentRoute === '/';
+      return currentRoute.startsWith(r.path);
+    });
     if (route) {
       return route.element;
     }

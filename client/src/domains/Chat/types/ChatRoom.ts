@@ -34,6 +34,11 @@ export interface ChatRoom {
   isPrivate?: boolean;
   lastMessage?: Message;
   lastSequenceNumber?: number;
+  displayName?: string; // v2.2.0: 서버에서 계산된 표시용 이름
+  displayAvatar?: string | null; // v2.2.0: 서버에서 계산된 표시용 아바타
+  displayStatus?: string; // v2.2.0: 서버에서 계산된 표시용 상태
+  displayStatusText?: string; // v2.2.0: 서버에서 계산된 표시용 상태 메시지
+  isArchived?: boolean;
   createdAt: string;
   updatedAt: string;
   unreadCount?: number;

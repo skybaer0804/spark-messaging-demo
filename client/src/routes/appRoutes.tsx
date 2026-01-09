@@ -191,9 +191,13 @@ export function findRouteTitleByPath(pathname: string) {
   }
 
   for (const r of appRoutes) {
-    if (normalized === r.path) return r.title;
+    if (r.path === '/') {
+      if (normalized === '/') return r.title;
+      continue;
+    }
+    if (normalized.startsWith(r.path)) return r.title;
     if (r.children) {
-      const hit = r.children.find((c) => normalized === c.path);
+      const hit = r.children.find((c) => normalized.startsWith(c.path));
       if (hit) return hit.title;
     }
   }

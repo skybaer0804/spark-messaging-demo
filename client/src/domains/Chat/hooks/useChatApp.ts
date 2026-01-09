@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'preact/hooks';
 import { useToast } from '@/core/context/ToastContext';
-import { setChatCurrentRoom, setChatRoomList } from '@/stores/chatRoomsStore';
+import { setChatCurrentRoom, setChatRoomList, currentWorkspaceId } from '@/stores/chatRoomsStore';
 import { useChat } from '../context/ChatContext';
 import { useChatRoom } from './useChatRoom';
 import { ChatRoom } from '../types';
@@ -76,7 +76,7 @@ export function useChatApp() {
         name: extraData.name || (type === 'direct' ? undefined : roomIdInput.trim()),
         description: extraData.description,
         members: selectedUserIds.length > 0 ? selectedUserIds : extraData.members || undefined,
-        workspaceId: extraData.workspaceId || 'current_workspace_id', // 실제 연동 필요
+        workspaceId: extraData.workspaceId || currentWorkspaceId.value || '',
         type,
         teamId: extraData.teamId,
         parentId: extraData.parentId,

@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 
 const chatRoomSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  identifier: { type: String, unique: true, sparse: true }, // 1:1 채팅용 고유 식별자 (정렬된 userId 조합)
+  slug: { type: String, unique: true, sparse: true }, // 공개/비공개 채널용 유니크 ID (URL 등 활용)
+  name: { type: String }, // 그룹 채팅방 이름 (1:1은 null 가능)
   description: { type: String },
   type: {
     type: String,

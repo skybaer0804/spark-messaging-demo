@@ -106,7 +106,20 @@ exports.getAllUsers = async (req, res) => {
     }
 
     const users = await User.find(query).select('username email profileImage status workspaces companyId deptId');
-    res.json(users);
+
+    // Redis에서 실시간 상태 가져오기
+    const userIds = users.map((u) => u._id.toString());
+    const statuses = await userService.getUsersStatus(userIds);
+
+    const usersWithStatus = users.map((user) => {
+      const userObj = user.toObject();
+      return {
+        ...userObj,
+        status: statuses[user._id.toString()] || userObj.status || 'offline',
+      };
+    });
+
+    res.json(usersWithStatus);
   } catch (error) {
     console.error('GetAllUsers error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });

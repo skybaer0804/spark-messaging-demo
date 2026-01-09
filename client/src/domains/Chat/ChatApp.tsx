@@ -38,6 +38,11 @@ import {
   IconEdit,
   IconDotsVertical,
   IconArrowLeft,
+  IconUserCircle,
+  IconCircleFilled,
+  IconCircle,
+  IconUser,
+  IconLogout,
 } from '@tabler/icons-preact';
 import { Button } from '@/ui-components/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
@@ -93,6 +98,7 @@ function ChatRoomSidebar({
 }: ChatRoomSidebarProps) {
   const [showInviteList, setShowInviteList] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false);
   const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false);
   const [newRoomData, setNewRoomData] = useState({ name: '', topic: '', isPrivate: false });
@@ -106,8 +112,8 @@ function ChatRoomSidebar({
     private: true,
     discussion: true,
   });
-  const { showInfo } = useToast();
-  const { user: currentUser } = useAuth();
+  const { showInfo, showSuccess } = useToast();
+  const { user: currentUser, signOut } = useAuth();
   const { navigate } = useRouterState();
 
   const handleContextMenu = (e: MouseEvent, roomId: string) => {
@@ -119,10 +125,34 @@ function ChatRoomSidebar({
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const handleUpdateStatus = async (status: string) => {
+    try {
+      await authApi.updateProfile({ status });
+      setShowProfileMenu(false);
+      showSuccess(`상태가 ${status}로 변경되었습니다.`);
+      // 실제 앱에서는 전역 유저 상태가 업데이트되어야 함
+      if (currentUser) {
+        currentUser.status = status as any;
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/auth/login');
+    } catch (err) {
+      console.error('Failed to logout:', err);
+    }
+  };
+
   useEffect(() => {
     const handleClick = () => {
       setContextMenu(null);
       setShowCreateMenu(false);
+      setShowProfileMenu(false);
     };
     window.addEventListener('click', handleClick);
     return () => window.removeEventListener('click', handleClick);
@@ -149,15 +179,16 @@ function ChatRoomSidebar({
   const { filteredRoomList, filteredUserList } = useMemo(() => {
     if (!searchQuery.trim()) return { filteredRoomList: roomList, filteredUserList: [] };
     const lowerQuery = searchQuery.toLowerCase();
+    const currentUserId = currentUser?.id || (currentUser as any)?._id;
 
     const filteredRooms = roomList.filter((r) => {
-      const roomName = r.type === 'direct' ? getDirectChatName(r, currentUser?.id) : r.name;
+      const roomName = r.type === 'direct' ? getDirectChatName(r, currentUserId) : r.name;
       return roomName?.toLowerCase().includes(lowerQuery);
     });
 
     // 이미 채팅방이 있는 유저는 제외하고 검색 (또는 포함해서 검색 결과에 노출)
     const filteredUsers = userList.filter((u) => {
-      if (u._id === currentUser?.id) return false;
+      if (u._id === currentUserId) return false;
       return u.username.toLowerCase().includes(lowerQuery);
     });
 
@@ -176,8 +207,11 @@ function ChatRoomSidebar({
 
   const renderRoomItem = (room: ChatRoom) => {
     const isActive = currentRoom?._id === room._id;
-    const directMember = room.type === 'direct' ? room.members.find((m) => m._id !== currentUser?.id) : null;
-    const roomName = getDirectChatName(room, currentUser?.id);
+    const currentUserId = currentUser?.id || (currentUser as any)?._id;
+    const roomName = room.displayName || getDirectChatName(room, currentUserId);
+    const displayAvatar = room.type === 'direct' ? room.displayAvatar : null;
+    const displayStatus = room.type === 'direct' ? room.displayStatus : 'offline';
+    const directMember = room.type === 'direct' ? room.members.find((m) => m._id !== currentUserId) : null;
 
     return (
       <div
@@ -193,10 +227,10 @@ function ChatRoomSidebar({
         <div className="avatar">
           {room.type === 'direct' ? (
             <>
-              <Avatar src={directMember?.profileImage || directMember?.avatar} size="sm">
+              <Avatar src={displayAvatar || directMember?.profileImage || directMember?.avatar} size="sm">
                 {roomName?.substring(0, 1)}
               </Avatar>
-              <div className={`avatar-status avatar-status--${directMember?.status || 'offline'}`} />
+              <div className={`avatar-status avatar-status--${displayStatus || directMember?.status || 'offline'}`} />
             </>
           ) : (
             <Avatar
@@ -210,8 +244,10 @@ function ChatRoomSidebar({
         </div>
         <div className="chat-app__sidebar-item-content">
           <div className="chat-app__sidebar-item-name">{room.unreadCount ? <strong>{roomName}</strong> : roomName}</div>
-          {room.type === 'direct' && directMember?.statusText && (
-            <div className="chat-app__sidebar-item-status-text">{directMember.statusText}</div>
+          {room.type === 'direct' && (room.displayStatusText || directMember?.statusText) && (
+            <div className="chat-app__sidebar-item-status-text">
+              {room.displayStatusText || directMember?.statusText}
+            </div>
           )}
         </div>
         {room.unreadCount ? <div className="chat-app__sidebar-item-badge">{room.unreadCount}</div> : null}
@@ -313,17 +349,106 @@ function ChatRoomSidebar({
             <>
               <div
                 className="chat-app__sidebar-profile"
-                onClick={() => navigate('/profile')}
-                style={{ cursor: 'pointer', position: 'relative' }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowProfileMenu(!showProfileMenu);
+                }}
+                style={{ cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center' }}
               >
-                <Avatar src={currentUser?.profileImage} size="sm">
-                  {currentUser?.username?.substring(0, 1)}
-                </Avatar>
+                <IconUserCircle size={32} color="var(--color-text-secondary)" />
                 <div
                   className={`avatar-status avatar-status--${currentUser?.status || 'online'}`}
-                  style={{ border: '2px solid #2c333d' }}
+                  style={{ border: '2px solid #2c333d', bottom: '-2px', right: '-2px' }}
                 />
               </div>
+
+              {/* Profile Menu Dropdown */}
+              {showProfileMenu && (
+                <div className="chat-app__profile-menu" onClick={(e) => e.stopPropagation()}>
+                  <div className="chat-app__profile-menu-header">
+                    <Flex align="center" gap="md">
+                      <div style={{ position: 'relative' }}>
+                        <Avatar src={currentUser?.profileImage} size="md">
+                          {currentUser?.username?.substring(0, 1)}
+                        </Avatar>
+                        <div
+                          className={`avatar-status avatar-status--${currentUser?.status || 'online'}`}
+                          style={{ border: '2px solid #fff', bottom: '0', right: '0', width: '12px', height: '12px' }}
+                        />
+                      </div>
+                      <Box>
+                        <Typography variant="h4" style={{ fontWeight: 'bold' }}>
+                          {currentUser?.username || 'User'}
+                        </Typography>
+                        <Typography variant="caption" color="text-secondary">
+                          {currentUser?.status === 'online'
+                            ? '온라인'
+                            : currentUser?.status === 'away'
+                            ? '자리비움'
+                            : currentUser?.status === 'busy'
+                            ? '바쁨'
+                            : 'offline'}
+                        </Typography>
+                      </Box>
+                    </Flex>
+                  </div>
+
+                  <div className="chat-app__profile-menu-section">
+                    <Typography variant="caption" className="chat-app__profile-menu-section-title">
+                      상태
+                    </Typography>
+                    <List disablePadding>
+                      <ListItem onClick={() => handleUpdateStatus('online')} className="chat-app__profile-menu-item">
+                        <IconCircleFilled size={14} style={{ color: '#2bac76', marginRight: '12px' }} />
+                        <ListItemText primary="온라인" />
+                      </ListItem>
+                      <ListItem onClick={() => handleUpdateStatus('away')} className="chat-app__profile-menu-item">
+                        <IconCircleFilled size={14} style={{ color: '#f59e0b', marginRight: '12px' }} />
+                        <ListItemText primary="자리비움" />
+                      </ListItem>
+                      <ListItem onClick={() => handleUpdateStatus('busy')} className="chat-app__profile-menu-item">
+                        <IconCircleFilled size={14} style={{ color: '#e11d48', marginRight: '12px' }} />
+                        <ListItemText primary="바쁨" />
+                      </ListItem>
+                      <ListItem onClick={() => handleUpdateStatus('offline')} className="chat-app__profile-menu-item">
+                        <IconCircle size={14} style={{ color: '#94a3b8', marginRight: '12px' }} />
+                        <ListItemText primary="offline" />
+                      </ListItem>
+                    </List>
+                  </div>
+
+                  <Divider />
+
+                  <div className="chat-app__profile-menu-section">
+                    <Typography variant="caption" className="chat-app__profile-menu-section-title">
+                      Account
+                    </Typography>
+                    <List disablePadding>
+                      <ListItem
+                        onClick={() => {
+                          navigate('/profile');
+                          setShowProfileMenu(false);
+                        }}
+                        className="chat-app__profile-menu-item"
+                      >
+                        <IconUser size={18} style={{ marginRight: '12px', color: '#64748b' }} />
+                        <ListItemText primary="프로필" />
+                      </ListItem>
+                    </List>
+                  </div>
+
+                  <Divider />
+
+                  <div className="chat-app__profile-menu-section">
+                    <List disablePadding>
+                      <ListItem onClick={handleLogout} className="chat-app__profile-menu-item">
+                        <IconLogout size={18} style={{ marginRight: '12px', color: '#64748b' }} />
+                        <ListItemText primary="로그아웃" />
+                      </ListItem>
+                    </List>
+                  </div>
+                </div>
+              )}
 
               <div className="chat-app__sidebar-actions">
                 <IconButton size="small" onClick={() => setIsSearching(true)}>
@@ -630,12 +755,18 @@ function ChatAppContent() {
   useEffect(() => {
     if (pathname === '/chatapp/directory') {
       setActiveView('directory');
+    } else if (pathname.startsWith('/chatapp/chat/')) {
+      const roomId = pathname.split('/').pop();
+      if (roomId && !currentRoom && roomList.length > 0) {
+        onRoomSelect(roomId);
+      }
+      setActiveView('chat');
     } else if (currentRoom) {
       setActiveView('chat');
     } else {
       setActiveView('home');
     }
-  }, [pathname, currentRoom]);
+  }, [pathname, currentRoom, roomList]);
 
   const onRoomSelect = (roomId: string) => {
     const room = roomList.find((r) => r._id === roomId);
@@ -947,7 +1078,7 @@ function ChatAppContent() {
                   <IconHash size={20} />
                 )}
                 <Typography variant="h3" style={{ fontWeight: 800 }}>
-                  {getDirectChatName(currentRoom, user?.id)}
+                  {getDirectChatName(currentRoom, user?.id || (user as any)?._id)}
                 </Typography>
               </Flex>
               {currentRoom.description && (
@@ -997,7 +1128,8 @@ function ChatAppContent() {
           >
             <Stack spacing="md" style={{ flex: 1, minHeight: 0 }}>
               {messages.map((msg) => {
-                const isOwnMessage = msg.senderId === user?.id || msg.status === 'sending';
+                const currentUserId = user?.id || (user as any)?._id;
+                const isOwnMessage = msg.senderId === currentUserId || msg.status === 'sending';
                 return (
                   <Flex
                     key={msg._id}
@@ -1013,7 +1145,8 @@ function ChatAppContent() {
                       <Flex align="center" gap="sm" style={{ marginBottom: '4px' }}>
                         {!isOwnMessage && (
                           <Typography variant="caption" color="text-secondary">
-                            {msg.senderName || (msg.senderId ? msg.senderId.substring(0, 6) : 'Unknown')}
+                            {msg.senderName ||
+                              (typeof msg.senderId === 'string' ? msg.senderId.substring(0, 6) : 'Unknown')}
                           </Typography>
                         )}
                         <Typography variant="caption" color="text-tertiary">

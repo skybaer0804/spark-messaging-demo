@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from 'preact/hooks';
-import { IconSparkles, IconPlus, IconHome } from '@tabler/icons-preact';
+import { IconSparkles, IconPlus } from '@tabler/icons-preact';
 import { useRouterState } from '@/routes/RouterState';
 import { appRoutes, type AppRouteNode } from '@/routes/appRoutes';
 import { currentWorkspaceId, setCurrentWorkspaceId } from '@/stores/chatRoomsStore';
@@ -48,7 +48,7 @@ export function Sidebar() {
         {/* 2.2.0: 홈 아이콘 (상단 배치) */}
         <div className="lnb__header">
           <div className="lnb__logo" onClick={() => navigate('/')} title="Home">
-            <IconHome size={28} />
+            <IconSparkles size={28} />
           </div>
         </div>
 
@@ -92,13 +92,6 @@ export function Sidebar() {
             );
           })}
         </nav>
-
-        {/* 하단 로고 */}
-        <div className="lnb__footer">
-          <div className="lnb__logo lnb__logo--small" onClick={() => navigate('/')} title="Spark Messaging">
-            <IconSparkles size={24} />
-          </div>
-        </div>
       </div>
     </aside>
   );

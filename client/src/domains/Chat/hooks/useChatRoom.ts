@@ -20,12 +20,17 @@ export function useChatRoom() {
         await roomService.joinRoom(room._id);
         const history = await chatService.getMessages(room._id);
 
-        // v2.2.0: 서버 데이터 모델에 맞춰 포맷팅
-        const formatted = history.map((msg: any) => ({
-          ...msg,
-          timestamp: new Date(msg.timestamp),
-          status: 'sent',
-        }));
+        // v2.2.0: 서버 데이터 모델에 맞춰 포맷팅 (Populate된 senderId 처리)
+        const formatted = history.map((msg: any) => {
+          const senderObj = typeof msg.senderId === 'object' ? msg.senderId : null;
+          return {
+            ...msg,
+            senderId: senderObj ? senderObj._id : msg.senderId,
+            senderName: msg.senderName || (senderObj ? senderObj.username : 'Unknown'),
+            timestamp: new Date(msg.timestamp),
+            status: 'sent',
+          };
+        });
 
         setMessages(formatted);
         setCurrentRoom(room);
@@ -41,7 +46,8 @@ export function useChatRoom() {
     async (content: string) => {
       if (!currentRoom || !user || !content.trim()) return;
 
-      const tempId = sendOptimisticMessage(currentRoom._id, content, user.id, user.username);
+      const currentUserId = user.id || (user as any)._id;
+      const tempId = sendOptimisticMessage(currentRoom._id, content, currentUserId, user.username);
 
       try {
         const response = await chatService.sendMessage(currentRoom._id, content, 'text', tempId);
