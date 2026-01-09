@@ -11,6 +11,7 @@ import { Typography } from '@/ui-component/Typography/Typography';
 import { Paper } from '@/ui-component/Paper/Paper';
 import { List, ListItem, ListItemText, ListItemAvatar } from '@/ui-component/List/List';
 import { Avatar } from '@/ui-component/Avatar/Avatar';
+import { Divider } from '@/ui-component/Divider/Divider';
 import {
   IconArrowLeft,
   IconSend,
@@ -26,11 +27,14 @@ import {
 import { Button } from '@/ui-component/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
 import { useAuth } from '@/hooks/useAuth';
-import { authApi } from '@/services/authService';
+import { authApi } from '@/services/ApiService';
 import { useToast } from '@/context/ToastContext';
+import { ChatProvider } from './context/ChatContext';
+import { ChatDataProvider } from './context/ChatDataProvider';
+import { useRouterState } from '@/routes/RouterState';
 import './ChatApp.scss';
 
-import type { Message, ChatRoom, ChatUser } from './types';
+import type { ChatRoom, ChatUser } from './types';
 import type { Organization } from './hooks/useChatApp';
 
 interface ChatRoomSidebarProps {
@@ -69,6 +73,7 @@ function ChatRoomSidebar({
   const [showInviteList, setShowInviteList] = useState(false);
   const [inviteTab, setInviteTab] = useState<'user' | 'org'>('user');
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; roomId: string } | null>(null);
+  const { showInfo } = useToast();
 
   const handleContextMenu = (e: MouseEvent, roomId: string) => {
     e.preventDefault();
@@ -124,25 +129,23 @@ function ChatRoomSidebar({
             >
               <Flex style={{ borderBottom: '1px solid var(--color-border-default)' }}>
                 <Button
-                  variant="ghost"
+                  variant={inviteTab === 'user' ? 'primary' : 'secondary'}
                   fullWidth
                   size="sm"
                   onClick={() => setInviteTab('user')}
                   style={{
                     borderRadius: 0,
-                    borderBottom: inviteTab === 'user' ? '2px solid var(--color-interactive-primary)' : 'none',
                   }}
                 >
                   Users
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant={inviteTab === 'org' ? 'primary' : 'secondary'}
                   fullWidth
                   size="sm"
                   onClick={() => setInviteTab('org')}
                   style={{
                     borderRadius: 0,
-                    borderBottom: inviteTab === 'org' ? '2px solid var(--color-interactive-primary)' : 'none',
                   }}
                 >
                   Orgs
@@ -150,7 +153,7 @@ function ChatRoomSidebar({
               </Flex>
 
               {inviteTab === 'user' ? (
-                <List size="small">
+                <List>
                   {userList.map((user) => (
                     <ListItem
                       key={user._id}
@@ -158,11 +161,11 @@ function ChatRoomSidebar({
                       style={{ cursor: 'pointer' }}
                     >
                       <ListItemAvatar>
-                        <Avatar src={user.avatar} size="small">
+                        <Avatar src={user.avatar} size="sm">
                           {user.username.substring(0, 1)}
                         </Avatar>
                       </ListItemAvatar>
-                      <ListItemText primary={user.username} primaryTypographyProps={{ variant: 'body-small' }} />
+                      <ListItemText primary={user.username} />
                       <input
                         type="checkbox"
                         checked={selectedUserIds.includes(user._id)}
@@ -173,19 +176,17 @@ function ChatRoomSidebar({
                   ))}
                 </List>
               ) : (
-                <List size="small">
+                <List>
                   {orgList.map((org) => (
                     <ListItem key={org._id} onClick={() => toggleOrgSelection(org._id)} style={{ cursor: 'pointer' }}>
                       <ListItemAvatar>
-                        <Avatar variant="rounded" size="small">
+                        <Avatar variant="rounded" size="sm">
                           {org.name.substring(0, 1)}
                         </Avatar>
                       </ListItemAvatar>
                       <ListItemText
                         primary={org.name}
                         secondary={`${org.dept1}${org.dept2 ? ' > ' + org.dept2 : ''}`}
-                        primaryTypographyProps={{ variant: 'body-small', fontWeight: 600 }}
-                        secondaryTypographyProps={{ variant: 'caption' }}
                       />
                       <input
                         type="checkbox"
@@ -258,19 +259,19 @@ function ChatRoomSidebar({
             border: '1px solid var(--color-border-default)',
           }}
         >
-          <List size="small" style={{ padding: 0 }}>
+          <List style={{ padding: 0 }}>
             <ListItem
               onClick={() => {
                 if (currentRoom?._id === contextMenu.roomId) {
                   leaveRoom();
                 } else {
-                  toast.info('해당 방에 먼저 들어가주세요.');
+                  showInfo('해당 방에 먼저 들어가주세요.');
                 }
                 setContextMenu(null);
               }}
-              style={{ cursor: 'pointer', '&:hover': { backgroundColor: 'var(--color-bg-tertiary)' } }}
+              style={{ cursor: 'pointer' }}
             >
-              <ListItemText primary="방 나가기" primaryTypographyProps={{ variant: 'body-small', color: 'error' }} />
+              <ListItemText primary="방 나가기" />
             </ListItem>
           </List>
         </Paper>
@@ -279,7 +280,15 @@ function ChatRoomSidebar({
   );
 }
 
-export function ChatApp() {
+function ChatAppContent() {
+  const { pathname } = useRouterState();
+
+  // 경로 방어 로직: /chatapp 경로가 아닐 경우 렌더링하지 않음
+  // (SidebarLayout에서 content로 들어오므로 중복 노출 방지)
+  if (!pathname.startsWith('/chatapp')) {
+    return null;
+  }
+
   const {
     isConnected,
     messages,
@@ -326,11 +335,12 @@ export function ChatApp() {
   const [showUserList, setShowUserList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const { user } = useAuth();
+  const { showSuccess } = useToast();
 
   const toggleGlobalNotifications = async (enabled: boolean) => {
     try {
       await authApi.updateNotificationSettings({ globalEnabled: enabled });
-      toast.success(`Notifications ${enabled ? 'enabled' : 'disabled'}`);
+      showSuccess(`Notifications ${enabled ? 'enabled' : 'disabled'}`);
     } catch (err) {
       console.error('Failed to update settings:', err);
     }
@@ -625,7 +635,7 @@ export function ChatApp() {
                         <Avatar
                           src={member.avatar}
                           variant="circular"
-                          size="small"
+                          size="sm"
                           style={{
                             border: `2px solid ${
                               member.status === 'online' ? 'var(--color-success-main)' : 'var(--color-text-tertiary)'
@@ -638,8 +648,6 @@ export function ChatApp() {
                       <ListItemText
                         primary={member.username}
                         secondary={member.status === 'online' ? 'Online' : 'Offline'}
-                        primaryTypographyProps={{ variant: 'body-small', fontWeight: 600 }}
-                        secondaryTypographyProps={{ variant: 'caption' }}
                       />
                     </ListItem>
                   ))}
@@ -710,11 +718,11 @@ export function ChatApp() {
                   onInput={(e) => {
                     const target = e.currentTarget as HTMLInputElement;
                     setInput(target.value);
-                    // 한글 입력 시 포커스 유지
+                    // 한글 입력 시 포커스 유지 로직 최적화
                     if (isComposing) {
+                      const inputElement = e.currentTarget;
                       requestAnimationFrame(() => {
-                        const inputElement = inputWrapperRef.current?.querySelector('input') as HTMLInputElement;
-                        if (inputElement && document.activeElement !== inputElement) {
+                        if (document.activeElement !== inputElement) {
                           inputElement.focus();
                         }
                       });
@@ -776,7 +784,7 @@ export function ChatApp() {
               zIndex: 3000,
               display: 'flex',
               alignItems: 'center',
-              justify: 'center',
+              justifyContent: 'center',
             }}
             onClick={() => setShowSettings(false)}
           >
@@ -811,5 +819,15 @@ export function ChatApp() {
         )}
       </Flex>
     </Box>
+  );
+}
+
+export function ChatApp() {
+  return (
+    <ChatProvider>
+      <ChatDataProvider>
+        <ChatAppContent />
+      </ChatDataProvider>
+    </ChatProvider>
   );
 }

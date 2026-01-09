@@ -1,17 +1,50 @@
-.profile {
-  padding: var(--space-padding-card-lg);
+@use '/src/styles/tokens/index';
 
-  @media (max-width: 768px) {
-    padding: var(--space-padding-card-md);
-  }
+.profile {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-xl) var(--spacing-md);
+  min-height: 100%;
+  background-color: var(--color-bg-tertiary);
 
   &__card {
+    width: 100%;
     max-width: 600px;
+    height: fit-content;
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--elevation-shadow-2);
+    background-color: var(--color-bg-default);
+  }
+
+  &__header {
+    border-bottom: 1px solid var(--color-border-default);
+    padding-bottom: var(--spacing-xl);
+  }
+
+  &__avatar {
+    background-color: var(--color-interactive-primary);
+    color: var(--primitive-gray-0);
+    font-size: 2rem;
+    font-weight: 700;
   }
 
   &__field {
     display: flex;
     flex-direction: column;
-    gap: var(--space-gap-xs);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-secondary);
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: var(--color-bg-tertiary);
+    }
+  }
+
+  &__value {
+    padding: var(--spacing-xs) 0;
+    font-weight: 500;
+    color: var(--color-text-primary);
   }
 }

@@ -88,9 +88,15 @@ export class ChatService {
         return;
       }
       const isOwnMessage = this.isOwnMessage(msg);
-      const content = typeof msg.content === 'object' && (msg.content as any).content 
-        ? (msg.content as any).content 
-        : msg.content;
+      
+      // 콘텐트가 객체인 경우 (중첩된 경우) 처리
+      let content = '';
+      if (typeof msg.content === 'object' && msg.content !== null) {
+        content = (msg.content as any).content || JSON.stringify(msg.content);
+      } else {
+        content = String(msg.content || '');
+      }
+
       const senderId = typeof msg.content === 'object' && (msg.content as any).senderId
         ? (msg.content as any).senderId
         : (msg as any).from || msg.senderId;
@@ -143,9 +149,15 @@ export class ChatService {
       }
 
       const isOwnMessage = this.isOwnMessage(msg);
-      const content = typeof msg.content === 'object' && (msg.content as any).content 
-        ? (msg.content as any).content 
-        : msg.content;
+      
+      // 콘텐트가 객체인 경우 (중첩된 경우) 처리
+      let content = '';
+      if (typeof msg.content === 'object' && msg.content !== null) {
+        content = (msg.content as any).content || JSON.stringify(msg.content);
+      } else {
+        content = String(msg.content || '');
+      }
+
       const senderId = typeof msg.content === 'object' && (msg.content as any).senderId
         ? (msg.content as any).senderId
         : (msg as any).from || msg.senderId;

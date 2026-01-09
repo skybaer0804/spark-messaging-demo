@@ -265,7 +265,7 @@ export function Sidebar() {
               <nav className="sidebar__nav">
                 <List disablePadding>
                   {mainRoutes
-                    .filter((r) => r.id !== 'home')
+                    .filter((r) => r.id !== 'home' && r.id !== 'auth')
                     .filter((r) => r.id !== 'notification' || user?.role === 'Admin')
                     .map((r) => {
                       const isActive = activeMainRoute?.id === r.id;

@@ -1,5 +1,5 @@
 import { createContext } from 'preact';
-import { useContext, useState, useCallback } from 'preact/hooks';
+import { useContext, useState, useCallback, useEffect } from 'preact/hooks';
 import { ToastContainer } from '../components/Toast/ToastContainer';
 import { ToastProps, ToastAction } from '../components/Toast/Toast';
 
@@ -56,6 +56,16 @@ export function ToastProvider({ children }: { children: any }) {
   const showWarning = useCallback((message: string, duration?: number) => {
     return showToast(message, 'warning', duration);
   }, [showToast]);
+
+  // 전역 API 에러 이벤트 리스너
+  useEffect(() => {
+    const handleApiError = (event: any) => {
+      showError(event.detail || '알 수 없는 오류가 발생했습니다.');
+    };
+
+    window.addEventListener('api-error', handleApiError);
+    return () => window.removeEventListener('api-error', handleApiError);
+  }, [showError]);
 
   return (
     <ToastContext.Provider value={{ showToast, showSuccess, showError, showInfo, showWarning, hideToast }}>

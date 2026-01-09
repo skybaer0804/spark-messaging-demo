@@ -14,5 +14,6 @@ export interface Message {
   type: 'sent' | 'received';
   room?: string;
   senderId?: string;
+  senderName?: string;
   fileData?: FileData;
 }

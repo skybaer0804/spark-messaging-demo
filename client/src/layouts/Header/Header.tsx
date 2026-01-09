@@ -6,9 +6,10 @@ import { Flex } from '@/ui-component/Layout/Flex';
 import { Typography } from '@/ui-component/Typography/Typography';
 import { ThemeCustomization } from '@/components/ThemeCustomization/ThemeCustomization';
 import { Select, SelectOption } from '@/ui-component/Select/Select';
-import { IconMoon, IconSun, IconWifi, IconWifiOff, IconSettings, IconUser } from '@tabler/icons-react';
+import { IconMoon, IconSun, IconWifi, IconWifiOff, IconSettings, IconUser, IconLogin } from '@tabler/icons-react';
 import { useRouterState } from '@/routes/RouterState';
 import { appRoutes } from '@/routes/appRoutes';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HeaderProps {
   title: string;
@@ -20,12 +21,13 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const { pathname, navigate } = useRouterState();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { isAuthenticated, user } = useAuth();
 
   const homeRoute = appRoutes.find((r) => r.id === 'home');
   const viewOptions: SelectOption[] = [
     ...(homeRoute ? [{ value: homeRoute.path, label: homeRoute.title }] : []),
     ...appRoutes
-      .filter((r) => r.id !== 'design-system' && r.id !== 'home')
+      .filter((r) => r.id !== 'design-system' && r.id !== 'home' && r.id !== 'auth')
       .map((r) => ({ value: r.path, label: r.title })),
   ];
 
@@ -43,7 +45,6 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
   return (
     <header className="header">
       <div className="header__left">
-        {/* 모바일: Select로 뷰 전환 */}
         <div className="header__mobile-select">
           <Select
             options={viewOptions}
@@ -54,7 +55,6 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
             fullWidth={false}
           />
         </div>
-        {/* 데스크톱: 타이틀 표시 */}
         <Typography variant="h3" className="header__title">
           {title}
         </Typography>
@@ -80,15 +80,27 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
 
           {/* 컨트롤 버튼 */}
           <Flex align="center" gap="xs" className="header__controls">
-            <IconButton
-              size="medium"
-              color="default"
-              onClick={() => navigate('/profile')}
-              title="프로필"
-              className="header__icon-button"
-            >
-              <IconUser size={20} />
-            </IconButton>
+            {isAuthenticated ? (
+              <IconButton
+                size="medium"
+                color="default"
+                onClick={() => navigate('/profile')}
+                title="프로필"
+                className="header__icon-button"
+              >
+                <IconUser size={20} />
+              </IconButton>
+            ) : (
+              <IconButton
+                size="medium"
+                color="primary"
+                onClick={() => navigate('/login')}
+                title="로그인"
+                className="header__icon-button"
+              >
+                <IconLogin size={20} />
+              </IconButton>
+            )}
             <IconButton
               size="medium"
               color="default"

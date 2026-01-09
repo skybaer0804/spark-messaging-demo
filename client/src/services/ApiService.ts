@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { useToast } from '@/context/ToastContext';
-const { showError } = useToast();
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
@@ -33,12 +32,12 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       // 이미 로그인 페이지가 아니라면 알림 표시
       if (!window.location.pathname.includes('/auth')) {
-        showError('세션이 만료되었습니다. 다시 로그인해주세요.');
+        window.dispatchEvent(new CustomEvent('api-error', { detail: '세션이 만료되었습니다. 다시 로그인해주세요.' }));
       }
     } else {
       // 일반적인 에러 토스트 표시 (단, auth 관련 API는 호출부에서 직접 에러 처리를 할 수 있도록 조건부 표시)
-      if (!error.config.url.includes('/auth/login') && !error.config.url.includes('/auth/register')) {
-        showError(message);
+      if (error.config && !error.config.url.includes('/auth/login') && !error.config.url.includes('/auth/register')) {
+        window.dispatchEvent(new CustomEvent('api-error', { detail: message }));
       }
     }
 

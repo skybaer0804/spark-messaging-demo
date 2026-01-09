@@ -89,14 +89,6 @@ function toTitle(label: string) {
 
 export const appRoutes: AppRouteNode[] = [
   {
-    id: 'auth',
-    label: '로그인',
-    path: '/login',
-    icon: <IconHome size={20} />,
-    title: 'Login',
-    element: <AuthPage />,
-  },
-  {
     id: 'home',
     label: '홈',
     path: '/',
