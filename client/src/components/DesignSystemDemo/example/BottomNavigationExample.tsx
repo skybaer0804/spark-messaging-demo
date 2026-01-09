@@ -1,12 +1,12 @@
 import { useState } from 'preact/hooks';
-import { BottomNavigation } from '@/ui-component/BottomNavigation/BottomNavigation';
-import { Paper } from '@/ui-component/Paper/Paper';
-import { Typography } from '@/ui-component/Typography/Typography';
-import { Stack } from '@/ui-component/Layout/Stack';
+import { BottomNavigation } from '@/ui-components/BottomNavigation/BottomNavigation';
+import { Paper } from '@/ui-components/Paper/Paper';
+import { Typography } from '@/ui-components/Typography/Typography';
+import { Stack } from '@/ui-components/Layout/Stack';
 import { IconHome, IconSearch, IconUser } from '@tabler/icons-react';
 import type { DesignSystemExampleDefinition } from './types';
 
-const usageCode = `import { BottomNavigation } from '@/ui-component/BottomNavigation/BottomNavigation';
+const usageCode = `import { BottomNavigation } from '@/ui-components/BottomNavigation/BottomNavigation';
 
 <BottomNavigation
   value={value}

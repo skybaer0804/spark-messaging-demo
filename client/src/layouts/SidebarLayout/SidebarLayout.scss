@@ -26,11 +26,11 @@
 
     // Grid.tsx가 내부에서 grid-template-columns를 --grid-template-columns로 구성하므로
     // 여기서는 "columns"에 전달할 변수만 관리합니다.
-    // 기본은 미니 사이드바 너비
-    --sidebar-layout-columns: var(--sidebar-width-mini) 1fr;
+    // 기본은 LNB 너비 (80px)
+    --sidebar-layout-columns: 80px 1fr;
 
     &.sidebar-layout--with-second-menu {
-      --sidebar-layout-columns: var(--sidebar-width-mini) var(--sidebar-second-menu-width) 1fr;
+      --sidebar-layout-columns: 80px var(--sidebar-second-menu-width) 1fr;
     }
   }
 

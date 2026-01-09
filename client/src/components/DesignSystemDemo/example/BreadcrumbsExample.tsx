@@ -1,11 +1,11 @@
-import { Breadcrumbs } from '@/ui-component/Breadcrumbs/Breadcrumbs';
+import { Breadcrumbs } from '@/ui-components/Breadcrumbs/Breadcrumbs';
 import type { DesignSystemExampleDefinition } from './types';
 
 const exampleData = {
   items: [{ label: 'Home' }, { label: 'Library' }, { label: 'Data' }, { label: 'Current Page' }],
 };
 
-const usageCode = `import { Breadcrumbs } from '@/ui-component/Breadcrumbs/Breadcrumbs';
+const usageCode = `import { Breadcrumbs } from '@/ui-components/Breadcrumbs/Breadcrumbs';
 
 <Breadcrumbs
   items={[{ label: 'Home', onClick: () => {} }, { label: 'Current' }]}

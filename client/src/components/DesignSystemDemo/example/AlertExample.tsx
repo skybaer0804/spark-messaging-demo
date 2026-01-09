@@ -1,5 +1,5 @@
-import { Alert } from '@/ui-component/Alert/Alert';
-import { Stack } from '@/ui-component/Layout/Stack';
+import { Alert } from '@/ui-components/Alert/Alert';
+import { Stack } from '@/ui-components/Layout/Stack';
 import type { DesignSystemExampleDefinition } from './types';
 
 const exampleData = {
@@ -11,7 +11,7 @@ const exampleData = {
   ] as const,
 };
 
-const usageCode = `import { Alert } from '@/ui-component/Alert/Alert';
+const usageCode = `import { Alert } from '@/ui-components/Alert/Alert';
 
 <Alert severity="success">성공</Alert>
 <Alert severity="info" variant="outlined">정보</Alert>

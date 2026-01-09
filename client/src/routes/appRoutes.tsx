@@ -7,21 +7,24 @@ import {
   IconHome,
   IconUser,
   IconUsers,
+  IconVideo,
 } from '@tabler/icons-react';
-import { ChatApp } from '@/components/ChatApp/ChatApp';
-import { NotificationApp } from '@/components/NotificationApp/NotificationApp';
-import { VideoMeeting } from '@/components/VideoMeeting/VideoMeeting';
+import { ChatApp } from '@/domains/Chat';
+import { NotificationApp } from '@/domains/Notification';
+import { VideoMeeting } from '@/domains/VideoMeeting';
 import { DesignSystemDemo } from '@/components/DesignSystemDemo/DesignSystemDemo';
 import { HomePage } from '@/components/HomePage/HomePage';
 import { AuthPage } from '@/components/Auth/AuthPage';
 import { Profile } from '@/components/Profile/Profile';
 import { Organization } from '@/components/Organization/Organization';
+import { ThemeCustomization } from '@/components/ThemeCustomization/ThemeCustomization';
 
 export type AppRouteId =
   | 'home'
   | 'chatapp'
   | 'notification'
-  | 'reverse-auction'
+  | 'video-meeting'
+  | 'settings'
   | 'design-system'
   | 'auth'
   | 'profile'
@@ -92,7 +95,7 @@ export const appRoutes: AppRouteNode[] = [
     id: 'home',
     label: '홈',
     path: '/',
-    icon: <IconHome size={20} />,
+    icon: <IconHome size={24} />,
     title: 'Home',
     element: <HomePage />,
   },
@@ -100,7 +103,7 @@ export const appRoutes: AppRouteNode[] = [
     id: 'chatapp',
     label: '채팅',
     path: '/chatapp',
-    icon: <IconMessageCircle size={20} />,
+    icon: <IconMessageCircle size={24} />,
     title: 'Chat',
     element: <ChatApp />,
   },
@@ -108,15 +111,35 @@ export const appRoutes: AppRouteNode[] = [
     id: 'notification',
     label: '알림',
     path: '/notification',
-    icon: <IconBell size={20} />,
+    icon: <IconBell size={24} />,
     title: 'Notification',
     element: <NotificationApp />,
+  },
+  {
+    id: 'video-meeting',
+    label: '회의',
+    path: '/video-meeting',
+    icon: <IconVideo size={24} />,
+    title: 'Video Meeting',
+    element: <VideoMeeting />,
+  },
+  {
+    id: 'settings',
+    label: '설정',
+    path: '/settings',
+    icon: <IconSettings size={24} />,
+    title: 'Settings',
+    element: (
+      <div style={{ padding: '20px' }}>
+        <ThemeCustomization open={true} onClose={() => {}} />
+      </div>
+    ),
   },
   {
     id: 'profile',
     label: '프로필',
     path: '/profile',
-    icon: <IconUser size={20} />,
+    icon: <IconUser size={24} />,
     title: 'Profile',
     element: <Profile />,
   },
@@ -124,23 +147,15 @@ export const appRoutes: AppRouteNode[] = [
     id: 'organization',
     label: '조직',
     path: '/organization',
-    icon: <IconUsers size={20} />,
+    icon: <IconUsers size={24} />,
     title: 'Organization',
     element: <Organization />,
-  },
-  {
-    id: 'reverse-auction',
-    label: '역경매',
-    path: '/reverse-auction',
-    icon: <IconGavel size={20} />,
-    title: 'Reverse Auction',
-    element: <VideoMeeting />,
   },
   {
     id: 'design-system',
     label: '디자인',
     path: '/design-system',
-    icon: <IconPalette size={20} />,
+    icon: <IconPalette size={24} />,
     title: 'Design System Demo',
     element: <DesignSystemDemo />,
     secondMenu: true,

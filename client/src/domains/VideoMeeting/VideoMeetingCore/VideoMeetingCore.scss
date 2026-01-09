@@ -1,0 +1,13 @@
+// VideoMeetingCore는 video-meeting 클래스를 사용하므로
+// VideoMeeting.scss의 스타일을 그대로 사용
+
+.video-meeting-core {
+  // VideoMeeting.scss의 모든 스타일을 상속
+  @extend .video-meeting;
+
+  &__header {
+    @media (max-width: 768px) {
+      padding: 0.75rem;
+    }
+  }
+}

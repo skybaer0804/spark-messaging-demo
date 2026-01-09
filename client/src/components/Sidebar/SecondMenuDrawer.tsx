@@ -1,11 +1,11 @@
 import type { ComponentChildren } from 'preact';
 import { IconPin, IconPinFilled } from '@tabler/icons-react';
-import { Typography } from '@/ui-component/Typography/Typography';
-import { List, ListItem, ListItemText } from '@/ui-component/List/List';
-import { IconButton } from '@/ui-component/Button/IconButton';
+import { Typography } from '@/ui-components/Typography/Typography';
+import { List, ListItem, ListItemText } from '@/ui-components/List/List';
+import { IconButton } from '@/ui-components/Button/IconButton';
 import { useRouterState } from '@/routes/RouterState';
 import { useSidebarLayoutOptional } from '@/layouts/SidebarLayout/SidebarLayoutContext';
-import { useTheme } from '@/context/ThemeProvider';
+import { useTheme } from '@/core/context/ThemeProvider';
 import './SecondMenuDrawer.scss';
 
 interface SecondMenuDrawerProps {

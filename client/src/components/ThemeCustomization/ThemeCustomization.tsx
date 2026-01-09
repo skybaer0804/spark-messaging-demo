@@ -1,12 +1,12 @@
 import { useState } from 'preact/hooks';
-import { useTheme, PresetColor } from '@/context/ThemeProvider';
-import { Drawer } from '@/ui-component/Drawer/Drawer';
-import { Stack } from '@/ui-component/Layout/Stack';
-import { Flex } from '@/ui-component/Layout/Flex';
-import { Typography } from '@/ui-component/Typography/Typography';
-import { Button } from '@/ui-component/Button/Button';
-import { Switch } from '@/ui-component/Switch/Switch';
-import { Paper } from '@/ui-component/Paper/Paper';
+import { useTheme, PresetColor } from '@/core/context/ThemeProvider';
+import { Drawer } from '@/ui-components/Drawer/Drawer';
+import { Stack } from '@/ui-components/Layout/Stack';
+import { Flex } from '@/ui-components/Layout/Flex';
+import { Typography } from '@/ui-components/Typography/Typography';
+import { Button } from '@/ui-components/Button/Button';
+import { Switch } from '@/ui-components/Switch/Switch';
+import { Paper } from '@/ui-components/Paper/Paper';
 import { IconPalette, IconShape, IconColorSwatch } from '@tabler/icons-react';
 import './ThemeCustomization.scss';
 

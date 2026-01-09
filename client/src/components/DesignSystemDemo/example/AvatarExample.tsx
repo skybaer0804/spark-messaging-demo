@@ -1,6 +1,6 @@
-import { Avatar } from '@/ui-component/Avatar/Avatar';
-import { Stack } from '@/ui-component/Layout/Stack';
-import { Typography } from '@/ui-component/Typography/Typography';
+import { Avatar } from '@/ui-components/Avatar/Avatar';
+import { Stack } from '@/ui-components/Layout/Stack';
+import { Typography } from '@/ui-components/Typography/Typography';
 import type { DesignSystemExampleDefinition } from './types';
 
 const exampleData = {
@@ -10,7 +10,7 @@ const exampleData = {
   ],
 };
 
-const usageCode = `import { Avatar } from '@/ui-component/Avatar/Avatar';
+const usageCode = `import { Avatar } from '@/ui-components/Avatar/Avatar';
 
 <Avatar size="lg" src="..." alt="User" />
 <Avatar variant="rounded" size="sm">AB</Avatar>

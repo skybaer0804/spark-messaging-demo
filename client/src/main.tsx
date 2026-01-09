@@ -1,8 +1,8 @@
 import { render } from 'preact';
 import { App } from './app';
-import { AuthProvider } from './context/AuthContext';
-import { ToastProvider } from './context/ToastContext';
-import { ThemeProvider } from './context/ThemeProvider';
+import { AuthProvider } from '@/core/context/AuthContext';
+import { ToastProvider } from '@/core/context/ToastContext';
+import { ThemeProvider } from '@/core/context/ThemeProvider';
 import './index.css';
 
 render(

@@ -1,284 +1,104 @@
-@use '/src/styles/tokens/index';
-
-.sidebar {
-  display: flex;
-  width: var(--sidebar-width);
-  background: var(--color-background-primary);
-  border-right: 1px solid var(--color-border-default);
-  flex-shrink: 0;
+.lnb {
+  width: 80px;
   height: 100%;
-  overflow: hidden;
-  transition: width 0.3s ease;
-  position: relative;
-
-  &--mini {
-    width: var(--sidebar-width-mini);
-  }
-
-  &--expanded {
-    width: var(--sidebar-width);
-  }
-
+  background-color: var(--color-background-primary);
+  border-right: 1px solid var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: all 0.2s ease;
 
   &__container {
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: var(--sidebar-padding);
-    gap: var(--space-gap-sm);
-    flex: 0 0 var(--sidebar-width);
-    width: var(--sidebar-width);
+    padding: var(--primitive-space-4) 0;
   }
 
   &__header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-padding-button-sm);
-    margin-bottom: var(--space-gap-lg);
-    min-height: 48px;
-  }
-
-  &__primary {
-    flex-shrink: 0;
-  }
-
-  &__primary-button {
-    justify-content: flex-start;
-  }
-
-  &__primary-button-label {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__scroll {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-gap-sm);
-  }
-
-  &__section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-gap-xs);
-  }
-
-  &__section-title {
-    padding: 0 var(--space-padding-button-sm);
-    text-transform: uppercase;
-    letter-spacing: var(--typo-nav-title-small-letter-spacing);
-  }
-
-  &__divider {
-    margin: 0;
-  }
-
-  &__bottom {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-gap-sm);
-  }
-
-  &__bottom-button {
-    width: 100%;
-    border: none;
-    background: transparent;
-    border-radius: var(--sidebar-radius);
-    padding: var(--sidebar-item-padding);
-    display: flex;
-    align-items: center;
-    gap: var(--sidebar-item-gap);
-    cursor: pointer;
-    color: var(--color-text-primary);
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background: var(--sidebar-item-hover-bg);
-    }
-  }
-
-  &__bottom-button-icon {
-    display: flex;
-    align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    color: var(--color-icon-primary);
-  }
-
-  &__bottom-button-label {
-    flex: 1;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    padding-bottom: var(--primitive-space-6);
   }
 
   &__logo {
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--color-interactive-primary);
-    flex-shrink: 0;
+    cursor: pointer;
+    border-radius: var(--primitive-radius-md);
+    transition: background-color 0.2s;
 
-    &--centered {
-      width: 100%;
+    &:hover {
+      background-color: var(--color-background-secondary);
     }
   }
 
-  &__header-title {
-    font-weight: var(--primitive-font-weight-semibold);
-    color: var(--color-text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-
   &__nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--primitive-space-2);
     flex: 1;
   }
 
-  &__nav-item {
+  &__item {
+    width: 64px;
+    height: 64px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: var(--sidebar-item-gap);
-    padding: var(--sidebar-item-padding);
-    background: transparent;
+    justify-content: center;
     border: none;
-    border-radius: var(--sidebar-radius);
+    background: none;
     cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
-    width: 100%;
-    min-height: 48px;
-    box-sizing: border-box;
+    border-radius: var(--primitive-radius-md);
+    color: var(--color-text-secondary);
+    transition: all 0.2s;
+    padding: 0;
 
     &:hover {
-      background: var(--sidebar-item-hover-bg);
+      background-color: var(--color-background-secondary);
+      color: var(--color-text-primary);
     }
 
     &--active {
-      background: var(--sidebar-item-active-bg);
+      color: var(--color-interactive-primary);
+      background-color: var(--color-surface-level-1);
 
-      .sidebar__nav-item-icon {
-        color: var(--sidebar-item-active-text);
+      .lnb__item-icon {
+        transform: scale(1.1);
       }
-
-      .list-item-text__primary {
-        color: var(--sidebar-item-active-text);
-        font-weight: var(--text-label-weight);
-      }
-
-      .sidebar__nav-item-label {
-        color: var(--sidebar-item-active-text);
-      }
-
-      &:hover {
-        background: var(--sidebar-item-active-bg);
-        opacity: 0.9;
-      }
-    }
-
-    // 펼쳐졌을 때 메뉴 타이틀 색상이 축소했을 때와 동일하게
-    .list-item-text__primary {
-      color: var(--color-text-primary);
-    }
-
-    &-mini {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: var(--space-gap-xs);
-      width: 100%;
-      padding: var(--space-padding-button-sm) 0;
     }
 
     &-icon {
+      margin-bottom: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-      color: var(--color-text-primary);
-      transition: color 0.2s ease;
+      transition: transform 0.2s;
     }
 
     &-label {
-      font-size: 0.75rem;
-      color: var(--color-text-primary);
-      text-align: center;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 100%;
+      font-size: 10px;
+      font-weight: var(--primitive-font-weight-bold);
     }
   }
 
-  &__nav-link {
-    display: block;
-    text-decoration: none;
-    color: inherit;
+  &__footer {
+    padding-top: var(--primitive-space-4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
+}
 
-  &__nav-button {
-    width: 100%;
-    border: none;
-    background: transparent;
-    padding: 0;
-    cursor: pointer;
-    text-align: left;
-    color: inherit;
-  }
-
-  &__room-avatar {
-    background: var(--color-interactive-primary);
-    color: var(--color-background-primary);
-  }
-
-  // ListItemText 기본 색상 설정 - 펼쳐졌을 때와 축소했을 때 동일한 색상
-  .list-item-text__primary {
-    color: var(--color-text-primary);
-    font-weight: var(--primitive-font-weight-regular);
-  }
-
-  // 미니 모드에서 확장되지 않았을 때
-  &--mini:not(&--expanded) {
-    .sidebar__container {
-      flex-basis: var(--sidebar-width-mini);
-      width: var(--sidebar-width-mini);
-    }
-
-    .sidebar__nav-item {
-      flex-direction: column;
-      justify-content: center;
-      padding: var(--space-padding-button-sm) 0;
-    }
-
-    .list-item-text {
-      display: none;
-    }
-
-    .sidebar__primary-button {
-      justify-content: center;
-    }
-
-    .sidebar__primary-button-label {
-      display: none;
-    }
-
-    .sidebar__bottom-button {
-      justify-content: center;
-    }
-
-    .sidebar__bottom-button-label {
-      display: none;
-    }
+// 모바일에서는 LNB를 숨기고 BottomTab을 사용하므로 SidebarLayout에서 처리
+@media (max-width: 768px) {
+  .lnb {
+    display: none;
   }
 }

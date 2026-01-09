@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'preact/hooks';
-import { Typography } from '@/ui-component/Typography/Typography';
-import { Card } from '@/ui-component/Card/Card';
-import { Flex } from '@/ui-component/Layout/Flex';
-import { List, ListItem } from '@/ui-component/List/List';
+import { Typography } from '@/ui-components/Typography/Typography';
+import { Card } from '@/ui-components/Card/Card';
+import { Flex } from '@/ui-components/Layout/Flex';
+import { List, ListItem } from '@/ui-components/List/List';
 import './Organization.scss';
 
 export function Organization() {

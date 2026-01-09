@@ -4,7 +4,7 @@ import { appRoutes } from './appRoutes';
 import { useRouterState } from './RouterState';
 import { DesignSystemDemo } from '@/components/DesignSystemDemo/DesignSystemDemo';
 import { PrivacyPolicy } from '@/components/PrivacyPolicy/PrivacyPolicy';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/core/hooks/useAuth';
 import { useEffect } from 'preact/hooks';
 
 function RouteNotFound() {

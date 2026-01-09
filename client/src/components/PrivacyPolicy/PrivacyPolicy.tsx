@@ -1,7 +1,7 @@
-import { Container } from '@/ui-component/Layout/Container';
-import { Stack } from '@/ui-component/Layout/Stack';
-import { Typography } from '@/ui-component/Typography/Typography';
-import { Paper } from '@/ui-component/Paper/Paper';
+import { Container } from '@/ui-components/Layout/Container';
+import { Stack } from '@/ui-components/Layout/Stack';
+import { Typography } from '@/ui-components/Typography/Typography';
+import { Paper } from '@/ui-components/Paper/Paper';
 import './PrivacyPolicy.scss';
 
 export function PrivacyPolicy() {
@@ -38,12 +38,10 @@ export function PrivacyPolicy() {
             <Typography variant="h2" component="h2">
               2. 수집 목적
             </Typography>
-            <Typography variant="body-medium">
-              수집한 개인정보는 다음 목적으로 사용됩니다:
-            </Typography>
+            <Typography variant="body-medium">수집한 개인정보는 다음 목적으로 사용됩니다:</Typography>
             <ul className="privacy-policy__list">
               <li>실시간 메시징 및 알림 서비스 제공</li>
-              <li>비디오 통화 및 역경매 기능 제공</li>
+              <li>비디오 통화 및 화상회의 기능 제공</li>
               <li>서비스 개선 및 사용자 경험 향상</li>
               <li>오류 분석 및 기술 지원</li>
               <li>법적 의무 이행</li>
@@ -54,9 +52,7 @@ export function PrivacyPolicy() {
             <Typography variant="h2" component="h2">
               3. 개인정보 보관
             </Typography>
-            <Typography variant="body-medium">
-              수집한 개인정보는 다음 기간 동안 보관됩니다:
-            </Typography>
+            <Typography variant="body-medium">수집한 개인정보는 다음 기간 동안 보관됩니다:</Typography>
             <ul className="privacy-policy__list">
               <li>서비스 제공 기간 동안 보관</li>
               <li>사용자 요청 시 즉시 삭제</li>
@@ -82,9 +78,7 @@ export function PrivacyPolicy() {
             <Typography variant="h2" component="h2">
               5. 사용자 권리
             </Typography>
-            <Typography variant="body-medium">
-              사용자는 언제든지 다음을 요청할 수 있습니다:
-            </Typography>
+            <Typography variant="body-medium">사용자는 언제든지 다음을 요청할 수 있습니다:</Typography>
             <ul className="privacy-policy__list">
               <li>개인정보 열람 요청</li>
               <li>개인정보 수정 또는 삭제 요청</li>
@@ -111,7 +105,8 @@ export function PrivacyPolicy() {
               7. 정책 변경
             </Typography>
             <Typography variant="body-medium">
-              본 개인정보처리방침은 법령 및 정책 변경에 따라 변경될 수 있습니다. 변경 사항은 앱 내 공지 또는 웹사이트를 통해 안내합니다.
+              본 개인정보처리방침은 법령 및 정책 변경에 따라 변경될 수 있습니다. 변경 사항은 앱 내 공지 또는 웹사이트를
+              통해 안내합니다.
             </Typography>
           </section>
 
@@ -133,4 +128,3 @@ export function PrivacyPolicy() {
     </Container>
   );
 }
-

@@ -1,8 +1,8 @@
-import { Stack } from '@/ui-component/Layout/Stack';
-import { Flex } from '@/ui-component/Layout/Flex';
-import { Button } from '@/ui-component/Button/Button';
-import { IconButton } from '@/ui-component/Button/IconButton';
-import { Typography } from '@/ui-component/Typography/Typography';
+import { Stack } from '@/ui-components/Layout/Stack';
+import { Flex } from '@/ui-components/Layout/Flex';
+import { Button } from '@/ui-components/Button/Button';
+import { IconButton } from '@/ui-components/Button/IconButton';
+import { Typography } from '@/ui-components/Typography/Typography';
 import { IconPlus, IconSearch } from '@tabler/icons-react';
 import type { DesignSystemExampleDefinition } from './types';
 
@@ -11,8 +11,8 @@ const exampleData = {
   sizes: ['sm', 'md', 'lg'] as const,
 };
 
-const usageCode = `import { Button } from '@/ui-component/Button/Button';
-import { IconButton } from '@/ui-component/Button/IconButton';
+const usageCode = `import { Button } from '@/ui-components/Button/Button';
+import { IconButton } from '@/ui-components/Button/IconButton';
 import { IconSearch } from '@tabler/icons-react';
 
 <Button variant="primary">Primary</Button>

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'preact/hooks';
-import { Typography } from '@/ui-component/Typography/Typography';
-import { Card } from '@/ui-component/Card/Card';
-import { Flex } from '@/ui-component/Layout/Flex';
-import { Box } from '@/ui-component/Layout/Box';
-import { Avatar } from '@/ui-component/Avatar/Avatar';
-import { Button } from '@/ui-component/Button/Button';
-import { Input } from '@/ui-component/Input/Input';
-import { Select } from '@/ui-component/Select/Select';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/context/ToastContext';
-import { authApi } from '@/services/ApiService';
+import { Typography } from '@/ui-components/Typography/Typography';
+import { Card } from '@/ui-components/Card/Card';
+import { Flex } from '@/ui-components/Layout/Flex';
+import { Box } from '@/ui-components/Layout/Box';
+import { Avatar } from '@/ui-components/Avatar/Avatar';
+import { Button } from '@/ui-components/Button/Button';
+import { Input } from '@/ui-components/Input/Input';
+import { Select } from '@/ui-components/Select/Select';
+import { useAuth } from '@/core/hooks/useAuth';
+import { useToast } from '@/core/context/ToastContext';
+import { authApi } from '@/core/api/ApiService';
 import { IconUser, IconMail, IconShield, IconDeviceFloppy, IconEdit } from '@tabler/icons-react';
 import './Profile.scss';
 

@@ -1,15 +1,15 @@
 import './Header.scss';
 import { useState } from 'preact/hooks';
-import { useTheme } from '../../context/ThemeProvider';
-import { IconButton } from '@/ui-component/Button/IconButton';
-import { Flex } from '@/ui-component/Layout/Flex';
-import { Typography } from '@/ui-component/Typography/Typography';
+import { useTheme } from '@/core/context/ThemeProvider';
+import { IconButton } from '@/ui-components/Button/IconButton';
+import { Flex } from '@/ui-components/Layout/Flex';
+import { Typography } from '@/ui-components/Typography/Typography';
 import { ThemeCustomization } from '@/components/ThemeCustomization/ThemeCustomization';
-import { Select, SelectOption } from '@/ui-component/Select/Select';
+import { Select, SelectOption } from '@/ui-components/Select/Select';
 import { IconMoon, IconSun, IconWifi, IconWifiOff, IconSettings, IconUser, IconLogin } from '@tabler/icons-react';
 import { useRouterState } from '@/routes/RouterState';
 import { appRoutes } from '@/routes/appRoutes';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/core/hooks/useAuth';
 
 interface HeaderProps {
   title: string;

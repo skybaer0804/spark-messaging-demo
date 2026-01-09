@@ -1,11 +1,12 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo } from 'preact/hooks';
 import { Sidebar } from '@/components/Sidebar/Sidebar';
+import { BottomTab } from '@/components/BottomTab/BottomTab';
 import { Content } from '@/layouts/Content/Content';
 import { Header } from '../Header/Header';
-import { Drawer } from '@/ui-component/Drawer/Drawer';
-import { Grid } from '@/ui-component/Layout/Grid';
-import { useTheme } from '@/context/ThemeProvider';
+import { Drawer } from '@/ui-components/Drawer/Drawer';
+import { Grid } from '@/ui-components/Layout/Grid';
+import { useTheme } from '@/core/context/ThemeProvider';
 import { useRouterState } from '@/routes/RouterState';
 import { appRoutes, type AppRouteNode } from '@/routes/appRoutes';
 import { SecondMenuDrawer } from '@/components/Sidebar/SecondMenuDrawer';
@@ -79,6 +80,8 @@ function SidebarLayoutInner({ headerTitle, isConnected, socketId, children }: Si
           <Content>
             {children}
           </Content>
+          {/* 모바일 하단 탭바 */}
+          {deviceSize === 'mobile' && <BottomTab />}
         </div>
 
         {/* 모바일: 오버레이 Drawer */}

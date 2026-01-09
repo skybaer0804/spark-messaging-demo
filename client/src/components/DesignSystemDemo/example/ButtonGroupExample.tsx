@@ -1,10 +1,10 @@
-import { Button } from '@/ui-component/Button/Button';
-import { ButtonGroup } from '@/ui-component/ButtonGroup/ButtonGroup';
-import { Stack } from '@/ui-component/Layout/Stack';
+import { Button } from '@/ui-components/Button/Button';
+import { ButtonGroup } from '@/ui-components/ButtonGroup/ButtonGroup';
+import { Stack } from '@/ui-components/Layout/Stack';
 import type { DesignSystemExampleDefinition } from './types';
 
-const usageCode = `import { ButtonGroup } from '@/ui-component/ButtonGroup/ButtonGroup';
-import { Button } from '@/ui-component/Button/Button';
+const usageCode = `import { ButtonGroup } from '@/ui-components/ButtonGroup/ButtonGroup';
+import { Button } from '@/ui-components/Button/Button';
 
 <ButtonGroup>
   <Button variant="secondary">Left</Button>

@@ -1,40 +1,41 @@
 # 스타일 가이드
 
 ## 디자인 토큰 시스템 (Design Tokens)
-3단계 계층 구조를 엄격히 준수합니다.
 
-Primitive: 원시 값 (예: --gray-500, --spacing-4). 직접 사용 금지.
+3단계 계층 구조를 엄격히 준수하며, 모든 스타일 수정은 토큰 수정을 통해 이루어집니다.
 
-Semantic: 의미적 별칭 (예: --text-primary, --bg-default).
+1.  **Primitive**: 원시 값 (예: `--gray-500`, `--spacing-4`). **컴포넌트에서 직접 사용 금지.**
+2.  **Semantic**: 의미적 별칭 (예: `--text-primary`, `--bg-default`). 공통 UI 패턴에 사용.
+3.  **Component**: 컴포넌트 전용 (예: `--btn-bg`, `--card-padding`). 특정 컴포넌트 최적화에 사용.
 
-Component: 컴포넌트 전용 (예: --btn-bg, --card-padding).
+**[수정 규칙]**
 
-사용 규칙: 스타일 작성 시 Component 토큰을 최우선으로 사용하고, 없으면 Semantic 토큰을 사용합니다.
-
-하드코딩된 값(Hex, px)이나 Primitive 토큰의 직접 사용을 지양합니다.
+- 스타일 변경 시 개별 SCSS 파일에서 하드코딩된 값(Hex, px)을 수정하지 않습니다.
+- `src/styles/tokens/` 내의 해당 **디자인 토큰 값을 직접 수정**하여 프로젝트 전체에 변경 사항이 자동 반영되도록 합니다.
+- 스타일 작성 시 `Component` 토큰을 최우선으로 사용하고, 없으면 `Semantic` 토큰을 사용합니다.
 
 ## SCSS 및 BEM 네이밍 규칙
-- 모든 스타일은 SCSS를 사용합니다.
-- CSS 클래스 네이밍은 BEM(Block Element Modifier) 방식을 따릅니다.
-  - Block: 독립적인 컴포넌트 단위 (예: `button`, `card`, `header`)
-  - Element: Block의 하위 요소 (예: `button__icon`, `card__title`)
-  - Modifier: Block 또는 Element의 변형 (예: `button--primary`, `button--disabled`, `card__title--large`)
-- 클래스명은 소문자와 하이픈(-)만 사용합니다.
-- 중첩은 최대 3단계를 넘지 않도록 합니다.
 
-예시:
+- 모든 스타일은 **SCSS**를 사용합니다.
+- CSS 클래스 네이밍은 **BEM(Block Element Modifier)** 방식을 엄격히 따릅니다.
+  - **Block**: 독립적인 컴포넌트 단위 (예: `chat-list`, `nav-bar`)
+  - **Element**: Block의 하위 요소 (예: `chat-list__item`, `nav-bar__icon`)
+  - **Modifier**: 변형 요소 (예: `chat-list__item--active`, `nav-bar--collapsed`)
+- 클래스명은 소문자와 하이픈(`-`)만 사용합니다.
+- **중첩(Nesting)은 최대 3단계**를 넘지 않도록 하여 유지보수성을 확보합니다.
+
 ```scss
-.button {
-  &__icon {
-    // ...
+.chat-item {
+  display: flex;
+  padding: var(--chat-item-padding); // Component 토큰 사용
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
   }
-  
-  &--primary {
-    // ...
-  }
-  
-  &--disabled {
-    // ...
+
+  &--unread {
+    background-color: var(--bg-highlight); // Semantic 토큰 사용
   }
 }
 ```
@@ -42,22 +43,417 @@ Component: 컴포넌트 전용 (예: --btn-bg, --card-padding).
 # 컴포넌트 및 로직 가이드
 
 ## 컴포넌트 모듈화
-- UI 컴포넌트와 로직을 함께 포함하여 모듈화합니다.
-- prop 전달을 최소화합니다.
-- 레이아웃 모듈화 시 children 및 이벤트 핸들러를 prop으로 전달합니다.
+
+- UI 컴포넌트와 비즈니스 로직을 하나로 묶어 모듈화합니다.
+- `props` 전달을 최소화하고, 필요한 데이터는 내부 훅이나 컨텍스트를 통해 해결합니다.
+- 레이아웃 모듈화 시에만 `children` 및 이벤트 핸들러를 `props`로 전달합니다.
 
 ## 함수화 및 재사용성
-- 반복되는 로직은 함수로 분리합니다.
-- 공통 로직은 유틸리티 함수로 모듈화합니다.
-- 컴포넌트는 재사용 가능하도록 설계합니다.
-- 단일 책임 원칙을 따릅니다.
 
-## UI 라이브러리
-- MUI를 사용할 경우 7버전 이상의 문법을 사용합니다.
-- 반응형 디자인을 항상 고려하며, Grid를 우선적으로 사용합니다.
+- 반복되는 비즈니스 로직은 커스텀 훅(`hooks/`)으로 분리합니다.
+- 공통 유틸리티는 `utils/`에 모듈화하여 관리합니다.
+- 모든 컴포넌트는 단일 책임 원칙을 따르며 재사용 가능하도록 설계합니다.
 
 ## 코드 구조
-- 각 컴포넌트는 자체 스타일 파일(SCSS)을 가집니다.
-- 관련 로직은 컴포넌트 내부 또는 별도의 훅/유틸리티로 분리합니다.
-- 타입 안정성을 위해 TypeScript를 사용하는 경우 타입을 명시합니다.
 
+- 각 컴포넌트는 자체 스타일 파일(SCSS)을 가집니다.
+- 타입 안정성을 위해 **TypeScript** 타입을 명시적으로 선언합니다.
+- 파일 구조는 도메인 중심(`Chat`, `Notification`, `VideoMeeting`)으로 관리합니다.
+
+# Output Language
+
+Always respond in Korean (한국어).
+
+
+
+
+### 1. Socket & Real-time 개발 규칙
+
+#### Socket 이벤트 네이밍 컨벤션
+
+**클라이언트 → 서버 (요청)**:
+- `REQUEST_MESSAGES` - 메시지 조회
+- `REQUEST_SYNC` - 누락 메시지 동기화
+- `CHAT_ENTER_ROOM` - 방 입장
+- `CHAT_LEAVE_ROOM` - 방 퇴출
+
+**서버 → 클라이언트 (브로드캐스트)**:
+- `ROOM_LIST_UPDATED` - 채팅방 목록 업데이트
+- `MESSAGE_ADDED` - 새 메시지 추가
+- `MESSAGE_DELETED` - 메시지 삭제
+- `NOTIFICATION_RECEIVED` - 알림 수신
+- `MEETING_STARTED` - 회의 시작
+- `UNREAD_COUNT_UPDATED` - 안읽음 카운트 변경
+
+#### 메시지 시퀀싱 규칙
+
+```typescript
+interface Message {
+  _id: string;
+  roomId: string;
+  senderId: string;
+  content: string;
+  type: 'text' | 'file' | 'image';
+  
+  // [필수] 메시지 시퀀스 - 방 내에서 1씩 증가
+  sequenceNumber: number;
+  
+  // [선택] 낙관적 업데이트용
+  tempId?: string;
+  status?: 'sending' | 'sent' | 'failed';
+  
+  // 읽음 추적
+  readBy: string[];
+  timestamp: Date;
+}
+```
+
+---
+
+### 2. 낙관적 업데이트 (Optimistic Update) 패턴
+
+#### 구현 Step
+
+```typescript
+// Step 1: 클라이언트에서 tempId 생성
+const tempId = `temp_${Date.now()}_${Math.random()}`;
+
+// Step 2: 즉시 UI에 렌더링 (status: 'sending')
+setMessages(prev => [...prev, {
+  tempId,
+  content,
+  status: 'sending'
+}]);
+
+// Step 3: 서버 전송
+const response = await chatAPI.sendMessage({ content, tempId });
+
+// Step 4: 성공 시 tempId → 실제 _id 매핑
+setMessages(prev =>
+  prev.map(msg =>
+    msg.tempId === tempId
+      ? { ...response.message, status: 'sent' }
+      : msg
+  )
+);
+
+// Step 5: 실패 시 status → 'failed'
+// ... error handling
+```
+
+---
+
+### 3. Reconnection Sync 패턴
+
+```typescript
+// 마지막 시퀀스 번호를 서버에 전송
+const syncMessages = async () => {
+  const lastSeq = lastSequenceRef.current;
+  const response = await chatAPI.syncMessages({
+    roomId,
+    fromSequence: lastSeq
+  });
+  
+  // 누락 메시지 병합 (시퀀스 순 정렬)
+  setMessages(prev => {
+    const combined = [...prev, ...response.messages];
+    const sorted = combined.sort(
+      (a, b) => a.sequenceNumber - b.sequenceNumber
+    );
+    return Array.from(
+      new Map(sorted.map(m => [m.sequenceNumber, m])).values()
+    );
+  });
+};
+
+// 네트워크 재연결 감지 시 자동 동기화
+socketService.on('reconnect', syncMessages);
+```
+
+---
+
+### 4. 에러 처리 & 로깅
+
+#### 에러 분류
+
+**NetworkError** (서버 연결 불가)
+- 처리: 재시도 로직 (exponential backoff)
+- 로깅: ERROR 레벨
+
+```typescript
+const sendWithRetry = async (msg, maxRetries = 3) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await chatAPI.sendMessage(msg);
+    } catch (err) {
+      if (isNetworkError(err)) {
+        const delay = Math.min(1000 * Math.pow(2, i), 10000);
+        logger.warn(`Retrying in ${delay}ms`, { attempt: i + 1 });
+        await sleep(delay);
+      } else {
+        throw err;
+      }
+    }
+  }
+};
+```
+
+**ValidationError** (입력값 오류)
+- 처리: 사용자 피드백, UI 하이라이트
+- 로깅: WARN 레벨
+
+**ServerError** (500, 503)
+- 처리: 자동 재시도 + 사용자 알림
+- 로깅: ERROR 레벨
+
+#### 로깅 규칙
+
+```typescript
+// 디버그 로깅 (개발 모드)
+if (process.env.NODE_ENV === 'development') {
+  socketService.on('*', (event, data) => {
+    logger.debug(`[Socket] ${event}`, data);
+  });
+}
+
+// 핵심 작업 로깅
+logger.info(`[Chat] Sending message to room: ${roomId}`);
+logger.warn(`[Chat] Message gap detected`, { missing });
+logger.error(`[Chat] Sync failed:`, error);
+```
+
+---
+
+### 5. 테스트 작성 규칙
+
+#### 테스트 파일 위치
+
+```
+src/domains/Chat/
+├── components/ChatList/
+│   ├── ChatList.tsx
+│   └── __tests__/
+│       └── ChatList.test.tsx
+├── hooks/
+│   ├── useChatRoom.ts
+│   └── __tests__/
+│       └── useChatRoom.test.ts
+```
+
+#### 테스트 타이틀 컨벤션
+
+```typescript
+describe('ChatMessage', () => {
+  it('should render without crashing', () => {});
+  it('should update status to sent after API response', () => {});
+  it('should display checkmark when status is sent', () => {});
+  it('should show error when network fails', () => {});
+});
+```
+
+#### 컴포넌트 테스트 템플릿
+
+```typescript
+import { render, screen } from '@testing-library/react';
+
+describe('ChatMessage', () => {
+  it('should render message content', () => {
+    render(<ChatMessage message={mockMessage} />);
+    expect(screen.getByText('Hello')).toBeInTheDocument();
+  });
+  
+  it('should display checkmark when status is sent', () => {
+    render(<ChatMessage message={{ ...mockMessage, status: 'sent' }} />);
+    expect(screen.getByText('✓ 전송됨')).toBeInTheDocument();
+  });
+});
+```
+
+#### 훅 테스트 템플릿
+
+```typescript
+import { renderHook, act, waitFor } from '@testing-library/react';
+
+describe('useOptimisticUpdate', () => {
+  it('should send message optimistically', async () => {
+    const { result } = renderHook(() => useOptimisticUpdate());
+    
+    act(() => {
+      result.current.sendMessage('room-1', 'Hello');
+    });
+    
+    expect(result.current.messages[0].status).toBe('sending');
+  });
+  
+  it('should update status to sent after API response', async () => {
+    // ... test implementation
+    await waitFor(() => {
+      expect(result.current.messages[0].status).toBe('sent');
+    });
+  });
+});
+```
+
+---
+
+### 6. 성능 최적화
+
+#### 메시지 리스트 가상화 (1000+ 메시지)
+
+```typescript
+import { FixedSizeList } from 'react-window';
+
+<FixedSizeList
+  height={600}
+  itemCount={messages.length}
+  itemSize={60}
+  width="100%"
+>
+  {({ index, style }) => (
+    <ChatMessage message={messages[index]} style={style} />
+  )}
+</FixedSizeList>
+```
+
+#### 메모리 누수 방지
+
+```typescript
+useEffect(() => {
+  socketService.on('NEW_MESSAGE', handleNewMessage);
+  
+  // ✅ 필수: cleanup 함수에서 리스너 제거
+  return () => {
+    socketService.off('NEW_MESSAGE', handleNewMessage);
+  };
+}, []);
+```
+
+**필수 정리 항목**:
+- [ ] Socket 이벤트 리스너 제거
+- [ ] setTimeout/setInterval 정리
+- [ ] 구독(subscription) 해제
+
+---
+
+### 7. 도메인별 구조
+
+```
+src/domains/
+├── Chat/
+│   ├── components/
+│   │   ├── ChatList/
+│   │   ├── ChatWindow/
+│   │   └── ChatMessage/
+│   ├── hooks/
+│   │   ├── useChatRoom.ts
+│   │   ├── useChatRooms.ts
+│   │   ├── useMessageSync.ts
+│   │   └── useOptimisticUpdate.ts
+│   ├── types/
+│   │   └── chat.types.ts
+│   ├── utils/
+│   └── __tests__/
+├── Notification/
+└── VideoMeeting/
+```
+
+**Barrel Export** (각 도메인의 index.ts):
+
+```typescript
+// src/domains/Chat/index.ts
+export { ChatList } from './components/ChatList/ChatList';
+export { ChatWindow } from './components/ChatWindow/ChatWindow';
+export { useChatRooms } from './hooks/useChatRooms';
+export { useMessageSync } from './hooks/useMessageSync';
+export type { Message, ChatRoom } from './types/chat.types';
+```
+
+---
+
+### 8. 타입 안정성
+
+#### 도메인별 타입
+
+```typescript
+// src/domains/Chat/types/chat.types.ts
+export interface Message {
+  _id: string;
+  roomId: string;
+  senderId: string;
+  content: string;
+  sequenceNumber: number;
+  tempId?: string;
+  status?: MessageStatus;
+  readBy: string[];
+  timestamp: Date;
+}
+
+export type MessageStatus = 'sending' | 'sent' | 'failed';
+
+export interface ChatRoom {
+  _id: string;
+  name: string;
+  members: string[];
+  lastMessage?: Message;
+  isGroup: boolean;
+  createdAt: Date;
+}
+
+export interface UserChatRoom {
+  userId: string;
+  roomId: string;
+  unreadCount: number;
+  isPinned: boolean;
+  notificationEnabled: boolean;
+}
+```
+
+#### API 응답 타입
+
+```typescript
+export interface MessageResponse {
+  message: Message;
+  tempId?: string;
+  sequenceNumber: number;
+}
+
+export interface SyncResponse {
+  messages: Message[];
+  count: number;
+}
+```
+
+#### 훅 반환 타입
+
+```typescript
+export interface UseOptimisticUpdateReturn {
+  messages: Message[];
+  sendMessage: (roomId: string, content: string) => Promise<void>;
+  retryMessage: (message: Message) => Promise<void>;
+}
+```
+
+---
+
+## 최종 .cursorrules 구조
+
+```
+.cursorrules (v2.2.0)
+
+## 스타일 가이드 (기존 유지)
+   - 디자인 토큰 시스템
+   - SCSS & BEM
+   - 컴포넌트 모듈화
+
+## Socket & Real-time 개발 규칙 (NEW)
+## 낙관적 업데이트 & Reconnection Sync (NEW)
+## 에러 처리 & 로깅 (NEW)
+## 테스트 작성 규칙 (NEW)
+## 성능 최적화 (NEW)
+## 도메인별 구조 (NEW)
+## 타입 안정성 (NEW)
+
+# Output Language: Korean
+```
+
+---
