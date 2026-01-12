@@ -141,30 +141,35 @@ export function ChatProvider({ children }: { children: any }) {
 
     // v2.2.0: 방 목록 업데이트 알림 수신
     const unsubRoomListUpdate = connectionServiceRef.current['client'].onMessage((msg: any) => {
+      // 서버에서 보내는 이벤트 타입이 'ROOM_LIST_UPDATED'인지 확인
       if (msg.type === 'ROOM_LIST_UPDATED') {
-        const updateData = msg.data || {};
+        const updateData = msg.data || msg.content || {}; // content 필드도 확인
+
+        console.log('[ChatContext] Received ROOM_LIST_UPDATED:', updateData);
 
         // 데이터가 있는 경우 로컬 상태 즉시 반영 (Signal 활용)
         if (updateData.roomId) {
           const { roomId, lastMessage, unreadCountIncrement } = updateData;
 
-          updateRoomList(
-            chatRoomList.value
-              .map((room: any) => {
-                if (room._id === roomId) {
-                  return {
-                    ...room,
-                    lastMessage,
-                    unreadCount: (room.unreadCount || 0) + (unreadCountIncrement || 0),
-                    updatedAt: new Date().toISOString(),
-                  };
-                }
-                return room;
-              })
-              .sort(
-                (a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime(),
-              ) as any,
+          const currentRooms = chatRoomList.value;
+          const updatedRooms = currentRooms.map((room: any) => {
+            if (room._id === roomId) {
+              return {
+                ...room,
+                lastMessage: lastMessage || room.lastMessage,
+                unreadCount: (room.unreadCount || 0) + (unreadCountIncrement || 0),
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return room;
+          });
+
+          // 리스트 상단으로 이동 (Sorting)
+          updatedRooms.sort(
+            (a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime(),
           );
+
+          updateRoomList(updatedRooms as any);
         } else {
           // 데이터가 없으면 기존처럼 전체 새로고침
           refreshRoomList();

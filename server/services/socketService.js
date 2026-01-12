@@ -54,6 +54,7 @@ class SocketService {
   }
 
   async notifyRoomListUpdated(userId, roomData = {}) {
+    console.log(`[Socket] Notifying room list update to user ${userId}:`, roomData);
     await this.broadcastEvent('ROOM_LIST_UPDATED', roomData, [userId]);
   }
 

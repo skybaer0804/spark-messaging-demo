@@ -101,8 +101,12 @@ export function useChatRoom() {
   useEffect(() => {
     const unsub = chatService.onRoomMessage((newMsg) => {
       // v2.2.0: 내가 현재 이 방을 보고 있다면 즉시 읽음 처리 요청
+      // 단, 내 unreadCount가 이미 0이면 루프 방지를 위해 생략 가능
       if (currentRoom && newMsg.roomId === currentRoom._id) {
-        chatService.markAsRead(currentRoom._id);
+        const roomInList = chatRoomList.value.find((r: any) => r._id === currentRoom._id);
+        if (roomInList && roomInList.unreadCount > 0) {
+          chatService.markAsRead(currentRoom._id);
+        }
       }
 
       // 내가 보낸 메시지(tempId 매칭)면 무시 (이미 낙관적 업데이트됨)

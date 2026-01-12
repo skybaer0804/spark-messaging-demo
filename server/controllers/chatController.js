@@ -450,8 +450,8 @@ exports.markAsRead = async (req, res) => {
     );
 
     // 3. 방의 모든 멤버에게 읽음 상태가 변경되었음을 알림
+    // 나 자신에게는 목록 업데이트 알림을 보낼 필요가 없음 (이미 읽었음을 알고 있음)
     socketService.notifyMessageRead(roomId, userId);
-    socketService.notifyRoomListUpdated(userId);
 
     res.json({ message: 'Marked as read' });
   } catch (error) {

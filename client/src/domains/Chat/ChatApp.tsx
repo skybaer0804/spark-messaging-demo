@@ -196,8 +196,10 @@ function ChatRoomSidebar({
   }, [roomList, userList, searchQuery, currentUser]);
 
   const groupedRooms = useMemo(() => {
+    const directRooms = filteredRoomList.filter((r) => r.type === 'direct');
+
     return {
-      direct: filteredRoomList.filter((r) => r.type === 'direct'),
+      direct: directRooms,
       team: filteredRoomList.filter((r) => r.type === 'team'),
       public: filteredRoomList.filter((r) => r.type === 'public'),
       private: filteredRoomList.filter((r) => r.type === 'private'),
@@ -763,7 +765,8 @@ function ChatAppContent() {
       setActiveView('directory');
     } else if (pathname.startsWith('/chatapp/chat/')) {
       const roomId = pathname.split('/').pop();
-      if (roomId && !currentRoom && roomList.length > 0) {
+      // currentRoom._id와 roomId가 다를 때만 onRoomSelect 호출 (불필요한 중복 호출 방지)
+      if (roomId && currentRoom?._id !== roomId && roomList.length > 0) {
         onRoomSelect(roomId);
       }
       setActiveView('chat');
@@ -772,7 +775,7 @@ function ChatAppContent() {
     } else {
       setActiveView('home');
     }
-  }, [pathname, currentRoom, roomList]);
+  }, [pathname, currentRoom?._id, roomList]);
 
   const onRoomSelect = (roomId: string) => {
     // roomList에서 찾기 시도
@@ -1482,6 +1485,10 @@ function ChatAppContent() {
 }
 
 export function ChatApp() {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) return null;
+
   return (
     <ChatProvider>
       <ChatDataProvider>
