@@ -1,5 +1,6 @@
 import { createContext } from 'preact';
 import { useContext, useState, useEffect, useRef } from 'preact/hooks';
+import { useSignalEffect } from '@preact/signals';
 import sparkMessagingClient from '../../../config/sparkMessaging';
 import { ConnectionService } from '@/core/socket/ConnectionService';
 import { ChatService } from '@/core/socket/ChatService';
@@ -7,8 +8,9 @@ import { RoomService } from '../services/RoomService';
 import { FileTransferService } from '@/core/api/FileTransferService';
 import { useAuth } from '@/core/hooks/useAuth';
 import { authApi, workspaceApi } from '@/core/api/ApiService';
+import { messagesSignal } from '../hooks/useOptimisticUpdate';
 import { ChatRoom, ChatUser, Workspace } from '../types';
-import { currentWorkspaceId } from '@/stores/chatRoomsStore';
+import { currentWorkspaceId, chatRoomList } from '@/stores/chatRoomsStore';
 
 interface ChatContextType {
   isConnected: boolean;
@@ -40,6 +42,20 @@ export function ChatProvider({ children }: { children: any }) {
   const [userList, setUserList] = useState<ChatUser[]>([]);
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // v2.2.0: 전역 Signal과 로컬 상태 동기화 (Reactivity 보장)
+  // Signal이 변경될 때마다 Context의 roomList 상태를 업데이트하여 구독 중인 컴포넌트들을 리렌더링함
+  useSignalEffect(() => {
+    const signalValue = chatRoomList.value;
+    if (Array.isArray(signalValue)) {
+      setRoomList([...signalValue] as any);
+    }
+  });
+
+  const updateRoomList = (rooms: ChatRoom[]) => {
+    chatRoomList.value = rooms as any;
+    setRoomList(rooms);
+  };
   const [debugEnabled, setDebugEnabled] = useState(localStorage.getItem('chat_debug_mode') === 'true');
 
   const connectionServiceRef = useRef<ConnectionService>(new ConnectionService(sparkMessagingClient));
@@ -53,7 +69,7 @@ export function ChatProvider({ children }: { children: any }) {
     try {
       const workspaceId = currentWorkspaceId.value;
       const rooms = await chatServiceRef.current.getRooms(workspaceId || undefined);
-      setRoomList(rooms);
+      updateRoomList(rooms);
     } catch (error) {
       console.error('Failed to load rooms:', error);
     }
@@ -72,7 +88,13 @@ export function ChatProvider({ children }: { children: any }) {
   const refreshWorkspaceList = async () => {
     try {
       const response = await workspaceApi.getWorkspaces();
-      setWorkspaceList(response.data);
+      const workspaces = response.data;
+      setWorkspaceList(workspaces);
+
+      // v2.2.0: 워크스페이스가 있고 현재 선택된 워크스페이스가 없으면 첫 번째 것으로 자동 선택
+      if (workspaces.length > 0 && !currentWorkspaceId.value) {
+        currentWorkspaceId.value = workspaces[0]._id;
+      }
     } catch (error) {
       console.error('Failed to load workspaces:', error);
     }
@@ -117,6 +139,53 @@ export function ChatProvider({ children }: { children: any }) {
       refreshRoomList();
     });
 
+    // v2.2.0: 방 목록 업데이트 알림 수신
+    const unsubRoomListUpdate = connectionServiceRef.current['client'].onMessage((msg: any) => {
+      if (msg.type === 'ROOM_LIST_UPDATED') {
+        const updateData = msg.data || {};
+
+        // 데이터가 있는 경우 로컬 상태 즉시 반영 (Signal 활용)
+        if (updateData.roomId) {
+          const { roomId, lastMessage, unreadCountIncrement } = updateData;
+
+          updateRoomList(
+            chatRoomList.value
+              .map((room: any) => {
+                if (room._id === roomId) {
+                  return {
+                    ...room,
+                    lastMessage,
+                    unreadCount: (room.unreadCount || 0) + (unreadCountIncrement || 0),
+                    updatedAt: new Date().toISOString(),
+                  };
+                }
+                return room;
+              })
+              .sort(
+                (a: any, b: any) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime(),
+              ) as any,
+          );
+        } else {
+          // 데이터가 없으면 기존처럼 전체 새로고침
+          refreshRoomList();
+        }
+      }
+      if (msg.type === 'MESSAGE_READ') {
+        // 읽음 처리 시 메시지 목록의 readBy를 업데이트하기 위해 이벤트를 전파하거나 직접 처리
+        // 여기서는 간단히 현재 열려있는 방이라면 메시지 목록을 갱신하도록 처리
+        const { roomId, userId } = msg.data || {};
+        const currentMessages = messagesSignal.value;
+        if (currentMessages.length > 0 && currentMessages[0].roomId === roomId) {
+          messagesSignal.value = currentMessages.map((m) => {
+            if (m.senderId !== userId && (!m.readBy || !m.readBy.includes(userId))) {
+              return { ...m, readBy: [...(m.readBy || []), userId] };
+            }
+            return m;
+          });
+        }
+      }
+    });
+
     // v2.2.0: 실시간 유저 상태 변경 감지
     const unsubStatusChange = connectionServiceRef.current['client'].onMessage((msg: any) => {
       if (msg.type === 'USER_STATUS_CHANGED') {
@@ -128,6 +197,12 @@ export function ChatProvider({ children }: { children: any }) {
     // Initial load
     const init = async () => {
       setIsLoading(true);
+
+      // v2.2.0: 유저 정보에 이미 워크스페이스가 있다면 초기값으로 설정
+      if (user && user.workspaces && user.workspaces.length > 0 && !currentWorkspaceId.value) {
+        currentWorkspaceId.value = user.workspaces[0];
+      }
+
       await Promise.all([refreshRoomList(), refreshUserList(), refreshWorkspaceList()]);
 
       const status = connectionService.getConnectionStatus();
@@ -146,6 +221,7 @@ export function ChatProvider({ children }: { children: any }) {
       unsubError();
       unsubRoomMessage();
       unsubStatusChange();
+      unsubRoomListUpdate();
     };
   }, [user]);
 

@@ -41,6 +41,15 @@ export class PushService {
 
   static async subscribeToPush() {
     try {
+      // 권한 요청
+      if (Notification.permission !== 'granted') {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') {
+          console.warn('Push notification permission denied');
+          return false;
+        }
+      }
+
       const registration = await navigator.serviceWorker.ready;
 
       // 기존 구독 확인

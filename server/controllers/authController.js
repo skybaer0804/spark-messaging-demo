@@ -30,7 +30,17 @@ exports.register = async (req, res, next) => {
     console.log('Step 4: Signing JWT...');
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
     console.log('Step 5: Sending response...');
-    res.status(201).json({ token, user: { id: user._id, email, username } });
+    res.status(201).json({
+      token,
+      user: {
+        id: user._id,
+        email,
+        username,
+        workspaces: user.workspaces,
+        companyId: user.companyId,
+        deptId: user.deptId,
+      },
+    });
     console.log('--- Register Handler End ---');
   } catch (error) {
     console.error('--- Register Handler Error ---');
@@ -66,7 +76,17 @@ exports.login = async (req, res) => {
     await userService.setUserStatus(user._id, 'online');
     console.log('Login successful:', email);
 
-    res.json({ token, user: { id: user._id, email, username: user.username } });
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        email,
+        username: user.username,
+        workspaces: user.workspaces,
+        companyId: user.companyId,
+        deptId: user.deptId,
+      },
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });

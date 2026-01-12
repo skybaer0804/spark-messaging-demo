@@ -135,6 +135,11 @@ export class ChatService {
     return response.data;
   }
 
+  public async markAsRead(roomId: string) {
+    const response = await chatApi.markAsRead(roomId);
+    return response.data;
+  }
+
   public cleanup() {
     this.unsubscribeCallbacks.forEach((unsubscribe) => unsubscribe());
     this.unsubscribeCallbacks = [];

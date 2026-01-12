@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'preact/hooks';
+import { useCallback } from 'preact/hooks';
+import { signal } from '@preact/signals';
 import { Message } from '../types';
 
 export interface UseOptimisticUpdateReturn {
@@ -8,8 +9,17 @@ export interface UseOptimisticUpdateReturn {
   updateMessageStatus: (tempId: string, updatedMessage: Partial<Message>) => void;
 }
 
+// v2.2.0: 메시지 리스트를 signal로 관리하여 리렌더링 최적화
+export const messagesSignal = signal<Message[]>([]);
+
 export function useOptimisticUpdate(): UseOptimisticUpdateReturn {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const setMessages = useCallback((msgs: Message[] | ((prev: Message[]) => Message[])) => {
+    if (typeof msgs === 'function') {
+      messagesSignal.value = msgs(messagesSignal.value);
+    } else {
+      messagesSignal.value = msgs;
+    }
+  }, []);
 
   const sendOptimisticMessage = useCallback(
     (roomId: string, content: string, senderId: string, senderName?: string) => {
@@ -29,20 +39,20 @@ export function useOptimisticUpdate(): UseOptimisticUpdateReturn {
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, newMessage]);
+      messagesSignal.value = [...messagesSignal.value, newMessage];
       return tempId;
     },
     [],
   );
 
   const updateMessageStatus = useCallback((tempId: string, updatedMessage: Partial<Message>) => {
-    setMessages((prev) =>
-      prev.map((msg) => (msg.tempId === tempId || msg._id === tempId ? { ...msg, ...updatedMessage } : msg)),
+    messagesSignal.value = messagesSignal.value.map((msg) =>
+      msg.tempId === tempId || msg._id === tempId ? { ...msg, ...updatedMessage } : msg
     );
   }, []);
 
   return {
-    messages,
+    messages: messagesSignal.value,
     setMessages,
     sendOptimisticMessage,
     updateMessageStatus,

@@ -67,9 +67,23 @@ exports.createRoom = async (req, res) => {
     });
 
     // 생성된 방 정보를 멤버들과 함께 리턴
-    const populatedRoom = await ChatRoom.findById(newRoom._id).populate('members', 'username profileImage status');
+    const populatedRoom = await ChatRoom.findById(newRoom._id).populate(
+      'members',
+      'username profileImage status statusText',
+    );
 
-    res.status(201).json(populatedRoom);
+    const roomObj = populatedRoom.toObject();
+    if (roomObj.type === 'direct') {
+      const otherMember = roomObj.members.find((m) => m._id.toString() !== currentUserId.toString());
+      roomObj.displayName = otherMember ? otherMember.username : 'Unknown';
+      roomObj.displayAvatar = otherMember ? otherMember.profileImage || otherMember.avatar : null;
+      roomObj.displayStatus = otherMember ? otherMember.status : 'offline';
+      roomObj.displayStatusText = otherMember ? otherMember.statusText : '';
+    } else {
+      roomObj.displayName = roomObj.name;
+    }
+
+    res.status(201).json(roomObj);
   } catch (error) {
     console.error('Error creating room:', error);
     res.status(500).json({ message: 'Failed to create room', error: error.message });
@@ -98,14 +112,17 @@ exports.getRooms = async (req, res) => {
 
     // 워크스페이스 필터링 및 응답 포맷팅
     const formattedRooms = userRooms
-      .filter((ur) => ur.roomId && (!workspaceId || ur.roomId.workspaceId.toString() === workspaceId))
+      .filter(
+        (ur) =>
+          ur.roomId && !ur.roomId.isArchived && (!workspaceId || ur.roomId.workspaceId.toString() === workspaceId),
+      )
       .map((ur) => {
         const room = ur.roomId.toObject();
 
         // 1:1 대화방의 경우 상대적 이름 처리
         if (room.type === 'direct') {
           const otherMember = room.members.find((m) => m._id.toString() !== userId.toString());
-          room.displayName = otherMember ? otherMember.username : 'Unknown User';
+          room.displayName = otherMember ? otherMember.username : 'Unknown';
           room.displayAvatar = otherMember ? otherMember.profileImage || otherMember.avatar : null;
           room.displayStatus = otherMember ? otherMember.status : 'offline';
           room.displayStatusText = otherMember ? otherMember.statusText : '';
@@ -134,12 +151,39 @@ exports.leaveRoom = async (req, res) => {
     const { roomId } = req.params;
     const userId = req.user.id;
 
+    const room = await ChatRoom.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ message: 'Room not found' });
+    }
+
     // 1. UserChatRoom 레코드 삭제 (사용자의 방 목록에서 제거)
     await UserChatRoom.findOneAndDelete({ userId, roomId });
 
     // 2. ChatRoom의 members 배열에서 사용자 제거
-    await ChatRoom.findByIdAndUpdate(roomId, {
-      $pull: { members: userId },
+    room.members = room.members.filter((id) => id.toString() !== userId.toString());
+
+    // 3. 1:1 대화방(direct)인 경우 추가 처리
+    if (room.type === 'direct') {
+      // 상대방이 이미 나갔거나 내가 나감으로써 더 이상 '활성' 1:1 방이 아님
+      // identifier를 제거하여 나중에 같은 상대와 채팅 시 새 방이 생성되도록 함
+      room.identifier = null;
+
+      // 방에 아무도 없으면 아카이브 처리, 한 명이라도 있으면 목록 유지 위해 아카이브 안 함
+      if (room.members.length === 0) {
+        room.isArchived = true;
+      }
+    } else {
+      // 그룹 방의 경우에도 멤버가 없으면 아카이브
+      if (room.members.length === 0) {
+        room.isArchived = true;
+      }
+    }
+
+    await room.save();
+
+    // 4. 방에 남아있는 사람들에게 멤버가 나갔음을 알림 (Unknown 처리를 위해 목록 갱신)
+    room.members.forEach((memberId) => {
+      socketService.notifyRoomListUpdated(memberId.toString());
     });
 
     res.json({ message: 'Successfully left the room', roomId });
@@ -218,6 +262,39 @@ exports.uploadFile = async (req, res) => {
 
     await socketService.sendRoomMessage(roomId, type, messageData, senderId);
 
+    // 4. 수신자들의 unreadCount 증가 및 목록 업데이트 알림
+    const allMemberIds = room.members.map((m) => m._id.toString());
+    const recipientIds = allMemberIds.filter((id) => id !== senderId);
+
+    if (recipientIds.length > 0) {
+      // 현재 방을 보고 있지 않은 유저들만 필터링하여 unreadCount 증가
+      const activeRooms = await userService.getUsersActiveRooms(recipientIds);
+      const recipientIdsToIncrement = recipientIds.filter((id) => activeRooms[id] !== roomId.toString());
+
+      if (recipientIdsToIncrement.length > 0) {
+        await UserChatRoom.updateMany(
+          { roomId, userId: { $in: recipientIdsToIncrement } },
+          { $inc: { unreadCount: 1 } },
+        );
+
+        recipientIdsToIncrement.forEach(async (userId) => {
+          const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
+          if (userChatRoom) {
+            socketService.notifyUnreadCount(userId, roomId, userChatRoom.unreadCount);
+          }
+        });
+      }
+
+      // 목록 정보(마지막 메시지 등)는 모든 수신자에게 업데이트 알림
+      recipientIds.forEach((userId) => {
+        socketService.notifyRoomListUpdated(userId, {
+          roomId,
+          lastMessage: messageData,
+          unreadCountIncrement: recipientIdsToIncrement.includes(userId) ? 1 : 0,
+        });
+      });
+    }
+
     res.status(201).json(newMessage);
   } catch (error) {
     res.status(500).json({ message: 'File upload failed', error: error.message });
@@ -261,19 +338,8 @@ exports.sendMessage = async (req, res) => {
     const allMemberIds = room.members.map((m) => m._id.toString());
     const recipientIds = allMemberIds.filter((id) => id !== senderId);
 
-    await UserChatRoom.updateMany({ roomId, userId: { $in: recipientIds } }, { $inc: { unreadCount: 1 } });
-
-    // 2.2.0: 수신자들에게 실시간 안읽음 카운트 알림
-    recipientIds.forEach(async (userId) => {
-      const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
-      if (userChatRoom) {
-        socketService.notifyUnreadCount(userId, roomId, userChatRoom.unreadCount);
-      }
-    });
-
-    // 5. Socket SDK를 통해 실시간 브로드캐스트 (MESSAGE_ADDED)
+    // Socket SDK를 통해 실시간 브로드캐스트를 위한 데이터 준비
     const sender = room.members.find((m) => m._id.toString() === senderId);
-
     const messageData = {
       _id: newMessage._id,
       roomId,
@@ -285,20 +351,50 @@ exports.sendMessage = async (req, res) => {
       timestamp: newMessage.timestamp,
     };
 
+    if (recipientIds.length > 0) {
+      // 현재 방을 보고 있지 않은 유저들만 필터링하여 unreadCount 증가
+      const activeRooms = await userService.getUsersActiveRooms(recipientIds);
+      const recipientIdsToIncrement = recipientIds.filter((id) => activeRooms[id] !== roomId.toString());
+
+      if (recipientIdsToIncrement.length > 0) {
+        await UserChatRoom.updateMany(
+          { roomId, userId: { $in: recipientIdsToIncrement } },
+          { $inc: { unreadCount: 1 } },
+        );
+
+        // 2.2.0: 수신자들에게 실시간 안읽음 카운트 알림
+        recipientIdsToIncrement.forEach(async (userId) => {
+          const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
+          if (userChatRoom) {
+            socketService.notifyUnreadCount(userId, roomId, userChatRoom.unreadCount);
+          }
+        });
+      }
+
+      // 목록 정보는 모든 수신자에게 업데이트 알림
+      recipientIds.forEach((userId) => {
+        socketService.notifyRoomListUpdated(userId, {
+          roomId,
+          lastMessage: messageData,
+          unreadCountIncrement: recipientIdsToIncrement.includes(userId) ? 1 : 0,
+        });
+      });
+    }
+
+    // 5. Socket SDK를 통해 실시간 브로드캐스트 (MESSAGE_ADDED)
     await socketService.sendRoomMessage(roomId, newMessage.type, messageData, senderId);
 
-    // 6. 푸시 알림 전송 (오프라인이거나 현재 방에 있지 않은 유저에게만)
+    // 6. 푸시 알림 전송 (현재 방에 있지 않은 모든 유저에게)
     if (recipientIds.length > 0) {
-      const [userStatuses, activeRooms] = await Promise.all([
-        userService.getUsersStatus(recipientIds),
-        userService.getUsersActiveRooms(recipientIds),
-      ]);
+      console.log(`[Push] Attempting to send push to recipients: ${recipientIds}`);
+      const activeRooms = await userService.getUsersActiveRooms(recipientIds);
 
       const recipientIdsToNotify = recipientIds.filter((id) => {
-        const isOffline = userStatuses[id] === 'offline';
-        const isNotInRoom = activeRooms[id] !== roomId;
-        return isOffline || isNotInRoom;
+        const isNotInRoom = activeRooms[id] !== roomId.toString(); // ID 비교 안정화
+        return isNotInRoom;
       });
+
+      console.log(`[Push] Filtered recipients to notify: ${recipientIdsToNotify}`);
 
       if (recipientIdsToNotify.length > 0) {
         notificationService.notifyNewMessage(
@@ -338,13 +434,24 @@ exports.syncMessages = async (req, res) => {
   }
 };
 
-// 읽음 처리 (unreadCount 초기화)
+// 읽음 처리 (unreadCount 초기화 및 메시지 readBy 업데이트)
 exports.markAsRead = async (req, res) => {
   try {
     const { roomId } = req.params;
     const userId = req.user.id;
 
+    // 1. 유저의 해당 방 안읽음 카운트 초기화
     await UserChatRoom.findOneAndUpdate({ userId, roomId }, { unreadCount: 0 });
+
+    // 2. 해당 방의 내가 읽지 않은 메시지들에 대해 내 ID 추가
+    await Message.updateMany(
+      { roomId, senderId: { $ne: userId }, readBy: { $ne: userId } },
+      { $addToSet: { readBy: userId } },
+    );
+
+    // 3. 방의 모든 멤버에게 읽음 상태가 변경되었음을 알림
+    socketService.notifyMessageRead(roomId, userId);
+    socketService.notifyRoomListUpdated(userId);
 
     res.json({ message: 'Marked as read' });
   } catch (error) {

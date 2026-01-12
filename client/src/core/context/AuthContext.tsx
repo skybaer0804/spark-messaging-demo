@@ -41,7 +41,17 @@ export function AuthProvider({ children }: { children: any }) {
       if (token) {
         try {
           const response = await authApi.getMe();
-          setUser(response.data);
+          const userData = response.data;
+
+          // v2.2.0: 초기 로드 시 워크스페이스 정보 반영
+          if (userData.workspaces && userData.workspaces.length > 0) {
+            const { currentWorkspaceId } = await import('@/stores/chatRoomsStore');
+            if (!currentWorkspaceId.value) {
+              currentWorkspaceId.value = userData.workspaces[0];
+            }
+          }
+
+          setUser(userData);
         } catch (err) {
           console.error('Failed to get user:', err);
           localStorage.removeItem('token');
@@ -59,6 +69,15 @@ export function AuthProvider({ children }: { children: any }) {
       const response = await authApi.login(credentials);
       const { token, user: userData } = response.data;
       localStorage.setItem('token', token);
+
+      // v2.2.0: 워크스페이스 정보가 있으면 전역 스토어에 즉시 반영
+      if (userData.workspaces && userData.workspaces.length > 0) {
+        const { currentWorkspaceId } = await import('@/stores/chatRoomsStore');
+        if (!currentWorkspaceId.value) {
+          currentWorkspaceId.value = userData.workspaces[0];
+        }
+      }
+
       setUser(userData);
       showSuccess('로그인되었습니다');
       return response.data;
@@ -85,7 +104,7 @@ export function AuthProvider({ children }: { children: any }) {
   const signOut = async () => {
     try {
       await authApi.logout();
-      
+
       // 로그아웃 시 서비스 워커 해제 (푸시 알림 등 중단)
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();

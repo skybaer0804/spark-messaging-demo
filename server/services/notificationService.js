@@ -45,14 +45,15 @@ class NotificationService {
       });
 
       await Promise.all(pushPromises);
-      console.log(`Push notification sent to user: ${userId} (${subscriptions.length} devices)`);
+      console.log(`[Push] Notification sent to user: ${userId} (${subscriptions.length} devices)`);
     } catch (error) {
-      console.error('Error in sendPushNotification:', error);
+      console.error('[Push] Error in sendPushNotification:', error);
     }
   }
 
   // 채팅 메시지 알림 전송 유틸리티
   async notifyNewMessage(recipientIds, senderName, messageContent, roomId) {
+    console.log(`[Push] Notifying new message to recipients: ${recipientIds.join(', ')}`);
     const payload = {
       title: `${senderName}님의 메시지`,
       body: messageContent,

@@ -32,7 +32,7 @@ export function useChatApp() {
 
   // 전역 사이드바 동기화
   useEffect(() => {
-    setChatRoomList(roomList.map((r: ChatRoom) => r.name || ''));
+    setChatRoomList(roomList);
   }, [roomList]);
 
   useEffect(() => {
@@ -83,8 +83,13 @@ export function useChatApp() {
         isPrivate: extraData.isPrivate || false,
       });
 
+      // 방 생성 후 목록 새로고침 완료를 기다림
       await refreshRoomList();
-      await handleRoomSelect(newRoom);
+
+      // 방 선택 및 해당 경로로 이동 (onRoomSelect는 ChatApp 컴포넌트에서 pathname 감지로 처리됨)
+      if (newRoom && newRoom._id) {
+        handleRoomSelect(newRoom);
+      }
 
       setRoomIdInput('');
       setSelectedUserIds([]);

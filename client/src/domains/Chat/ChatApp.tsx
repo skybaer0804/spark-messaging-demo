@@ -211,7 +211,10 @@ function ChatRoomSidebar({
     const roomName = room.displayName || getDirectChatName(room, currentUserId);
     const displayAvatar = room.type === 'direct' ? room.displayAvatar : null;
     const displayStatus = room.type === 'direct' ? room.displayStatus : 'offline';
-    const directMember = room.type === 'direct' ? room.members.find((m) => m._id !== currentUserId) : null;
+    const directMember =
+      room.type === 'direct'
+        ? room.members?.find((m: any) => (m._id?.toString() || m.toString()) !== currentUserId?.toString())
+        : null;
 
     return (
       <div
@@ -284,6 +287,9 @@ function ChatRoomSidebar({
 
   const renderSection = (type: keyof typeof groupedRooms, label: string) => {
     const rooms = groupedRooms[type];
+    // 검색 중일 때는 결과가 있는 섹션만 표시, 평상시에는 1:1 대화방 섹션은 항상 표시
+    if (rooms.length === 0 && (isSearching || type !== 'direct')) return null;
+
     const isExpanded = expandedSections[type] !== false;
 
     return (
@@ -387,7 +393,7 @@ function ChatRoomSidebar({
                             ? '자리비움'
                             : currentUser?.status === 'busy'
                             ? '바쁨'
-                            : 'offline'}
+                            : '오프라인'}
                         </Typography>
                       </Box>
                     </Flex>
@@ -412,7 +418,7 @@ function ChatRoomSidebar({
                       </ListItem>
                       <ListItem onClick={() => handleUpdateStatus('offline')} className="chat-app__profile-menu-item">
                         <IconCircle size={14} style={{ color: '#94a3b8', marginRight: '12px' }} />
-                        <ListItemText primary="offline" />
+                        <ListItemText primary="오프라인인" />
                       </ListItem>
                     </List>
                   </div>
@@ -769,10 +775,16 @@ function ChatAppContent() {
   }, [pathname, currentRoom, roomList]);
 
   const onRoomSelect = (roomId: string) => {
+    // roomList에서 찾기 시도
     const room = roomList.find((r) => r._id === roomId);
     if (room) {
       handleRoomSelectRaw(room);
-      navigate(`/chatapp/chat/${roomId}`);
+      if (pathname !== `/chatapp/chat/${roomId}`) {
+        navigate(`/chatapp/chat/${roomId}`);
+      }
+    } else {
+      // 목록에 없으면(방금 생성된 경우 등) 강제 새로고침 후 재시도 가능하도록 로직 보완 필요
+      // 현재는 useChatApp의 handleCreateRoom -> refreshRoomList -> handleRoomSelect 흐름이 있음
     }
   };
 
@@ -782,13 +794,8 @@ function ChatAppContent() {
   };
 
   const startDirectChat = async (userId: string) => {
-    const existingRoom = roomList.find((r) => r.type === 'direct' && r.members.some((m) => m._id === userId));
-
-    if (existingRoom) {
-      onRoomSelect(existingRoom._id);
-    } else {
-      await handleCreateRoom('direct', { members: [userId] });
-    }
+    // 서버에서 identifier 기반으로 기존 활성 방을 찾거나 새 방을 생성하도록 위임
+    await handleCreateRoom('direct', { members: [userId] });
   };
 
   // Sidebar에서 "이 룸으로 들어가기" 요청을 보내면 여기서 실제 join을 수행
@@ -802,6 +809,7 @@ function ChatAppContent() {
   }, [handleRoomSelectRaw, isConnected, pendingJoinRoom, roomList]);
 
   const messagesRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null); // v2.2.0: 하단 앵커용
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputWrapperRef = useRef<HTMLDivElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -809,7 +817,7 @@ function ChatAppContent() {
   const [isComposing, setIsComposing] = useState(false);
   const [showUserList, setShowUserList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const { user } = useAuth();
+  const { user: currentUser } = useAuth();
   const { showSuccess } = useToast();
 
   const toggleGlobalNotifications = async (enabled: boolean) => {
@@ -821,12 +829,28 @@ function ChatAppContent() {
     }
   };
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom (Anchor-based)
   useEffect(() => {
-    if (messagesRef.current) {
-      messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
-    }
-  }, [messages.length, currentRoom]);
+    const scrollToBottom = () => {
+      if (messagesEndRef.current) {
+        // scrollIntoView는 브라우저가 제공하는 더 안전하고 부드러운 스크롤 방식입니다.
+        messagesEndRef.current.scrollIntoView({
+          behavior: 'auto', // 즉시 이동
+          block: 'end',
+        });
+      }
+    };
+
+    // 렌더링 주기를 고려하여 즉시 및 지연 실행
+    scrollToBottom();
+    const timer1 = setTimeout(scrollToBottom, 30);
+    const timer2 = setTimeout(scrollToBottom, 100);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [messages.length, currentRoom?._id]);
 
   const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -1078,7 +1102,8 @@ function ChatAppContent() {
                   <IconHash size={20} />
                 )}
                 <Typography variant="h3" style={{ fontWeight: 800 }}>
-                  {getDirectChatName(currentRoom, user?.id || (user as any)?._id)}
+                  {currentRoom.displayName ||
+                    getDirectChatName(currentRoom, currentUser?.id || (currentUser as any)?._id)}
                 </Typography>
               </Flex>
               {currentRoom.description && (
@@ -1128,8 +1153,12 @@ function ChatAppContent() {
           >
             <Stack spacing="md" style={{ flex: 1, minHeight: 0 }}>
               {messages.map((msg) => {
-                const currentUserId = user?.id || (user as any)?._id;
-                const isOwnMessage = msg.senderId === currentUserId || msg.status === 'sending';
+                const senderIdStr =
+                  typeof msg.senderId === 'object' ? (msg.senderId as any)?._id?.toString() : msg.senderId?.toString();
+                const currentUserIdStr = currentUser?.id?.toString() || (currentUser as any)?._id?.toString();
+
+                const isOwnMessage =
+                  (senderIdStr && currentUserIdStr && senderIdStr === currentUserIdStr) || msg.status === 'sending';
                 return (
                   <Flex
                     key={msg._id}
@@ -1163,8 +1192,24 @@ function ChatAppContent() {
                             : 'var(--color-surface-level-1)',
                           color: isOwnMessage ? 'var(--primitive-gray-0)' : 'inherit',
                           alignSelf: isOwnMessage ? 'flex-end' : 'flex-start',
+                          position: 'relative',
                         }}
                       >
+                        {/* v2.2.0: 안읽음 표시 (1) */}
+                        {isOwnMessage && msg.status === 'sent' && (!msg.readBy || msg.readBy.length === 0) && (
+                          <Typography
+                            variant="caption"
+                            style={{
+                              position: 'absolute',
+                              left: '-20px',
+                              bottom: '2px',
+                              color: 'var(--primitive-yellow-600)',
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            1
+                          </Typography>
+                        )}
                         {msg.fileData ? (
                           <Box>
                             {msg.fileData.fileType === 'image' && msg.fileData.data ? (
@@ -1213,6 +1258,8 @@ function ChatAppContent() {
                   </Flex>
                 );
               })}
+              {/* v2.2.0: 하단 앵커 요소 */}
+              <div ref={messagesEndRef} style={{ height: '1px', width: '100%' }} />
             </Stack>
           </Box>
 
@@ -1338,7 +1385,14 @@ function ChatAppContent() {
                       handleKeyPress(e);
                     }
                   }}
-                  placeholder={!isConnected ? 'Connecting...' : `Message #${currentRoom.name}`}
+                  placeholder={
+                    !isConnected
+                      ? 'Connecting...'
+                      : `Message #${
+                          currentRoom.displayName ||
+                          getDirectChatName(currentRoom, currentUser?.id || (currentUser as any)?._id)
+                        }`
+                  }
                   disabled={!isConnected}
                   fullWidth
                   className="chat-app__input"
@@ -1407,7 +1461,7 @@ function ChatAppContent() {
                   {/* Switch component usage depends on implementation, assuming common props */}
                   <input
                     type="checkbox"
-                    checked={(user as any)?.notificationSettings?.globalEnabled !== false}
+                    checked={(currentUser as any)?.notificationSettings?.globalEnabled !== false}
                     onChange={(e) => toggleGlobalNotifications(e.currentTarget.checked)}
                   />
                 </Flex>

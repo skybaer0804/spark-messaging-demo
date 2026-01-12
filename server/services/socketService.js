@@ -53,8 +53,12 @@ class SocketService {
     await this.broadcastEvent('UNREAD_COUNT_UPDATED', { roomId, unreadCount }, [userId]);
   }
 
-  async notifyRoomListUpdated(userId) {
-    await this.broadcastEvent('ROOM_LIST_UPDATED', {}, [userId]);
+  async notifyRoomListUpdated(userId, roomData = {}) {
+    await this.broadcastEvent('ROOM_LIST_UPDATED', roomData, [userId]);
+  }
+
+  async notifyMessageRead(roomId, userId) {
+    await this.broadcastEvent('MESSAGE_READ', { roomId, userId });
   }
 }
 

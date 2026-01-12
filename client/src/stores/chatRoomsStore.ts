@@ -1,6 +1,6 @@
 import { signal } from '@preact/signals';
 
-export const chatRoomList = signal<string[]>([]);
+export const chatRoomList = signal<any[]>([]);
 export const chatCurrentRoom = signal<string | null>(null);
 export const currentWorkspaceId = signal<string | null>(null);
 
@@ -8,7 +8,7 @@ export const currentWorkspaceId = signal<string | null>(null);
 // ChatApp 화면이 마운트된 뒤 실제 joinRoom을 수행하고 소비합니다.
 export const chatPendingJoinRoom = signal<string | null>(null);
 
-export function setChatRoomList(next: string[]) {
+export function setChatRoomList(next: any[]) {
   chatRoomList.value = next;
 }
 
