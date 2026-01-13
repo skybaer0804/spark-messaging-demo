@@ -6,6 +6,18 @@ import { NotificationService } from '@/core/socket/NotificationService';
 import { workspaceApi, notificationApi } from '@/core/api/ApiService';
 import type { Workspace } from '../../Chat/types/ChatRoom';
 
+export interface Notification {
+  _id: string;
+  title: string;
+  content: string;
+  scheduledAt?: string;
+  targetType: 'all' | 'workspace';
+  targetId?: string;
+  isSent: boolean;
+  createdAt: string;
+  senderId: string;
+}
+
 export function useNotificationApp() {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
@@ -14,8 +26,25 @@ export function useNotificationApp() {
   const [targetId, setTargetId] = useState('');
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
   const [isConnected, setIsConnected] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
   const { showSuccess, showError } = useToast();
   const notificationServiceRef = useRef<NotificationService | null>(null);
+
+  const fetchNotifications = async () => {
+    setIsLoading(true);
+    try {
+      const res = await notificationApi.getNotifications();
+      setNotifications(res.data);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+      showError('알림 목록을 불러오는데 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const connectionService = new ConnectionService(sparkMessagingClient);
@@ -41,6 +70,7 @@ export function useNotificationApp() {
     };
 
     fetchWorkspaces();
+    fetchNotifications();
 
     return () => {
       connectionService.cleanup();
@@ -60,10 +90,28 @@ export function useNotificationApp() {
       setTitle('');
       setMessage('');
       setScheduledAt('');
-      showSuccess('Notification created/sent successfully');
+      setIsDrawerOpen(false);
+      showSuccess('알림이 생성되었습니다.');
+      fetchNotifications();
     } catch (error) {
       console.error('Notification creation failed:', error);
-      showError('Failed to create notification');
+      showError('알림 생성에 실패했습니다.');
+    }
+  };
+
+  const handleResend = async (notification: Notification) => {
+    try {
+      await notificationApi.createNotification({
+        title: notification.title,
+        content: notification.content,
+        targetType: notification.targetType,
+        targetId: notification.targetId,
+      });
+      showSuccess('알림이 재발송되었습니다.');
+      fetchNotifications();
+    } catch (error) {
+      console.error('Notification resend failed:', error);
+      showError('알림 재발송에 실패했습니다.');
     }
   };
 
@@ -81,5 +129,11 @@ export function useNotificationApp() {
     workspaceList,
     isConnected,
     handleSend,
+    notifications,
+    isLoading,
+    isDrawerOpen,
+    setIsDrawerOpen,
+    handleResend,
+    fetchNotifications,
   };
 }

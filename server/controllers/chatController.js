@@ -309,13 +309,6 @@ exports.uploadFile = async (req, res) => {
           { roomId, userId: { $in: recipientIdsToIncrement } },
           { $inc: { unreadCount: 1 } },
         );
-
-        recipientIdsToIncrement.forEach(async (userId) => {
-          const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
-          if (userChatRoom) {
-            socketService.notifyUnreadCount(userId, roomId, userChatRoom.unreadCount);
-          }
-        });
       }
 
     // v2.3.0: 목록 정보(마지막 메시지 등)는 모든 멤버에게 업데이트 알림
@@ -408,14 +401,6 @@ exports.sendMessage = async (req, res) => {
           { roomId, userId: { $in: recipientIdsToIncrement } },
           { $inc: { unreadCount: 1 } },
         );
-
-        // 2.2.0: 수신자들에게 실시간 안읽음 카운트 알림
-        recipientIdsToIncrement.forEach(async (userId) => {
-          const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
-          if (userChatRoom) {
-            socketService.notifyUnreadCount(userId, roomId, userChatRoom.unreadCount);
-          }
-        });
       }
 
     // v2.3.0: 목록 정보(마지막 메시지 등)는 모든 멤버에게 업데이트 알림

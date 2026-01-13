@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
   companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
   deptId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dept' },
   lastLogoutAt: { type: Date, default: Date.now },
+  lastSyncAt: { type: Date, default: null }, // v2.3.0: 알림 동기화 시점 기록
   createdAt: { type: Date, default: Date.now },
 });
 

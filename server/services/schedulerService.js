@@ -5,25 +5,28 @@ const notificationService = require('./notificationService');
 
 class SchedulerService {
   initialize() {
-    // 1시간마다 실행 (매시 0분에 실행)
-    cron.schedule('0 * * * *', () => {
-      console.log('[Scheduler] Checking for scheduled notifications...');
+    // 매 분마다 실행 (0초에 실행되도록 설정 가능하나 기본적으로 매 분 시작 시 실행)
+    cron.schedule('* * * * *', () => {
+      const now = new Date();
+      console.log(`[Scheduler] Checking for scheduled notifications at ${now.toLocaleString()}...`);
       this.processScheduledNotifications();
     });
 
-    console.log('Scheduler Service Initialized (1-hour interval)');
+    console.log('Scheduler Service Initialized (Every 1 minute interval)');
   }
 
   async processScheduledNotifications() {
     try {
       const now = new Date();
-      // 예약 시간이 지났고 아직 발송되지 않은 알림 조회
+      // 예약 시간이 지났고(현재 시간보다 작거나 같음) 아직 발송되지 않은 알림 조회
       const pendingNotifications = await Notification.find({
-        scheduledAt: { $lte: now },
+        scheduledAt: { $ne: null, $lte: now },
         isSent: false,
       });
 
-      console.log(`[Scheduler] Found ${pendingNotifications.length} pending notifications`);
+      if (pendingNotifications.length > 0) {
+        console.log(`[Scheduler] Found ${pendingNotifications.length} pending notifications to send`);
+      }
 
       for (const notification of pendingNotifications) {
         await this.sendNotification(notification);
@@ -46,11 +49,14 @@ class SchedulerService {
       }
 
       if (targetUserIds.length > 0) {
-        await notificationService.notifyGlobal(targetUserIds, notification.title, notification.content);
+        await notificationService.notifyGlobal(targetUserIds, notification.title, notification.content, {
+          actionUrl: notification.actionUrl,
+          metadata: notification.metadata,
+        });
 
         notification.isSent = true;
         await notification.save();
-        console.log(`[Scheduler] Notification sent: ${notification.title}`);
+        console.log(`[Scheduler] Notification sent to ${targetUserIds.length} users: ${notification.title}`);
       }
     } catch (error) {
       console.error(`[Scheduler] Failed to send notification ${notification._id}:`, error);

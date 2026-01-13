@@ -69,23 +69,33 @@ exports.getNotifications = async (req, res) => {
 exports.syncNotifications = async (req, res) => {
   try {
     const userId = req.user.id;
+    // lastSyncAt 필드 포함 조회
     const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // 마지막 로그아웃 이후에 생성된 'all' 대상 공지사항 조회
-    const lastLogoutAt = user.lastLogoutAt || new Date(0);
+    // 마지막 동기화 시점 확인 (없으면 lastLogoutAt, 그것도 없으면 0)
+    const lastSyncAt = user.lastSyncAt || user.lastLogoutAt || new Date(0);
+
+    // 마지막 동기화 이후에 생성된 'all' 대상 공지사항 조회
     const pendingNotifications = await Notification.find({
       targetType: 'all',
       isSent: true,
-      createdAt: { $gt: lastLogoutAt },
+      createdAt: { $gt: lastSyncAt },
     }).sort({ createdAt: 1 });
 
     // v2.3.0: 웹 푸시 방식으로 변경 (서버에서 푸시 발송 트리거)
     if (pendingNotifications.length > 0) {
+      console.log(`[Sync] Found ${pendingNotifications.length} pending notifications for user ${userId}`);
+
+      // 동기화 시점 업데이트 (중복 방지)
+      user.lastSyncAt = new Date();
+      await user.save();
+
       for (const notif of pendingNotifications) {
+        // v2.3.0: 실제 Push API를 통해 발송 (다른 기기에서도 수신 가능)
         await notificationService.sendPushNotification(userId, {
           title: `[공지] ${notif.title}`,
           body: notif.content,
@@ -97,6 +107,10 @@ exports.syncNotifications = async (req, res) => {
           },
         });
       }
+    } else {
+      // 새로운 공지가 없더라도 동기화 시점은 현재로 업데이트하여 불필요한 재조회 방지
+      user.lastSyncAt = new Date();
+      await user.save();
     }
 
     res.json(pendingNotifications);

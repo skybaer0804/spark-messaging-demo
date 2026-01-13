@@ -246,17 +246,29 @@ export function ChatProvider({ children }: { children: any }) {
         const response = await notificationApi.syncNotifications();
         const pendingNotifications = response.data;
         if (pendingNotifications && pendingNotifications.length > 0) {
-          pendingNotifications.forEach((notif: any) => {
-            // 앱 내 토스트 알림으로 표시 (metadata 포함)
+          // v2.3.0: 너무 많은 알림이 한꺼번에 뜨지 않도록 최적화
+          if (pendingNotifications.length > 3) {
             window.dispatchEvent(
               new CustomEvent('api-info', {
                 detail: {
-                  message: `[공지] ${notif.title}\n${notif.content}`,
-                  actionUrl: notif.actionUrl,
+                  message: `[공지] ${pendingNotifications.length}개의 새로운 공지사항이 있습니다.`,
+                  actionUrl: '/notifications', // 공지사항 목록 페이지가 있다면 이동
                 },
               }),
             );
-          });
+          } else {
+            pendingNotifications.forEach((notif: any) => {
+              // 앱 내 토스트 알림으로 표시 (metadata 포함)
+              window.dispatchEvent(
+                new CustomEvent('api-info', {
+                  detail: {
+                    message: `[공지] ${notif.title}\n${notif.content}`,
+                    actionUrl: notif.actionUrl,
+                  },
+                }),
+              );
+            });
+          }
         }
       } catch (error) {
         console.error('Failed to sync notifications:', error);

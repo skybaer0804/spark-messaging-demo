@@ -7,8 +7,10 @@ import { Stack } from '@/ui-components/Layout/Stack';
 import { Flex } from '@/ui-components/Layout/Flex';
 import { Paper } from '@/ui-components/Paper/Paper';
 import { Typography } from '@/ui-components/Typography/Typography';
-import { IconSend, IconCalendar } from '@tabler/icons-preact';
+import { IconSend, IconCalendar, IconPlus, IconRefresh, IconHistory } from '@tabler/icons-preact';
 import { useAuth } from '@/core/hooks/useAuth';
+import { Drawer } from '@/ui-components/Drawer/Drawer';
+import { StatusChip } from '@/ui-components/StatusChip/StatusChip';
 import './NotificationApp.scss';
 
 export function NotificationApp() {
@@ -29,7 +31,31 @@ export function NotificationApp() {
     workspaceList,
     isConnected,
     handleSend,
+    notifications,
+    isLoading,
+    isDrawerOpen,
+    setIsDrawerOpen,
+    handleResend,
+    fetchNotifications,
   } = useNotificationApp();
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+    return new Intl.DateTimeFormat('ko-KR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  };
+
+  const getTargetLabel = (type: string, id?: string) => {
+    if (type === 'all') return '전체 사용자';
+    const workspace = workspaceList.find((ws) => ws._id === id);
+    return workspace ? `워크스페이스: ${workspace.name}` : '알 수 없는 대상';
+  };
 
   if (!isAdmin) {
     return (
@@ -43,35 +69,109 @@ export function NotificationApp() {
   }
 
   return (
-    <Paper square elevation={0} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Paper square elevation={0} className="notification-app">
+      <Box padding="lg" className="notification-app__header">
+        <Flex justify="space-between" align="center">
+          <Box>
+            <Typography variant="h3">시스템 알림 관리</Typography>
+            <Typography variant="body-medium" color="text-secondary">
+              과거 발송 목록을 확인하고 새로운 공지를 생성합니다.
+            </Typography>
+          </Box>
+          <Flex gap="sm">
+            <Button variant="outline" onClick={fetchNotifications} disabled={isLoading}>
+              <IconRefresh size={20} className={isLoading ? 'rotate' : ''} />
+            </Button>
+            <Button variant="primary" onClick={() => setIsDrawerOpen(true)}>
+              <IconPlus size={20} />
+              <span>공지 생성</span>
+            </Button>
+          </Flex>
+        </Flex>
+      </Box>
+
       <Box padding="lg" style={{ flex: 1, overflowY: 'auto' }}>
-        <Typography variant="h3" style={{ marginBottom: '8px' }}>
-          시스템 알림 생성
-        </Typography>
-        <Typography variant="body-medium" color="text-secondary" style={{ marginBottom: '24px' }}>
-          사용자들에게 전체 공지 또는 타겟 알림을 보냅니다.
-        </Typography>
+        <div className="notification-list">
+          {notifications.length === 0 ? (
+            <Flex direction="column" align="center" justify="center" style={{ padding: '80px 0' }}>
+              <IconHistory size={48} color="var(--color-text-tertiary)" style={{ marginBottom: '16px' }} />
+              <Typography color="text-tertiary">발송된 알림이 없습니다.</Typography>
+            </Flex>
+          ) : (
+            <table className="notification-table">
+              <thead>
+                <tr>
+                  <th>제목/내용</th>
+                  <th>대상</th>
+                  <th>발송 시간</th>
+                  <th>상태</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody>
+                {notifications.map((notif) => (
+                  <tr key={notif._id}>
+                    <td>
+                      <Typography variant="body-medium" style={{ fontWeight: 600 }}>
+                        {notif.title}
+                      </Typography>
+                      <Typography variant="caption" color="text-secondary" className="text-truncate">
+                        {notif.content}
+                      </Typography>
+                    </td>
+                    <td>
+                      <Typography variant="caption">{getTargetLabel(notif.targetType, notif.targetId)}</Typography>
+                    </td>
+                    <td>
+                      <Typography variant="caption">{formatDate(notif.createdAt)}</Typography>
+                    </td>
+                    <td>
+                      <StatusChip
+                        label={notif.isSent ? '발송완료' : '대기중'}
+                        color={notif.isSent ? 'success' : 'warning'}
+                      />
+                    </td>
+                    <td>
+                      <Button variant="outline" size="sm" onClick={() => handleResend(notif)}>
+                        <IconSend size={16} />
+                        <span>재발송</span>
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </Box>
 
-        <Stack spacing="xl">
-          <Input
-            label="알림 제목"
-            value={title}
-            onInput={(e) => setTitle(e.currentTarget.value)}
-            placeholder="알림 제목을 입력하세요..."
-            fullWidth
-          />
+      <Drawer
+        open={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        title="새 시스템 알림 생성"
+        anchor="right"
+        width={400}
+      >
+        <Box padding="lg">
+          <Stack spacing="xl">
+            <Input
+              label="알림 제목"
+              value={title}
+              onInput={(e) => setTitle(e.currentTarget.value)}
+              placeholder="알림 제목을 입력하세요..."
+              fullWidth
+            />
 
-          <Input
-            label="메시지 내용"
-            multiline
-            rows={4}
-            value={message}
-            onInput={(e) => setMessage(e.currentTarget.value)}
-            placeholder="알림 메시지를 입력하세요..."
-            fullWidth
-          />
+            <Input
+              label="메시지 내용"
+              multiline
+              rows={6}
+              value={message}
+              onInput={(e) => setMessage(e.currentTarget.value)}
+              placeholder="알림 메시지를 입력하세요..."
+              fullWidth
+            />
 
-          <Flex gap="md">
             <Select
               label="대상 유형"
               value={targetType}
@@ -80,7 +180,7 @@ export function NotificationApp() {
                 { label: '전체 사용자', value: 'all' },
                 { label: '특정 워크스페이스', value: 'workspace' },
               ]}
-              style={{ flex: 1 }}
+              fullWidth
             />
 
             {targetType === 'workspace' && (
@@ -92,52 +192,53 @@ export function NotificationApp() {
                   label: ws.name,
                   value: ws._id,
                 }))}
-                style={{ flex: 1 }}
+                fullWidth
               />
             )}
-          </Flex>
 
-          <Box>
-            <Typography variant="body-small" style={{ marginBottom: '8px', display: 'block', fontWeight: 600 }}>
-              예약 전송 (선택 사항)
-            </Typography>
-            <Flex gap="sm" align="center">
-              <IconCalendar size={20} color="var(--color-text-tertiary)" />
-              <input
-                type="datetime-local"
-                value={scheduledDate}
-                onChange={(e) => setScheduledAt(e.currentTarget.value)}
-                style={{
-                  padding: '8px',
-                  borderRadius: '4px',
-                  border: '1px solid var(--color-border-default)',
-                  backgroundColor: 'var(--color-bg-default)',
-                  color: 'var(--color-text-primary)',
-                  flex: 1,
-                }}
-              />
-            </Flex>
-            <Typography variant="caption" color="text-secondary" style={{ marginTop: '4px', display: 'block' }}>
-              비워두면 즉시 전송됩니다.
-            </Typography>
-          </Box>
-        </Stack>
-      </Box>
+            <Box>
+              <Typography variant="body-small" style={{ marginBottom: '8px', display: 'block', fontWeight: 600 }}>
+                예약 전송 (선택 사항)
+              </Typography>
+              <Flex gap="sm" align="center">
+                <IconCalendar size={20} color="var(--color-text-tertiary)" />
+                <input
+                  type="datetime-local"
+                  value={scheduledDate}
+                  onChange={(e) => setScheduledAt(e.currentTarget.value)}
+                  style={{
+                    padding: '8px',
+                    borderRadius: '4px',
+                    border: '1px solid var(--color-border-default)',
+                    backgroundColor: 'var(--color-bg-default)',
+                    color: 'var(--color-text-primary)',
+                    flex: 1,
+                  }}
+                />
+              </Flex>
+              <Typography variant="caption" color="text-secondary" style={{ marginTop: '4px', display: 'block' }}>
+                비워두면 즉시 전송됩니다.
+              </Typography>
+            </Box>
 
-      <Box padding="lg" style={{ borderTop: '1px solid var(--color-border-default)' }}>
-        <Button
-          variant="primary"
-          fullWidth
-          size="lg"
-          onClick={handleSend}
-          disabled={!isConnected || !message.trim() || !title.trim()}
-        >
-          <Stack direction="row" align="center" spacing="sm" justify="center">
-            <IconSend size={20} />
-            <span>알림 보내기</span>
+            <Box style={{ marginTop: '24px' }}>
+              <Button
+                variant="primary"
+                fullWidth
+                size="lg"
+                onClick={handleSend}
+                disabled={!isConnected || !message.trim() || !title.trim()}
+              >
+                <Stack direction="row" align="center" spacing="sm" justify="center">
+                  <IconSend size={20} />
+                  <span>알림 보내기</span>
+                </Stack>
+              </Button>
+            </Box>
           </Stack>
-        </Button>
-      </Box>
+        </Box>
+      </Drawer>
     </Paper>
   );
 }
+
