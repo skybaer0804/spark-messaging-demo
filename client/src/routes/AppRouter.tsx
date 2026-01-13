@@ -5,6 +5,7 @@ import { appRoutes } from './appRoutes';
 import { useRouterState } from './RouterState';
 import { DesignSystemDemo } from '@/components/DesignSystemDemo/DesignSystemDemo';
 import { PrivacyPolicy } from '@/components/PrivacyPolicy/PrivacyPolicy';
+import { Login, Signup } from '@/domains/Auth';
 import { useAuth } from '@/core/hooks/useAuth';
 import { useEffect } from 'preact/hooks';
 
@@ -51,13 +52,12 @@ export function AppRouter() {
 
   return (
     <Router onChange={handleRouteChange}>
+      <Login path="/login" />
+      <Signup path="/signup" />
+
       {appRoutes.map((r) => {
-        if (r.id === 'auth') {
-          return (
-            <div key={r.id} path={r.path}>
-              {r.element}
-            </div>
-          );
+        if (r.id === 'login' || r.id === 'signup') {
+          return null;
         }
         return (
           <ProtectedRoute key={r.id} path={r.path}>

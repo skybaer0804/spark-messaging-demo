@@ -20,6 +20,7 @@ import { Profile } from '@/components/Profile/Profile';
 import { Workspace } from '@/components/Workspace/Workspace';
 import { WorkspaceDetail } from '@/components/Workspace/WorkspaceDetail';
 import { ThemeCustomization } from '@/components/ThemeCustomization/ThemeCustomization';
+import { Login, Signup } from '@/domains/Auth';
 
 export type AppRouteId =
   | 'home'
@@ -28,7 +29,8 @@ export type AppRouteId =
   | 'video-meeting'
   | 'settings'
   | 'design-system'
-  | 'auth'
+  | 'login'
+  | 'signup'
   | 'profile'
   | 'workspace'
   | 'workspace-detail';
@@ -101,6 +103,22 @@ export const appRoutes: AppRouteNode[] = [
     icon: <IconHome size={24} />,
     title: 'Home',
     element: <HomePage />,
+  },
+  {
+    id: 'login',
+    label: '로그인',
+    path: '/login',
+    icon: <IconUser size={24} />,
+    title: 'Login',
+    element: <Login />,
+  },
+  {
+    id: 'signup',
+    label: '회원가입',
+    path: '/signup',
+    icon: <IconUser size={24} />,
+    title: 'Signup',
+    element: <Signup />,
   },
   {
     id: 'chatapp',

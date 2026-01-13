@@ -60,6 +60,23 @@
     border: 1px solid var(--button-secondary-border);
   }
 
+  &.text {
+    background-color: transparent;
+    color: var(--color-interactive-primary);
+    box-shadow: none;
+    border: none;
+
+    &:hover {
+      background-color: var(--color-background-secondary);
+      box-shadow: none;
+    }
+
+    &:disabled {
+      background-color: transparent;
+      color: var(--color-text-disabled);
+    }
+  }
+
   &.fullWidth {
     width: 100%;
   }

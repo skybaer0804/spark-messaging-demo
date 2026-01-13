@@ -13,6 +13,8 @@ export interface InputProps extends Omit<JSX.HTMLAttributes<HTMLInputElement | H
   value?: string | number;
   rows?: number;
   type?: string;
+  startAdornment?: JSX.Element;
+  endAdornment?: JSX.Element;
 }
 
 export function Input({
@@ -22,6 +24,8 @@ export function Input({
   multiline = false,
   fullWidth = true,
   className = '',
+  startAdornment,
+  endAdornment,
   ...props
 }: InputProps) {
   const { theme, contrast } = useTheme();
@@ -29,7 +33,15 @@ export function Input({
 
   const wrapperClasses = ['input-group', fullWidth ? 'fullWidth' : '', className].filter(Boolean).join(' ');
 
-  const inputClasses = ['input', multiline ? 'input-textarea' : '', error ? 'error' : ''].filter(Boolean).join(' ');
+  const inputClasses = [
+    'input',
+    multiline ? 'input-textarea' : '',
+    error ? 'error' : '',
+    startAdornment ? 'has-start' : '',
+    endAdornment ? 'has-end' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={wrapperClasses} data-theme={theme} data-contrast={contrast}>
@@ -38,12 +50,14 @@ export function Input({
           {label}
         </label>
       )}
-      <div className="input-wrapper">
+      <div className="input-container">
+        {startAdornment && <div className="input-adornment start">{startAdornment}</div>}
         {multiline ? (
           <textarea id={inputId} className={inputClasses} {...(props as JSX.HTMLAttributes<HTMLTextAreaElement>)} />
         ) : (
           <input id={inputId} className={inputClasses} {...(props as JSX.HTMLAttributes<HTMLInputElement>)} />
         )}
+        {endAdornment && <div className="input-adornment end">{endAdornment}</div>}
       </div>
       {helperText && <span className={`input-helper-text ${error ? 'error' : ''}`}>{helperText}</span>}
     </div>

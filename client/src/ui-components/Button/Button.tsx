@@ -3,7 +3,7 @@ import { useTheme } from '@/core/context/ThemeProvider';
 import './Button.scss';
 
 export interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'text';
   size?: 'lg' | 'md' | 'sm';
   fullWidth?: boolean;
   disabled?: boolean;

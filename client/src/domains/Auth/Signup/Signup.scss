@@ -1,0 +1,67 @@
+.signup-form {
+  &__field-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    padding-left: 2px;
+  }
+
+  &__label {
+    font-size: var(--typo-label-medium-size);
+    font-weight: var(--primitive-font-weight-bold);
+    color: var(--color-text-primary);
+  }
+
+  &__required-badge {
+    color: var(--color-status-success);
+    display: flex;
+    align-items: center;
+    animation: badge-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  &__submit {
+    margin-top: var(--space-gap-xl);
+    height: 56px;
+    font-size: var(--typo-body-large-size);
+    font-weight: var(--primitive-font-weight-bold);
+    border-radius: var(--primitive-radius-large);
+    box-shadow: 0 8px 16px rgba(80, 158, 227, 0.25);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(80, 158, 227, 0.35);
+    }
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-gap-sm);
+    margin-top: var(--space-gap-xl);
+    font-size: var(--typo-body-medium-size);
+    color: var(--color-text-secondary);
+
+    button {
+      padding: 4px 8px;
+      font-weight: var(--primitive-font-weight-bold);
+      color: var(--color-interactive-primary);
+      border-radius: var(--primitive-radius-small);
+
+      &:hover {
+        background-color: var(--color-background-secondary);
+      }
+    }
+  }
+}
+
+@keyframes badge-pop {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

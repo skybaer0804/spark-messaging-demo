@@ -7,7 +7,7 @@ import { ensureSparkMessagingConnected } from '@/core/utils/ensureSparkMessaging
 import { useAuth } from '@/core/context/AuthContext';
 import { useToast } from '@/core/context/ToastContext';
 import { PushService } from '@/core/api/PushService';
-import { AuthPage } from '@/components/Auth/AuthPage';
+import { Login, Signup } from '@/domains/Auth';
 import { DesignSystemDemo } from '@/components/DesignSystemDemo/DesignSystemDemo';
 import { PrivacyPolicy } from '@/components/PrivacyPolicy/PrivacyPolicy';
 import { Flex } from '@/ui-components/Layout/Flex';
@@ -159,17 +159,19 @@ export function App() {
 
     // 비로그인 상태에서 허용되는 경로
     if (!isAuthenticated) {
-      if (currentRoute === '/register') {
-        return <AuthPage />;
+      if (currentRoute === '/signup') {
+        return <Signup />;
       }
-      return <AuthPage />;
+      return <Login />;
     }
 
-    // 워크스페이스 온보딩 체크
+    // 워크스페이스 온보딩 체크 (특정 경로는 제외)
     const { user } = useAuth();
     const hasWorkspaces = user?.workspaces && user.workspaces.length > 0;
+    const allowedPathsWithoutWorkspace = ['/workspace', '/profile', '/design-system', '/legal/privacy-policy'];
+    const isAllowedPath = allowedPathsWithoutWorkspace.some((path) => currentRoute.startsWith(path));
 
-    if (!hasWorkspaces && !currentRoute.startsWith('/workspace')) {
+    if (!hasWorkspaces && !isAllowedPath) {
       return (
         <Flex
           direction="column"
@@ -228,9 +230,7 @@ export function App() {
         </ChatProvider>
       ) : (
         <RouterStateProvider pathname={currentRoute} onNavigate={handleNavigate}>
-          <div className="app__main">
-            <SidebarLayout>{renderContent()}</SidebarLayout>
-          </div>
+          <div className="app__main">{renderContent()}</div>
         </RouterStateProvider>
       )}
     </div>

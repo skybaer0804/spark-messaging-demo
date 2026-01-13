@@ -3,13 +3,19 @@ import './Grid.scss';
 
 export interface GridProps extends BoxProps {
   container?: boolean;
+  item?: boolean;
   spacing?: number | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | string;
   rowSpacing?: number | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | string;
   columnSpacing?: number | 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | string;
-  columns?: string | number; // e.g., '1fr 1fr' or 2 (converted to repeat(2, minmax(0, 1fr)))
+  columns?: string | number;
   rows?: string | number;
-  gap?: string; // legacy alias of spacing
+  gap?: string;
   flow?: 'row' | 'column' | 'dense';
+  xs?: number | 'auto';
+  sm?: number | 'auto';
+  md?: number | 'auto';
+  lg?: number | 'auto';
+  xl?: number | 'auto';
 }
 
 const formatGridTemplate = (value?: string | number) => {
@@ -27,12 +33,12 @@ const resolveSpacingValue = (value?: GridProps['spacing']) => {
   const named = ['none', 'xs', 'sm', 'md', 'lg', 'xl'];
   if (named.includes(v)) return `var(--grid-spacing-${v})`;
 
-  // Allow raw CSS values (e.g. '12px', '1rem', 'var(--some-token)')
   return v;
 };
 
 export function Grid({
-  container = true,
+  container,
+  item,
   spacing,
   rowSpacing,
   columnSpacing,
@@ -40,17 +46,37 @@ export function Grid({
   rows,
   gap,
   flow,
+  xs,
+  sm,
+  md,
+  lg,
+  xl,
   className = '',
   style,
   children,
   ...props
 }: GridProps) {
+  const isContainer = container !== undefined ? container : (item ? false : true);
   const baseSpacing = resolveSpacingValue(spacing ?? gap);
   const resolvedRowSpacing = resolveSpacingValue(rowSpacing);
   const resolvedColumnSpacing = resolveSpacingValue(columnSpacing);
 
+  const gridClasses = [
+    'grid',
+    isContainer ? 'grid--container' : '',
+    item ? 'grid--item' : '',
+    xs !== undefined ? `grid--xs-${xs}` : '',
+    sm !== undefined ? `grid--sm-${sm}` : '',
+    md !== undefined ? `grid--md-${md}` : '',
+    lg !== undefined ? `grid--lg-${lg}` : '',
+    xl !== undefined ? `grid--xl-${xl}` : '',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   const computedStyle = {
-    ...(container
+    ...(isContainer
       ? {
           '--grid-template-columns': formatGridTemplate(columns),
           '--grid-template-rows': formatGridTemplate(rows),
@@ -64,7 +90,7 @@ export function Grid({
   } as any;
 
   return (
-    <Box className={`grid ${container ? 'grid--container' : ''} ${className}`} style={computedStyle} {...props}>
+    <Box className={gridClasses} style={computedStyle} {...props}>
       {children}
     </Box>
   );

@@ -1,0 +1,90 @@
+.login-form {
+  &__password-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-icon-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    margin-right: -4px;
+    border-radius: var(--primitive-radius-medium);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      background-color: var(--color-background-secondary);
+      color: var(--color-interactive-primary);
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  &__options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-gap-xs);
+
+    .checkbox__label {
+      font-size: var(--typo-body-small-size);
+      font-weight: var(--primitive-font-weight-bold);
+      color: var(--color-text-secondary);
+    }
+  }
+
+  &__forgot-password {
+    padding: 0;
+    font-size: var(--typo-body-small-size);
+    color: var(--color-text-secondary);
+    transition: color 0.2s;
+
+    &:hover {
+      color: var(--color-interactive-primary);
+      text-decoration: underline;
+    }
+  }
+
+  &__submit {
+    margin-top: var(--space-gap-lg);
+    height: 56px;
+    font-size: var(--typo-body-large-size);
+    font-weight: var(--primitive-font-weight-bold);
+    border-radius: var(--primitive-radius-large);
+    box-shadow: 0 8px 16px rgba(80, 158, 227, 0.25);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(80, 158, 227, 0.35);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-gap-sm);
+    margin-top: var(--space-gap-xl);
+    font-size: var(--typo-body-medium-size);
+    color: var(--color-text-secondary);
+
+    button {
+      padding: 4px 8px;
+      font-weight: var(--primitive-font-weight-bold);
+      color: var(--color-interactive-primary);
+      border-radius: var(--primitive-radius-small);
+
+      &:hover {
+        background-color: var(--color-background-secondary);
+      }
+    }
+  }
+}
