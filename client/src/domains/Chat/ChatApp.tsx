@@ -42,6 +42,7 @@ import {
   IconCircle,
   IconUser,
   IconLogout,
+  IconRocket,
 } from '@tabler/icons-preact';
 import { Button } from '@/ui-components/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
@@ -727,6 +728,131 @@ function ChatRoomSidebar({
   );
 }
 
+// 2.2.0: Empty State for Chat Area - 컴포넌트 외부로 이동하여 리렌더링 시 애니메이션 중복 방지
+const EmptyState = () => (
+  <Box className="chat-app__empty-state">
+    <div className="chat-app__empty-state-hero">
+      <Stack align="center" spacing="sm">
+        <Flex align="center" gap="xs" className="chat-app__empty-state-badge">
+          <IconMessageCircle size={16} />
+          <Typography variant="body-small">실시간 메시징</Typography>
+        </Flex>
+        <div className="chat-app__empty-state-icon-wrapper">
+          <IconRocket size={40} />
+        </div>
+        <Typography variant="h1" className="chat-app__empty-state-title">
+          Start <span className="highlight">Messaging</span>
+        </Typography>
+        <Typography variant="body-large" className="chat-app__empty-state-desc">
+          사이드바에서 대화방을 선택하거나 검색하여
+          <br />
+          팀원들과 실시간으로 소통을 시작해보세요.
+        </Typography>
+      </Stack>
+    </div>
+  </Box>
+);
+
+// 2.2.0: Directory View - 컴포넌트 외부로 이동
+const DirectoryView = ({
+  directoryTab,
+  setDirectoryTab,
+  roomList,
+  onRoomSelect,
+  userList,
+  startDirectChat,
+}: {
+  directoryTab: 'channel' | 'team' | 'user';
+  setDirectoryTab: (tab: 'channel' | 'team' | 'user') => void;
+  roomList: any[];
+  onRoomSelect: (roomId: string) => void;
+  userList: any[];
+  startDirectChat: (userId: string) => void;
+}) => (
+  <Flex direction="column" style={{ height: '100%', backgroundColor: 'var(--color-bg-default)' }}>
+    <Paper square padding="md" style={{ borderBottom: '1px solid var(--color-border-default)' }}>
+      <Typography variant="h2" style={{ marginBottom: '16px' }}>
+        디렉토리
+      </Typography>
+      <Flex gap="md">
+        <Button
+          variant={directoryTab === 'channel' ? 'primary' : 'secondary'}
+          onClick={() => setDirectoryTab('channel')}
+        >
+          채널
+        </Button>
+        <Button variant={directoryTab === 'team' ? 'primary' : 'secondary'} onClick={() => setDirectoryTab('team')}>
+          팀
+        </Button>
+        <Button variant={directoryTab === 'user' ? 'primary' : 'secondary'} onClick={() => setDirectoryTab('user')}>
+          사용자
+        </Button>
+      </Flex>
+    </Paper>
+
+    <Box style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+      {directoryTab === 'channel' && (
+        <List>
+          {roomList
+            .filter((r) => r.type === 'public')
+            .map((room) => (
+              <ListItem key={room._id} onClick={() => onRoomSelect(room._id)} style={{ cursor: 'pointer' }}>
+                <ListItemAvatar>
+                  <Avatar variant="rounded">
+                    <IconHash />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={room.name} secondary={room.description} />
+              </ListItem>
+            ))}
+        </List>
+      )}
+      {directoryTab === 'team' && (
+        <List>
+          {roomList
+            .filter((r) => r.type === 'team')
+            .map((room) => (
+              <ListItem key={room._id} onClick={() => onRoomSelect(room._id)} style={{ cursor: 'pointer' }}>
+                <ListItemAvatar>
+                  <Avatar variant="rounded" style={{ backgroundColor: '#e11d48' }}>
+                    {room.name?.substring(0, 1).toUpperCase()}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={room.name} secondary={`${room.members.length}명의 멤버`} />
+              </ListItem>
+            ))}
+        </List>
+      )}
+      {directoryTab === 'user' && (
+        <List>
+          {userList.map((user) => (
+            <ListItem key={user._id} onClick={() => startDirectChat(user._id)} style={{ cursor: 'pointer' }}>
+              <ListItemAvatar>
+                <Box style={{ position: 'relative' }}>
+                  <Avatar src={user.avatar || user.profileImage} />
+                  <div
+                    className={`avatar-status avatar-status--${user.status || 'offline'}`}
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                      width: 12,
+                      height: 12,
+                      border: '2px solid #fff',
+                      borderRadius: '50%',
+                    }}
+                  />
+                </Box>
+              </ListItemAvatar>
+              <ListItemText primary={user.username} secondary={user.status === 'online' ? 'Online' : 'Offline'} />
+            </ListItem>
+          ))}
+        </List>
+      )}
+    </Box>
+  </Flex>
+);
+
 function ChatAppContent() {
   const { pathname, navigate } = useRouterState();
 
@@ -899,109 +1025,6 @@ function ChatAppContent() {
     setImageModal(null);
   };
 
-  // --- Components Renderers ---
-
-  // Empty State for Chat Area
-  const EmptyState = () => (
-    <Flex
-      direction="column"
-      align="center"
-      justify="center"
-      style={{ height: '100%', color: 'var(--color-text-tertiary)' }}
-    >
-      <Typography variant="h2" style={{ marginBottom: '8px' }}>
-        Start Messaging
-      </Typography>
-      <Typography variant="body-medium">사이드바에서 방을 선택하거나 검색하여 대화를 시작하세요.</Typography>
-    </Flex>
-  );
-
-  // Directory View
-  const DirectoryView = () => (
-    <Flex direction="column" style={{ height: '100%', backgroundColor: 'var(--color-bg-default)' }}>
-      <Paper square padding="md" style={{ borderBottom: '1px solid var(--color-border-default)' }}>
-        <Typography variant="h2" style={{ marginBottom: '16px' }}>
-          디렉토리
-        </Typography>
-        <Flex gap="md">
-          <Button
-            variant={directoryTab === 'channel' ? 'primary' : 'secondary'}
-            onClick={() => setDirectoryTab('channel')}
-          >
-            채널
-          </Button>
-          <Button variant={directoryTab === 'team' ? 'primary' : 'secondary'} onClick={() => setDirectoryTab('team')}>
-            팀
-          </Button>
-          <Button variant={directoryTab === 'user' ? 'primary' : 'secondary'} onClick={() => setDirectoryTab('user')}>
-            사용자
-          </Button>
-        </Flex>
-      </Paper>
-
-      <Box style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-        {directoryTab === 'channel' && (
-          <List>
-            {roomList
-              .filter((r) => r.type === 'public')
-              .map((room) => (
-                <ListItem key={room._id} onClick={() => onRoomSelect(room._id)} style={{ cursor: 'pointer' }}>
-                  <ListItemAvatar>
-                    <Avatar variant="rounded">
-                      <IconHash />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary={room.name} secondary={room.description} />
-                </ListItem>
-              ))}
-          </List>
-        )}
-        {directoryTab === 'team' && (
-          <List>
-            {roomList
-              .filter((r) => r.type === 'team')
-              .map((room) => (
-                <ListItem key={room._id} onClick={() => onRoomSelect(room._id)} style={{ cursor: 'pointer' }}>
-                  <ListItemAvatar>
-                    <Avatar variant="rounded" style={{ backgroundColor: '#e11d48' }}>
-                      {room.name?.substring(0, 1).toUpperCase()}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary={room.name} secondary={`${room.members.length}명의 멤버`} />
-                </ListItem>
-              ))}
-          </List>
-        )}
-        {directoryTab === 'user' && (
-          <List>
-            {userList.map((user) => (
-              <ListItem key={user._id} onClick={() => startDirectChat(user._id)} style={{ cursor: 'pointer' }}>
-                <ListItemAvatar>
-                  <Box style={{ position: 'relative' }}>
-                    <Avatar src={user.avatar || user.profileImage} />
-                    <div
-                      className={`avatar-status avatar-status--${user.status || 'offline'}`}
-                      style={{
-                        position: 'absolute',
-                        bottom: 0,
-                        right: 0,
-                        width: 12,
-                        height: 12,
-                        border: '2px solid #fff',
-                        borderRadius: '50%',
-                      }}
-                    />
-                  </Box>
-                </ListItemAvatar>
-                <ListItemText primary={user.username} secondary={user.status === 'online' ? 'Online' : 'Offline'} />
-              </ListItem>
-            ))}
-          </List>
-        )}
-      </Box>
-    </Flex>
-  );
-
   // 모바일에서는 깊이 구조로 뷰 전환
   const [isMobile, setIsMobile] = useState(false);
 
@@ -1044,7 +1067,18 @@ function ChatAppContent() {
         </Box>
         {!isMobile && (
           <Box style={{ flex: 1, backgroundColor: 'var(--color-background-default)', height: '100%', minHeight: 0 }}>
-            {activeView === 'directory' ? <DirectoryView /> : <EmptyState />}
+            {activeView === 'directory' ? (
+              <DirectoryView
+                directoryTab={directoryTab}
+                setDirectoryTab={setDirectoryTab}
+                roomList={roomList}
+                onRoomSelect={onRoomSelect}
+                userList={userList}
+                startDirectChat={startDirectChat}
+              />
+            ) : (
+              <EmptyState />
+            )}
           </Box>
         )}
       </Box>
@@ -1052,7 +1086,16 @@ function ChatAppContent() {
   }
 
   if (activeView === 'directory' && isMobile) {
-    return <DirectoryView />;
+    return (
+      <DirectoryView
+        directoryTab={directoryTab}
+        setDirectoryTab={setDirectoryTab}
+        roomList={roomList}
+        onRoomSelect={onRoomSelect}
+        userList={userList}
+        startDirectChat={startDirectChat}
+      />
+    );
   }
 
   // Active Chat Room - 모바일에서는 채팅창만 표시
