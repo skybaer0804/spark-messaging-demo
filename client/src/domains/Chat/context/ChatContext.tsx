@@ -177,10 +177,11 @@ export function ChatProvider({ children }: { children: any }) {
           if (roomExists) {
             updatedRooms = currentRooms.map((room: any) => {
               if (room._id === roomId) {
-                // 서버에서 온 데이터로 덮어쓰기 (프론트 계산 로직 제거)
+                // v2.4.0: 서버에서 온 데이터로 덮어쓰되, unreadCount가 없으면 기존 값 유지
                 return {
                   ...room,
                   ...updateData,
+                  unreadCount: updateData.unreadCount !== undefined ? updateData.unreadCount : room.unreadCount,
                   updatedAt: updateData.updatedAt || new Date().toISOString(),
                 };
               }

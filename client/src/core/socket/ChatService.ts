@@ -61,6 +61,23 @@ export class ChatService {
         return;
       }
 
+      // v2.4.0: 시스템 이벤트 메시지는 채팅에 표시하지 않도록 필터링
+      const systemEventTypes = [
+        'user-joined',
+        'user-left',
+        'webrtc-offer',
+        'webrtc-answer',
+        'webrtc-ice-candidate',
+        'webrtc-stopped',
+        'request-participants',
+        'participants-list',
+        'room-destroyed',
+      ];
+      if (systemEventTypes.includes(msg.type as string)) {
+        this.logDebug(`System message ignored for chat UI: ${msg.type}`);
+        return;
+      }
+
       // v2.2.0: 메시지 포맷팅 (서버에서 보낸 필드 반영)
       // 서버에서 socketService.sendRoomMessage를 통해 { content, senderId, timestamp } 구조로 한 번 더 감싸서 보냄
       const payload = msg.content as any;

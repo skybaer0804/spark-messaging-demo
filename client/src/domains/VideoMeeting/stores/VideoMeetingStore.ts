@@ -123,6 +123,7 @@ export class VideoMeetingStore {
           timestamp: message.timestamp.getTime(),
           type: message.type === 'file' ? 'file-transfer' : 'chat',
           senderId: message.senderId,
+          senderName: message.senderName, // v2.4.0: 이름 필드 추가
           fileData: message.fileData,
         };
         this.chatStore.addMessage(chatMessage);
@@ -330,10 +331,10 @@ export class VideoMeetingStore {
   public async joinRoom(room: Room): Promise<void> {
     if (!this.isConnected.value || !this.roomService || !this.participantService) return;
 
-    // 인원 제한 확인
+    // 인원 제한 확인 (v2.4.0: 2명 제한 커스텀 메시지 적용)
     const currentParticipantsCount = room.participants || 0;
     if (currentParticipantsCount >= MEETING_CONFIG.MAX_PARTICIPANTS) {
-      this.showError(`인원이 가득 찼습니다. (최대 ${MEETING_CONFIG.MAX_PARTICIPANTS}명)`);
+      this.showError(`이미 방에 참여자가 꽉 찼습니다. (${MEETING_CONFIG.MAX_PARTICIPANTS}명 제한)`);
       return;
     }
 

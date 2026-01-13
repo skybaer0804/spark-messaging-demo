@@ -115,6 +115,20 @@ export function useNotificationApp() {
     }
   };
 
+  const handleDelete = async (notificationId: string) => {
+    if (!window.confirm('정말 이 알림을 삭제하시겠습니까?')) return;
+
+    try {
+      await notificationApi.deleteNotification(notificationId);
+      showSuccess('알림이 삭제되었습니다.');
+      // 목록에서 즉시 제거 (낙관적 업데이트)
+      setNotifications((prev) => prev.filter((n) => n._id !== notificationId));
+    } catch (error) {
+      console.error('Notification delete failed:', error);
+      showError('알림 삭제에 실패했습니다.');
+    }
+  };
+
   return {
     title,
     setTitle,
@@ -134,6 +148,7 @@ export function useNotificationApp() {
     isDrawerOpen,
     setIsDrawerOpen,
     handleResend,
+    handleDelete,
     fetchNotifications,
   };
 }

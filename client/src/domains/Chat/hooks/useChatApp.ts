@@ -111,20 +111,23 @@ export function useChatApp() {
     );
   };
 
-  const leaveRoom = async () => {
-    if (!currentRoom || !isConnected) return;
+  const leaveRoom = async (roomId?: string) => {
+    const targetRoomId = roomId || currentRoom?._id;
+    if (!targetRoomId || !isConnected) return;
 
     try {
       // 1. DB에서 제거 (UserChatRoom 삭제 및 Room 멤버에서 제거)
-      await chatService.leaveRoom(currentRoom._id);
+      await chatService.leaveRoom(targetRoomId);
 
       // 2. 소켓 채널 퇴장
-      await roomService.leaveRoom(currentRoom._id);
+      await roomService.leaveRoom(targetRoomId);
 
-      // 3. 클라이언트 상태 초기화
-      setCurrentRoom(null);
-      setMessages([]);
-      await chatService.setCurrentRoom(null);
+      // 3. 클라이언트 상태 초기화 (현재 보고 있는 방인 경우만)
+      if (currentRoom?._id === targetRoomId) {
+        setCurrentRoom(null);
+        setMessages([]);
+        await chatService.setCurrentRoom(null);
+      }
 
       // 4. 목록 새로고침
       await refreshRoomList();

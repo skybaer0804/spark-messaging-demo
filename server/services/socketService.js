@@ -81,12 +81,24 @@ class SocketService {
 
           if (participantsCount === 0) {
             const VideoMeeting = require('../models/VideoMeeting');
+            const ChatRoom = require('../models/ChatRoom'); // v2.4.0 추가
             const meeting = await VideoMeeting.findOne({ roomId });
 
             if (meeting && meeting.status === 'ongoing') {
               meeting.status = 'completed';
               await meeting.save();
               console.log(`[Meeting] Meeting ${meeting._id} status changed to completed`);
+
+              // v2.4.0: 화상회의 종료 시 연관된 채팅방 삭제 (또는 아카이브)
+              if (meeting.roomId) {
+                await ChatRoom.findByIdAndDelete(meeting.roomId);
+                console.log(`[Meeting] Associated ChatRoom ${meeting.roomId} deleted.`);
+
+                // 클라이언트에게 방 목록 업데이트 알림 (필요시)
+                if (userId) {
+                  await this.notifyRoomListUpdated(userId);
+                }
+              }
             }
           }
 

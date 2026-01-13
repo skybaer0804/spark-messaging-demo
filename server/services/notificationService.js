@@ -5,6 +5,9 @@ const PushSubscription = require('../models/PushSubscription');
 class NotificationService {
   async sendPushNotification(userId, payload, roomId = null) {
     try {
+      const User = require('../models/User');
+      const userService = require('./userService');
+
       const user = await User.findById(userId);
       if (!user) return;
 
@@ -21,9 +24,18 @@ class NotificationService {
         }
       }
 
-      // 3. 해당 유저의 모든 활성 기기 구독 정보 조회
+      // 3. [v2.4.0] 현재 유저가 이미 해당 방에 있는지 확인 (Redis 기반)
+      if (roomId) {
+        const activeRoomId = await userService.getActiveRoom(userId);
+        if (activeRoomId === roomId.toString()) {
+          console.log(`[Push] User ${userId} is already in room ${roomId}. Skipping push.`);
+          return;
+        }
+      }
+
+      // 4. 해당 유저의 모든 활성 기기 구독 정보 조회
       const subscriptions = await PushSubscription.find({ userId, isActive: true });
-      
+
       if (subscriptions.length === 0) {
         return;
       }
@@ -59,14 +71,12 @@ class NotificationService {
       body: messageContent,
       icon: '/asset/spark_icon_192.png',
       data: {
-        url: `/chat/${roomId}`,
-        roomId: roomId
-      }
+        url: `/chatapp/chat/${roomId}`, // v2.4.0: 정확한 프론트엔드 경로로 수정
+        roomId: roomId,
+      },
     };
 
-    const pushPromises = recipientIds.map(userId => 
-      this.sendPushNotification(userId, payload, roomId)
-    );
+    const pushPromises = recipientIds.map((userId) => this.sendPushNotification(userId, payload, roomId));
 
     await Promise.all(pushPromises);
   }

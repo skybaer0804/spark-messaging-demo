@@ -239,7 +239,12 @@ function VideoMeetingCoreComponent({ store }: VideoMeetingCoreProps) {
                         type="checkbox"
                         checked={meetingForm.invitedUsers.includes(u._id)}
                         onChange={(e) => {
-                          const ids = e.currentTarget.checked
+                          const isChecked = e.currentTarget.checked;
+                          if (isChecked && meetingForm.invitedUsers.length >= 1) {
+                            alert('화상회의는 최대 2명(나 + 초대 1명)까지만 가능합니다.');
+                            return;
+                          }
+                          const ids = isChecked
                             ? [...meetingForm.invitedUsers, u._id]
                             : meetingForm.invitedUsers.filter((id) => id !== u._id);
                           setMeetingForm({ ...meetingForm, invitedUsers: ids });
@@ -413,7 +418,6 @@ function VideoMeetingCoreComponent({ store }: VideoMeetingCoreProps) {
               <IconArrowLeft size={24} />
             </IconButton>
             <Typography variant="h3">{currentRoom.title}</Typography>
-            <StatusChip label={currentRoom.category} variant="badge" />
           </Stack>
 
           <Flex align="center" gap="md">

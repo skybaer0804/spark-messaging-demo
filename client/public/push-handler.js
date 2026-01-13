@@ -21,7 +21,27 @@ self.addEventListener('push', function (event) {
     data: data.data || { url: '/' },
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  // v2.4.0: 사용자가 현재 해당 채팅방을 보고 있는지 확인하여 푸시 알림 조건부 표시
+  const roomId = data.data?.roomId;
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      const isRoomActive = windowClients.some((client) => {
+        // 1. 창이 현재 활성 상태(포커스)인지 확인
+        // 2. URL이 해당 roomId를 포함하고 있는지 확인
+        const isUrlMatch = roomId && client.url.includes(`/chat/${roomId}`);
+        const isVisible = client.visibilityState === 'visible';
+        return isUrlMatch && isVisible;
+      });
+
+      if (isRoomActive) {
+        console.log(`[Service Worker] Skipping notification for active room: ${roomId}`);
+        return;
+      }
+
+      return self.registration.showNotification(title, options);
+    }),
+  );
 });
 
 // Notification Click Listener

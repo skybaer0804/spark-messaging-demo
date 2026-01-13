@@ -1,4 +1,4 @@
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState, useRef } from 'preact/hooks';
 import { VideoConference } from './VideoConference/VideoConference';
 import { VideoMeetingVideoConferenceAdapter } from './VideoConference/adapters/VideoConferenceAdapter';
 import { Chat } from '@/domains/Chat';
@@ -85,6 +85,45 @@ export function VideoMeeting() {
 
   const currentRoom = videoMeetingStore.currentRoom.value;
 
+  // v2.4.0: 가로 레이아웃 조정을 위한 상태
+  const [chatWidth, setChatWidth] = useState(350);
+  const [isResizing, setIsResizing] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const startResizing = (e: MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  const stopResizing = () => {
+    setIsResizing(false);
+  };
+
+  const resize = (e: MouseEvent) => {
+    if (isResizing && containerRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const newWidth = containerRect.right - e.clientX;
+      // 최소 250px, 최대 컨테이너의 50%로 제한
+      if (newWidth >= 250 && newWidth <= containerRect.width * 0.5) {
+        setChatWidth(newWidth);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', resize);
+      window.addEventListener('mouseup', stopResizing);
+    } else {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing]);
+
   useEffect(() => {
     // URL query parameter 확인 (guest join용)
     const params = new URLSearchParams(window.location.search);
@@ -99,22 +138,26 @@ export function VideoMeeting() {
   }, []);
 
   return (
-    <div className="video-meeting">
+    <div className="video-meeting" ref={containerRef}>
       {/* 화상회의 핵심 로직 (룸 리스트, 룸 생성, 참가 요청 등) */}
       <VideoMeetingCore store={videoMeetingStore} />
 
       {/* 룸 상세 화면에서만 영상과 채팅 표시 */}
       {currentRoom && (
         <div className="video-meeting__main-content">
-          {/* 모바일: 상단-영상-채팅 순서 */}
-          {/* PC: 영상-채팅 가로 배치 */}
           {/* 영상 영역 */}
-          <div className="video-meeting__video-section">
+          <div className="video-meeting__video-section" style={{ flex: 1 }}>
             {videoConferenceAdapter && <VideoConference adapter={videoConferenceAdapter} />}
           </div>
 
+          {/* v2.4.0: Resizable Splitter */}
+          <div
+            className={`video-meeting__splitter ${isResizing ? 'video-meeting__splitter--active' : ''}`}
+            onMouseDown={startResizing}
+          />
+
           {/* 채팅 영역 */}
-          <div className="video-meeting__chat-section">
+          <div className="video-meeting__chat-section" style={{ width: `${chatWidth}px`, flexShrink: 0 }}>
             {chatAdapterInstance && <Chat adapter={chatAdapterInstance} classNamePrefix="video-meeting__chat" />}
           </div>
         </div>

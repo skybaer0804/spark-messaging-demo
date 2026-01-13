@@ -86,27 +86,14 @@ exports.syncNotifications = async (req, res) => {
       createdAt: { $gt: lastSyncAt },
     }).sort({ createdAt: 1 });
 
-    // v2.3.0: 웹 푸시 방식으로 변경 (서버에서 푸시 발송 트리거)
+    // [v2.4.0] 로그인 시 미수신 공지는 데이터로만 전달하고 웹 푸시 발송은 하지 않음
+    // (사용자가 직접 알림 목록이나 뱃지를 통해 확인하도록 유도)
     if (pendingNotifications.length > 0) {
       console.log(`[Sync] Found ${pendingNotifications.length} pending notifications for user ${userId}`);
 
       // 동기화 시점 업데이트 (중복 방지)
       user.lastSyncAt = new Date();
       await user.save();
-
-      for (const notif of pendingNotifications) {
-        // v2.3.0: 실제 Push API를 통해 발송 (다른 기기에서도 수신 가능)
-        await notificationService.sendPushNotification(userId, {
-          title: `[공지] ${notif.title}`,
-          body: notif.content,
-          icon: '/asset/spark_icon_192.png',
-          data: {
-            url: notif.actionUrl || '/',
-            notificationId: notif._id,
-            ...notif.metadata,
-          },
-        });
-      }
     } else {
       // 새로운 공지가 없더라도 동기화 시점은 현재로 업데이트하여 불필요한 재조회 방지
       user.lastSyncAt = new Date();
@@ -117,5 +104,30 @@ exports.syncNotifications = async (req, res) => {
   } catch (error) {
     console.error('SyncNotifications error:', error);
     res.status(500).json({ message: 'Failed to sync notifications', error: error.message });
+  }
+};
+
+// v2.4.0: 알림 삭제 기능 추가
+exports.deleteNotification = async (req, res) => {
+  try {
+    const { notificationId } = req.params;
+    const senderId = req.user.id;
+
+    // Admin 권한 체크
+    const user = await User.findById(senderId);
+    if (!user || user.role.toLowerCase() !== 'admin') {
+      return res.status(403).json({ message: 'Only Admins can delete notifications' });
+    }
+
+    const deletedNotification = await Notification.findByIdAndDelete(notificationId);
+
+    if (!deletedNotification) {
+      return res.status(404).json({ message: 'Notification not found' });
+    }
+
+    res.json({ message: 'Notification deleted successfully', id: notificationId });
+  } catch (error) {
+    console.error('DeleteNotification error:', error);
+    res.status(500).json({ message: 'Failed to delete notification', error: error.message });
   }
 };

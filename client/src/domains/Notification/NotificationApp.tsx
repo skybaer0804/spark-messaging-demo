@@ -7,7 +7,7 @@ import { Stack } from '@/ui-components/Layout/Stack';
 import { Flex } from '@/ui-components/Layout/Flex';
 import { Paper } from '@/ui-components/Paper/Paper';
 import { Typography } from '@/ui-components/Typography/Typography';
-import { IconSend, IconCalendar, IconPlus, IconRefresh, IconHistory } from '@tabler/icons-preact';
+import { IconSend, IconCalendar, IconPlus, IconRefresh, IconHistory, IconTrash } from '@tabler/icons-preact';
 import { useAuth } from '@/core/hooks/useAuth';
 import { Drawer } from '@/ui-components/Drawer/Drawer';
 import { StatusChip } from '@/ui-components/StatusChip/StatusChip';
@@ -36,6 +36,7 @@ export function NotificationApp() {
     isDrawerOpen,
     setIsDrawerOpen,
     handleResend,
+    handleDelete,
     fetchNotifications,
   } = useNotificationApp();
 
@@ -79,7 +80,7 @@ export function NotificationApp() {
             </Typography>
           </Box>
           <Flex gap="sm">
-            <Button variant="outline" onClick={fetchNotifications} disabled={isLoading}>
+            <Button variant="secondary" onClick={fetchNotifications} disabled={isLoading}>
               <IconRefresh size={20} className={isLoading ? 'rotate' : ''} />
             </Button>
             <Button variant="primary" onClick={() => setIsDrawerOpen(true)}>
@@ -128,14 +129,19 @@ export function NotificationApp() {
                     <td>
                       <StatusChip
                         label={notif.isSent ? '발송완료' : '대기중'}
-                        color={notif.isSent ? 'success' : 'warning'}
+                        variant={notif.isSent ? 'active' : 'pending'}
                       />
                     </td>
                     <td>
-                      <Button variant="outline" size="sm" onClick={() => handleResend(notif)}>
-                        <IconSend size={16} />
-                        <span>재발송</span>
-                      </Button>
+                      <Flex gap="xs">
+                        <Button variant="secondary" size="sm" onClick={() => handleResend(notif)}>
+                          <IconSend size={16} />
+                          <span>재발송</span>
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={() => handleDelete(notif._id)}>
+                          <IconTrash size={16} />
+                        </Button>
+                      </Flex>
                     </td>
                   </tr>
                 ))}
@@ -150,7 +156,7 @@ export function NotificationApp() {
         onClose={() => setIsDrawerOpen(false)}
         title="새 시스템 알림 생성"
         anchor="right"
-        width={400}
+        width="400px"
       >
         <Box padding="lg">
           <Stack spacing="xl">
@@ -241,4 +247,3 @@ export function NotificationApp() {
     </Paper>
   );
 }
-

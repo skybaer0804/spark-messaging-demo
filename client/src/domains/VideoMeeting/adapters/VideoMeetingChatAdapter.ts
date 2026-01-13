@@ -32,6 +32,7 @@ export class VideoMeetingChatAdapter implements ChatAdapter {
       timestamp: msg.timestamp,
       type: msg.type,
       senderId: msg.senderId,
+      senderName: msg.senderName, // v2.4.0: 이름 필드 누락 해결
       fileData: msg.fileData,
     }));
   }
@@ -54,7 +55,7 @@ export class VideoMeetingChatAdapter implements ChatAdapter {
 
     try {
       console.log('[DEBUG] 메시지 전송 시작:', { roomId: currentRoom.roomId, content: content.trim() });
-      await this.chatService.sendRoomMessage(currentRoom.roomId, 'text', content.trim());
+      await this.chatService.sendMessage(currentRoom.roomId, content.trim(), 'text');
       console.log('[DEBUG] 메시지 전송 완료');
       this.chatStore.setInput('');
     } catch (error) {

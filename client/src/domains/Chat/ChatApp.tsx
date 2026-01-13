@@ -70,8 +70,8 @@ interface ChatRoomSidebarProps {
   toggleWorkspaceSelection: (workspaceId: string) => void;
   currentRoom: ChatRoom | null;
   handleRoomSelect: (roomId: string) => void;
-  leaveRoom: () => void;
-  onUserClick?: (userId: string) => void; // 사용자 클릭 핸들러 추가
+  leaveRoom: (roomId?: string) => void; // v2.4.0: roomId 선택 사항 추가
+  onUserClick?: (userId: string) => void;
 }
 
 function ChatRoomSidebar({
@@ -471,7 +471,13 @@ function ChatRoomSidebar({
                 <IconButton size="small" title="디렉토리" onClick={() => navigate('/chatapp/directory')}>
                   <IconAddressBook size={20} />
                 </IconButton>
-                <IconButton size="small" onClick={() => showInfo('준비 중입니다.')}>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showInfo('준비 중입니다.');
+                  }}
+                >
                   <IconArrowsExchange size={20} />
                 </IconButton>
                 <IconButton
@@ -483,7 +489,13 @@ function ChatRoomSidebar({
                 >
                   <IconEdit size={20} />
                 </IconButton>
-                <IconButton size="small" onClick={() => showInfo('준비 중입니다.')}>
+                <IconButton
+                  size="small"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showInfo('준비 중입니다.');
+                  }}
+                >
                   <IconDotsVertical size={20} />
                 </IconButton>
               </div>
@@ -702,24 +714,25 @@ function ChatRoomSidebar({
             left: contextMenu.x,
             zIndex: 1000,
             padding: '4px 0',
-            minWidth: '120px',
-            backgroundColor: 'var(--color-bg-default)',
+            minWidth: '160px',
+            backgroundColor: 'var(--color-bg-elevated, #fff)', // v2.4.0: 투명도 해결을 위해 고정 배경색 적용
             border: '1px solid var(--color-border-default)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
           }}
         >
           <List style={{ padding: 0 }}>
             <ListItem
-              onClick={() => {
-                if (currentRoom?._id === contextMenu.roomId) {
-                  leaveRoom();
-                } else {
-                  showInfo('해당 방에 먼저 들어가주세요.');
-                }
+              onClick={(e) => {
+                e.stopPropagation();
+                // v2.4.0: 선택한 방에서 즉시 나가기 가능하도록 개선
+                leaveRoom(contextMenu.roomId);
                 setContextMenu(null);
               }}
-              style={{ cursor: 'pointer' }}
+              style={{ cursor: 'pointer', padding: '8px 16px' }}
             >
-              <ListItemText primary="방 나가기" />
+              <Typography variant="body-medium" style={{ color: 'var(--color-text-error, #ff4d4f)' }}>
+                방 나가기
+              </Typography>
             </ListItem>
           </List>
         </Paper>

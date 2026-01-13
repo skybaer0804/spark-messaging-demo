@@ -2,21 +2,42 @@ import { useMemo, useEffect, useState } from 'preact/hooks';
 import { IconSparkles, IconPlus, IconUser } from '@tabler/icons-preact';
 import { useRouterState } from '@/routes/RouterState';
 import { appRoutes, type AppRouteNode } from '@/routes/appRoutes';
-import { currentWorkspaceId, setCurrentWorkspaceId, chatRoomList } from '@/stores/chatRoomsStore';
+import { currentWorkspaceId, setCurrentWorkspaceId, totalUnreadCount } from '@/stores/chatRoomsStore';
 import { workspaceApi } from '@/core/api/ApiService';
 import { useAuth } from '@/core/hooks/useAuth';
 import { Badge } from '@/ui-components/Badge/Badge';
 import { Avatar } from '@/ui-components/Avatar/Avatar';
 import './Sidebar.scss';
 
+// v2.4.0: 뱃지 렌더링 최적화를 위한 개별 컴포넌트 분리
+function NavItem({ route, isActive, onClick }: { route: AppRouteNode; isActive: boolean; onClick: () => void }) {
+  const isChat = route.id === 'chatapp';
+  const unread = totalUnreadCount.value;
+
+  return (
+    <button
+      type="button"
+      className={`lnb__item ${isActive ? 'lnb__item--active' : ''}`}
+      onClick={onClick}
+      title={route.label}
+    >
+      <div className="lnb__item-icon">
+        {isChat && unread > 0 ? (
+          <Badge badgeContent={unread} color="error">
+            {route.icon}
+          </Badge>
+        ) : (
+          route.icon
+        )}
+      </div>
+    </button>
+  );
+}
+
 export function Sidebar() {
   const { pathname, navigate } = useRouterState();
   const { user } = useAuth();
   const [workspaces, setWorkspaces] = useState<any[]>([]);
-
-  const totalUnreadCount = useMemo(() => {
-    return chatRoomList.value.reduce((acc, room) => acc + (room.unreadCount || 0), 0);
-  }, [chatRoomList.value]);
 
   const lnbRouteIds = ['chatapp', 'video-meeting', 'notification'];
 
@@ -84,30 +105,14 @@ export function Sidebar() {
 
         {/* 메인 메뉴 아이콘들 */}
         <nav className="lnb__nav">
-          {lnbRoutes.map((route) => {
-            const isActive = pathname.startsWith(route.path) && (route.path !== '/' || pathname === '/');
-            const isChat = route.id === 'chatapp';
-
-            return (
-              <button
-                key={route.id}
-                type="button"
-                className={`lnb__item ${isActive ? 'lnb__item--active' : ''}`}
-                onClick={() => navigate(route.path)}
-                title={route.label}
-              >
-                <div className="lnb__item-icon">
-                  {isChat && totalUnreadCount > 0 ? (
-                    <Badge badgeContent={totalUnreadCount} color="error">
-                      {route.icon}
-                    </Badge>
-                  ) : (
-                    route.icon
-                  )}
-                </div>
-              </button>
-            );
-          })}
+          {lnbRoutes.map((route) => (
+            <NavItem
+              key={route.id}
+              route={route}
+              isActive={pathname.startsWith(route.path) && (route.path !== '/' || pathname === '/')}
+              onClick={() => navigate(route.path)}
+            />
+          ))}
         </nav>
 
         <div className="lnb__divider" />
