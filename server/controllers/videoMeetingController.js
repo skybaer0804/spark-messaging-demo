@@ -25,9 +25,29 @@ exports.getMeetings = async (req, res) => {
 
 exports.createMeeting = async (req, res) => {
   try {
-    const { title, description, scheduledAt, invitedUsers, invitedWorkspaces, isReserved, isPrivate, password } =
-      req.body;
+    const {
+      title,
+      description,
+      scheduledAt,
+      invitedUsers,
+      invitedWorkspaces,
+      isReserved,
+      isPrivate,
+      password,
+      workspaceId: bodyWorkspaceId,
+    } = req.body;
     const hostId = req.user.id;
+
+    // v2.2.0: workspaceId가 body에 없으면 헤더에서 확인
+    const workspaceId = bodyWorkspaceId || req.headers['x-workspace-id'];
+
+    if (!workspaceId) {
+      return res.status(400).json({ message: 'workspaceId is required' });
+    }
+
+    if (isReserved && !scheduledAt) {
+      return res.status(400).json({ message: 'scheduledAt is required for reserved meetings' });
+    }
 
     // joinHash 생성 (랜덤 12자리)
     const joinHash = crypto.randomBytes(6).toString('hex');
@@ -40,7 +60,7 @@ exports.createMeeting = async (req, res) => {
       title,
       description,
       hostId,
-      scheduledAt: new Date(scheduledAt),
+      scheduledAt: scheduledAt ? new Date(scheduledAt) : new Date(), // 없으면 현재 시간으로 설정
       invitedUsers: invitedUsers || [],
       invitedWorkspaces: invitedWorkspaces || [],
       isReserved: isReserved || false,
@@ -57,7 +77,7 @@ exports.createMeeting = async (req, res) => {
     const newRoom = new ChatRoom({
       name: `Meeting: ${title}`,
       members: [hostId, ...(invitedUsers || [])],
-      workspaceId: req.body.workspaceId,
+      workspaceId,
       type: 'public',
     });
 
@@ -152,5 +172,28 @@ exports.startMeeting = async (req, res) => {
     res.json(meeting);
   } catch (error) {
     res.status(500).json({ message: 'Failed to start meeting', error: error.message });
+  }
+};
+
+exports.deleteMeeting = async (req, res) => {
+  try {
+    const { meetingId } = req.params;
+    const meeting = await VideoMeeting.findById(meetingId);
+
+    if (!meeting) return res.status(404).json({ message: 'Meeting not found' });
+    if (meeting.hostId.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Only host can delete the meeting' });
+    }
+
+    // 연관된 채팅방 삭제 (또는 아카이브)
+    if (meeting.roomId) {
+      await ChatRoom.findByIdAndUpdate(meeting.roomId, { isArchived: true });
+    }
+
+    await VideoMeeting.findByIdAndDelete(meetingId);
+
+    res.json({ message: 'Meeting deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to delete meeting', error: error.message });
   }
 };

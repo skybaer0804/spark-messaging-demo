@@ -1,4 +1,5 @@
 const Workspace = require('../models/Workspace');
+const ChatRoom = require('../models/ChatRoom');
 const crypto = require('crypto');
 const { encrypt } = require('./encryption');
 
@@ -7,6 +8,18 @@ const { encrypt } = require('./encryption');
  */
 async function initializeSystem() {
   try {
+    // v2.2.0: ChatRoom의 identifier 필드 데이터 정리 (null -> undefined)
+    // E11000 duplicate key error { identifier: null } 해결 위함
+    await ChatRoom.updateMany({ identifier: null }, { $unset: { identifier: '' } });
+
+    // 기존의 잘못된 유니크 인덱스가 있다면 삭제 시도 (새로운 sparse/partial index로 대체됨)
+    try {
+      await ChatRoom.collection.dropIndex('identifier_1');
+      console.log('Old identifier index dropped successfully');
+    } catch (e) {
+      // 인덱스가 없으면 무시
+    }
+
     const count = await Workspace.countDocuments();
 
     if (count === 0) {

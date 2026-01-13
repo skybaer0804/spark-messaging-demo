@@ -19,5 +19,6 @@ router.use(auth);
 router.get('/', getMeetings);
 router.post('/', createMeeting);
 router.post('/:meetingId/start', startMeeting);
+router.delete('/:meetingId', auth, require('../controllers/videoMeetingController').deleteMeeting);
 
 module.exports = router;

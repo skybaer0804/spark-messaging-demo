@@ -19,6 +19,9 @@ import {
   IconArrowLeft,
   IconCalendar,
   IconVideo,
+  IconVideoOff,
+  IconMicrophone,
+  IconMicrophoneOff,
   IconUsers,
   IconLink,
   IconPlus,
@@ -39,6 +42,8 @@ function VideoMeetingCoreComponent({ store }: VideoMeetingCoreProps) {
   const selectedCategory = store.selectedCategory.value;
   const pendingRequests = store.pendingRequests.value;
   const scheduledMeetings = store.scheduledMeetings.value;
+  const isLocalVideoEnabled = store.isLocalVideoEnabled.value;
+  const isLocalAudioEnabled = store.isLocalAudioEnabled.value;
   const myRooms = store.getMyRooms();
 
   // Drawer & Form State
@@ -404,41 +409,83 @@ function VideoMeetingCoreComponent({ store }: VideoMeetingCoreProps) {
       <Box padding="md" style={{ borderBottom: '1px solid var(--color-border-default)' }}>
         <Stack direction="row" align="center" justify="space-between">
           <Stack direction="row" align="center" spacing="sm">
-            <IconButton onClick={() => store.leaveRoom()} color="default" size="medium">
+            <IconButton onClick={() => store.leaveRoom()} color="default" size="medium" title="뒤로가기">
               <IconArrowLeft size={24} />
             </IconButton>
             <Typography variant="h3">{currentRoom.title}</Typography>
             <StatusChip label={currentRoom.category} variant="badge" />
           </Stack>
 
-          {userRole === 'demander' && pendingRequests.length > 0 && (
-            <Paper
-              elevation={2}
-              padding="sm"
-              style={{ position: 'absolute', top: '60px', right: '20px', zIndex: 100, width: '300px' }}
-            >
-              <Stack spacing="sm">
-                <Typography variant="h4">참여 요청 ({pendingRequests.length})</Typography>
-                {pendingRequests.map((req) => (
-                  <Paper key={req.socketId} variant="outlined" padding="sm">
-                    <Typography variant="body-small">{req.name}</Typography>
-                    <Flex gap="sm" style={{ marginTop: '8px' }}>
-                      <Button size="sm" onClick={() => store.approveRequest(req.socketId)} fullWidth>
-                        수락
-                      </Button>
-                      <Button size="sm" variant="secondary" onClick={() => store.rejectRequest(req.socketId)} fullWidth>
-                        거절
-                      </Button>
-                    </Flex>
-                  </Paper>
-                ))}
-              </Stack>
-            </Paper>
-          )}
+          <Flex align="center" gap="md">
+            {/* 비디오/오디오 컨트롤 */}
+            <Flex gap="xs">
+              <IconButton
+                onClick={() => store.toggleVideo()}
+                color={isLocalVideoEnabled ? 'primary' : 'default'}
+                size="medium"
+                title={isLocalVideoEnabled ? '카메라 끄기' : '카메라 켜기'}
+              >
+                {isLocalVideoEnabled ? <IconVideo size={20} /> : <IconVideoOff size={20} />}
+              </IconButton>
+              <IconButton
+                onClick={() => store.toggleAudio()}
+                color={isLocalAudioEnabled ? 'primary' : 'default'}
+                size="medium"
+                title={isLocalAudioEnabled ? '마이크 끄기' : '마이크 켜기'}
+              >
+                {isLocalAudioEnabled ? <IconMicrophone size={20} /> : <IconMicrophoneOff size={20} />}
+              </IconButton>
+            </Flex>
 
-          {userRole === 'guest' && (
-            <StatusChip label="게스트 모드 (관람/발언 전용)" variant="badge" style={{ marginLeft: '12px' }} />
-          )}
+            {userRole === 'demander' && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => store.destroyRoom()}
+                style={{ color: 'var(--color-error-main)' }}
+              >
+                방 폭파
+              </Button>
+            )}
+
+            <Button variant="primary" size="sm" onClick={() => store.leaveRoom()}>
+              나가기
+            </Button>
+
+            {userRole === 'demander' && pendingRequests.length > 0 && (
+              <Paper
+                elevation={2}
+                padding="sm"
+                style={{ position: 'absolute', top: '60px', right: '20px', zIndex: 100, width: '300px' }}
+              >
+                <Stack spacing="sm">
+                  <Typography variant="h4">참여 요청 ({pendingRequests.length})</Typography>
+                  {pendingRequests.map((req) => (
+                    <Paper key={req.socketId} variant="outlined" padding="sm">
+                      <Typography variant="body-small">{req.name}</Typography>
+                      <Flex gap="sm" style={{ marginTop: '8px' }}>
+                        <Button size="sm" onClick={() => store.approveRequest(req.socketId)} fullWidth>
+                          수락
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => store.rejectRequest(req.socketId)}
+                          fullWidth
+                        >
+                          거절
+                        </Button>
+                      </Flex>
+                    </Paper>
+                  ))}
+                </Stack>
+              </Paper>
+            )}
+
+            {userRole === 'guest' && (
+              <StatusChip label="게스트 모드 (관람/발언 전용)" variant="badge" style={{ marginLeft: '12px' }} />
+            )}
+          </Flex>
         </Stack>
       </Box>
     </Box>

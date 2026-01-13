@@ -6,6 +6,7 @@ import { FileTransferService } from '@/core/api/FileTransferService';
 import { RoomService } from '../services/RoomService';
 import { ParticipantService } from '../services/ParticipantService';
 import { WebRTCService } from '../services/WebRTCService';
+import { VideoStore } from './VideoStore';
 import { videoMeetingApi } from '@/core/api/ApiService';
 import type { Room, Participant, UserRole, Category, ChatMessage } from '../types';
 
@@ -53,6 +54,10 @@ export class VideoMeetingStore {
   public readonly requestedRoomId: Signal<string | null> = signal(null);
   public readonly socketId: Signal<string | null> = signal(null);
 
+  // 로컬 미디어 상태
+  public readonly isLocalVideoEnabled: Signal<boolean> = signal(false);
+  public readonly isLocalAudioEnabled: Signal<boolean> = signal(false);
+
   // 서비스 레퍼런스
   private connectionService: ConnectionService | null = null;
   private chatService: ChatService | null = null;
@@ -61,9 +66,9 @@ export class VideoMeetingStore {
   private participantService: ParticipantService | null = null;
   private webRTCService: WebRTCService | null = null;
 
-  // ChatStore 참조 (메시지 수신 시 업데이트)
   private chatStore: { addMessage: (message: ChatMessage) => void; clearMessages: () => void } | null = null;
   private chatUnsubscribe: (() => void) | null = null;
+  private videoStore: VideoStore | null = null;
 
   // Toast 기능 참조
   private toast: ToastFunctions | null = null;
@@ -87,6 +92,11 @@ export class VideoMeetingStore {
     this.chatStore = chatStore;
     // ChatStore가 설정된 후에 채팅 메시지 리스너 설정
     this.setupChatMessageListener();
+  }
+
+  // VideoStore 설정
+  public setVideoStore(videoStore: VideoStore): void {
+    this.videoStore = videoStore;
   }
 
   // 채팅 메시지 리스너 설정
@@ -208,8 +218,11 @@ export class VideoMeetingStore {
           if (currentUserRole === 'demander' || isMyRoom) {
             this.participantService.addParticipant({ socketId: status.socketId, ...myInfo });
             this.participants.value = [...this.participantService.getParticipants()];
-            // user-joined 메시지 전송 (수요자만)
+            // user-joined 메시지 전송 (내 정보를 다른 사람들에게 알림)
             await this.participantService.sendUserJoined(roomId, status.socketId, 1);
+          } else {
+            // 공급자 등 일반 참가자는 입장 후 기존 참가자 목록 요청
+            await this.participantService.requestParticipants(roomId);
           }
         }
       }
@@ -224,12 +237,31 @@ export class VideoMeetingStore {
       }
     });
 
+    // 룸 폭파 알림 처리
+    sparkMessagingClient.onMessage((msg: any) => {
+      if (msg.type === 'room-destroyed') {
+        const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
+        if (content.roomId === this.currentRoom.value?.roomId) {
+          this.showError('방장이 방을 종료했습니다.');
+          this.leaveRoom();
+        }
+      }
+    });
+
     // Participant 관리
     this.participantService.onRoomMessage({
       onUserJoined: (participant) => {
         if (!this.participantService) return;
         console.log('[DEBUG] 사용자 입장:', participant.socketId);
+
+        // 기존 참가자 목록 업데이트
         this.participants.value = [...this.participantService.getParticipants()];
+
+        // 새로운 사용자가 들어오면 WebRTC 연결 시작 (내가 이미 스트림을 가지고 있는 경우에만)
+        if (this.webRTCService?.getLocalStream()) {
+          console.log('[DEBUG] 새 사용자에게 WebRTC 연결 시도:', participant.socketId);
+          this.webRTCService.createPeerConnection(participant.socketId, true);
+        }
       },
       onUserLeft: (socketId) => {
         if (!this.participantService) return;
@@ -420,8 +452,93 @@ export class VideoMeetingStore {
       this.pendingRequests.value = [];
       this.joinRequestStatus.value = 'idle';
       this.requestedRoomId.value = null;
+
+      // 로컬 스트림 정리
+      if (this.webRTCService) {
+        this.webRTCService.stopLocalStream();
+      }
     } catch (error) {
       console.error('[ERROR] 룸 나가기 실패:', error);
+    }
+  }
+
+  // 방 폭파 (방장 전용)
+  public async destroyRoom(): Promise<void> {
+    if (!this.currentRoom.value || !this.isConnected.value || !this.roomService) return;
+
+    try {
+      const roomId = this.currentRoom.value.roomId;
+
+      // 1. 백엔드 DB에서 회의 삭제 (ID가 있다면)
+      // currentRoom에는 DB ID가 없을 수 있으므로 roomId로 조회하거나
+      // scheduledMeetings에서 찾아야 할 수도 있음.
+      // 하지만 여기서는 간단히 roomId 기반으로 처리하거나 skip 가능
+      // 여기서는 roomId가 DB의 _id인 경우가 많음 (createRoom 참고)
+
+      await videoMeetingApi.deleteMeeting(roomId).catch((err) => {
+        console.warn('DB meeting delete failed (might be a direct room):', err);
+      });
+
+      // 2. 룸 파괴 메시지 브로드캐스트
+      if (this.connectionService) {
+        await sparkMessagingClient.sendMessage('room-destroyed' as any, JSON.stringify({ roomId }));
+      }
+
+      await this.leaveRoom();
+      this.showSuccess('방을 폭파했습니다.');
+    } catch (error) {
+      console.error('[ERROR] 방 폭파 실패:', error);
+      this.showError('방 폭파에 실패했습니다.');
+    }
+  }
+
+  // 비디오 토글
+  public async toggleVideo(): Promise<void> {
+    if (!this.webRTCService || !this.videoStore) return;
+
+    const isVideoEnabled = this.videoStore.isVideoEnabled.value;
+    if (isVideoEnabled) {
+      this.webRTCService.stopLocalStream();
+      this.videoStore.setLocalStream(null);
+      this.isLocalVideoEnabled.value = false;
+      this.isLocalAudioEnabled.value = false;
+
+      // 다른 사람들에게 비디오 중지 알림
+      if (this.currentRoom.value) {
+        await this.webRTCService.sendVideoStopped(this.currentRoom.value.roomId);
+      }
+    } else {
+      try {
+        const stream = await this.webRTCService.startLocalStream();
+        this.videoStore.setLocalStream(stream);
+        this.isLocalVideoEnabled.value = true;
+        this.isLocalAudioEnabled.value = true;
+
+        // 새로 시작하면 기존 참가자들과 연결 시도
+        if (this.currentRoom.value) {
+          this.participants.value.forEach((p) => {
+            if (p.socketId !== this.socketId.value) {
+              this.webRTCService?.createPeerConnection(p.socketId, true);
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Failed to start video:', error);
+        this.showError('카메라를 시작할 수 없습니다.');
+      }
+    }
+  }
+
+  // 오디오 토글
+  public async toggleAudio(): Promise<void> {
+    const stream = this.webRTCService?.getLocalStream();
+    if (stream) {
+      const audioTrack = stream.getAudioTracks()[0];
+      if (audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        this.isLocalAudioEnabled.value = audioTrack.enabled;
+        this.showSuccess(audioTrack.enabled ? '마이크가 켜졌습니다.' : '마이크가 꺼졌습니다.');
+      }
     }
   }
 

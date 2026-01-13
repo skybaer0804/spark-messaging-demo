@@ -146,6 +146,7 @@ export const videoMeetingApi = {
     password?: string;
   }) => api.post('/video-meeting', data),
   startMeeting: (meetingId: string) => api.post(`/video-meeting/${meetingId}/start`),
+  deleteMeeting: (meetingId: string) => api.delete(`/video-meeting/${meetingId}`),
   getMeetingByHash: (hash: string) => api.get(`/video-meeting/join/${hash}`),
   verifyMeetingPassword: (hash: string, password?: string) =>
     api.post(`/video-meeting/join/${hash}/verify`, { password }),

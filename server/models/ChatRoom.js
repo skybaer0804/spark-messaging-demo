@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const chatRoomSchema = new mongoose.Schema({
-  identifier: { type: String, unique: true, sparse: true }, // 1:1 채팅용 고유 식별자 (정렬된 userId 조합)
+  identifier: { type: String, sparse: true }, // 1:1 채팅용 고유 식별자 (정렬된 userId 조합). index는 아래에서 별도로 정의
   slug: { type: String, unique: true, sparse: true }, // 공개/비공개 채널용 유니크 ID (URL 등 활용)
   name: { type: String }, // 그룹 채팅방 이름 (1:1은 null 가능)
   description: { type: String },
@@ -19,5 +19,15 @@ const chatRoomSchema = new mongoose.Schema({
   isArchived: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
+
+// v2.2.0: identifier에 대해 partial index 적용하여 null/undefined인 경우 유니크 체크 제외
+chatRoomSchema.index(
+  { identifier: 1 },
+  {
+    unique: true,
+    sparse: true,
+    partialFilterExpression: { identifier: { $type: 'string' } },
+  },
+);
 
 module.exports = mongoose.model('ChatRoom', chatRoomSchema);

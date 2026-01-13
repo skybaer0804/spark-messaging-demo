@@ -64,6 +64,16 @@ export class RoomService {
         } catch (error) {
           console.error('Failed to parse room data:', error);
         }
+      } else if (msg.type === 'room-destroyed') {
+        try {
+          const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content;
+          if (content.roomId) {
+            this.roomList = this.roomList.filter((r) => r.roomId !== content.roomId);
+            callback({ roomId: content.roomId } as any); // 변경 알림
+          }
+        } catch (error) {
+          console.error('Failed to parse room-destroyed content:', error);
+        }
       }
     });
     this.unsubscribeCallbacks.push(unsubscribe);

@@ -18,7 +18,7 @@ export function Sidebar() {
     return chatRoomList.value.reduce((acc, room) => acc + (room.unreadCount || 0), 0);
   }, [chatRoomList.value]);
 
-  const lnbRouteIds = ['chatapp', 'notification', 'video-meeting'];
+  const lnbRouteIds = ['chatapp', 'video-meeting', 'notification'];
 
   const lnbRoutes = useMemo(() => {
     return lnbRouteIds.map((id) => appRoutes.find((r) => r.id === id)).filter(Boolean) as AppRouteNode[];

@@ -1,4 +1,4 @@
-import type { VideoConferenceAdapter, VideoConferenceMessage } from '../types';
+import type { VideoConferenceAdapter } from '../types';
 import type { VideoStore } from '../../stores/VideoStore';
 import type { VideoMeetingStore } from '../../stores/VideoMeetingStore';
 import type { WebRTCService } from '../../services/WebRTCService';
@@ -14,7 +14,6 @@ export class VideoMeetingVideoConferenceAdapter implements VideoConferenceAdapte
     this.webRTCService = webRTCService;
   }
 
-  // ... (rest of the file remains same, just replacing types)
   getLocalStream() {
     return this.webRTCService.getLocalStream();
   }
@@ -28,10 +27,12 @@ export class VideoMeetingVideoConferenceAdapter implements VideoConferenceAdapte
     return this.videoMeetingStore.socketId.value;
   }
   async startLocalStream() {
-    await this.webRTCService.startLocalStream();
+    const stream = await this.webRTCService.startLocalStream();
+    this.videoStore.setLocalStream(stream);
   }
   async stopLocalStream() {
     this.webRTCService.stopLocalStream();
+    this.videoStore.setLocalStream(null);
   }
   setVideoRef(socketId: string, element: HTMLVideoElement | null) {
     this.webRTCService.setVideoRef(socketId, element);
@@ -51,32 +52,14 @@ export class VideoMeetingVideoConferenceAdapter implements VideoConferenceAdapte
     return this.videoMeetingStore.socketId;
   }
 
-  getRemoteStreams() {
-    return this.videoStore.remoteStreams.value;
-  }
   isConnected() {
     return this.videoMeetingStore.isConnected.value;
   }
   async toggleVideo() {
-    // Note: webRTCService.toggleVideo()가 없을 수도 있음. 
-    // 로컬 스트림 트랙 제어로 구현 필요
-    const stream = this.webRTCService.getLocalStream();
-    if (stream) {
-      const videoTrack = stream.getVideoTracks()[0];
-      if (videoTrack) {
-        videoTrack.enabled = !videoTrack.enabled;
-        this.videoStore.isVideoEnabled.value = videoTrack.enabled;
-      }
-    }
+    await this.videoMeetingStore.toggleVideo();
   }
   async toggleAudio() {
-    const stream = this.webRTCService.getLocalStream();
-    if (stream) {
-      const audioTrack = stream.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = !audioTrack.enabled;
-      }
-    }
+    await this.videoMeetingStore.toggleAudio();
   }
   async leave() {
     await this.videoMeetingStore.leaveRoom();

@@ -33,6 +33,9 @@ function initializeStores(toast: { showSuccess: (m: string) => void; showError: 
       // ChatStore 연결
       videoMeetingStoreInstance.setChatStore(chatStoreInstance);
 
+      // VideoStore 연결
+      videoMeetingStoreInstance.setVideoStore(videoStoreInstance);
+
       // ChatAdapter 생성 (Store에서 서비스 가져오기)
       const chatService = videoMeetingStoreInstance.getChatService();
       const fileTransferService = videoMeetingStoreInstance.getFileTransferService();

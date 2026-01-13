@@ -46,8 +46,7 @@ exports.createRoom = async (req, res) => {
       }
     }
 
-    const newRoom = new ChatRoom({
-      identifier: roomIdentifier,
+    const roomData = {
       name: type === 'direct' ? null : name || 'New Room',
       description,
       members: roomMembers,
@@ -56,7 +55,10 @@ exports.createRoom = async (req, res) => {
       teamId,
       parentId,
       isPrivate: !!isPrivate,
-    });
+      identifier: roomIdentifier || undefined, // null 대신 undefined 사용하여 sparse index 활용
+    };
+
+    const newRoom = new ChatRoom(roomData);
 
     await newRoom.save();
 
@@ -176,7 +178,7 @@ exports.leaveRoom = async (req, res) => {
 
     // 3. 1:1 대화방(direct)인 경우 추가 처리
     if (room.type === 'direct') {
-      room.identifier = null;
+      room.identifier = undefined; // null 대신 undefined로 설정하여 유니크 인덱스 충돌 방지 (sparse)
       if (room.members.length === 0) {
         room.isArchived = true;
       }
@@ -320,28 +322,28 @@ exports.uploadFile = async (req, res) => {
         );
       }
 
-    // v2.3.0: 목록 정보(마지막 메시지 등)는 모든 멤버에게 업데이트 알림
-    // 개별 사용자마다 unreadCount가 다르므로 각각 통지
-    for (const userId of allMemberIds) {
-      const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
-      const roomObj = room.toObject();
-      
-      // 1:1 대화방 이름 처리 로직 동일하게 적용
-      if (roomObj.type === 'direct') {
-        const otherMember = roomObj.members.find((m) => m._id.toString() !== userId);
-        roomObj.displayName = otherMember ? otherMember.username : 'Unknown';
-        roomObj.displayAvatar = otherMember ? otherMember.profileImage : null;
-        roomObj.displayStatus = otherMember ? otherMember.status : 'offline';
-      } else {
-        roomObj.displayName = roomObj.name;
-      }
+      // v2.3.0: 목록 정보(마지막 메시지 등)는 모든 멤버에게 업데이트 알림
+      // 개별 사용자마다 unreadCount가 다르므로 각각 통지
+      for (const userId of allMemberIds) {
+        const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
+        const roomObj = room.toObject();
 
-      socketService.notifyRoomListUpdated(userId, {
-        ...roomObj,
-        unreadCount: userChatRoom ? userChatRoom.unreadCount : 0,
-        lastMessage: messageData,
-      });
-    }
+        // 1:1 대화방 이름 처리 로직 동일하게 적용
+        if (roomObj.type === 'direct') {
+          const otherMember = roomObj.members.find((m) => m._id.toString() !== userId);
+          roomObj.displayName = otherMember ? otherMember.username : 'Unknown';
+          roomObj.displayAvatar = otherMember ? otherMember.profileImage : null;
+          roomObj.displayStatus = otherMember ? otherMember.status : 'offline';
+        } else {
+          roomObj.displayName = roomObj.name;
+        }
+
+        socketService.notifyRoomListUpdated(userId, {
+          ...roomObj,
+          unreadCount: userChatRoom ? userChatRoom.unreadCount : 0,
+          lastMessage: messageData,
+        });
+      }
     }
 
     res.status(201).json(newMessage);
@@ -412,28 +414,28 @@ exports.sendMessage = async (req, res) => {
         );
       }
 
-    // v2.3.0: 목록 정보(마지막 메시지 등)는 모든 멤버에게 업데이트 알림
-    // 개별 사용자마다 unreadCount가 다르므로 각각 통지
-    for (const userId of allMemberIds) {
-      const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
-      const roomObj = room.toObject();
-      
-      // 1:1 대화방 이름 처리 로직 동일하게 적용
-      if (roomObj.type === 'direct') {
-        const otherMember = roomObj.members.find((m) => m._id.toString() !== userId);
-        roomObj.displayName = otherMember ? otherMember.username : 'Unknown';
-        roomObj.displayAvatar = otherMember ? otherMember.profileImage : null;
-        roomObj.displayStatus = otherMember ? otherMember.status : 'offline';
-      } else {
-        roomObj.displayName = roomObj.name;
-      }
+      // v2.3.0: 목록 정보(마지막 메시지 등)는 모든 멤버에게 업데이트 알림
+      // 개별 사용자마다 unreadCount가 다르므로 각각 통지
+      for (const userId of allMemberIds) {
+        const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
+        const roomObj = room.toObject();
 
-      socketService.notifyRoomListUpdated(userId, {
-        ...roomObj,
-        unreadCount: userChatRoom ? userChatRoom.unreadCount : 0,
-        lastMessage: messageData,
-      });
-    }
+        // 1:1 대화방 이름 처리 로직 동일하게 적용
+        if (roomObj.type === 'direct') {
+          const otherMember = roomObj.members.find((m) => m._id.toString() !== userId);
+          roomObj.displayName = otherMember ? otherMember.username : 'Unknown';
+          roomObj.displayAvatar = otherMember ? otherMember.profileImage : null;
+          roomObj.displayStatus = otherMember ? otherMember.status : 'offline';
+        } else {
+          roomObj.displayName = roomObj.name;
+        }
+
+        socketService.notifyRoomListUpdated(userId, {
+          ...roomObj,
+          unreadCount: userChatRoom ? userChatRoom.unreadCount : 0,
+          lastMessage: messageData,
+        });
+      }
     }
 
     // 5. Socket SDK를 통해 실시간 브로드캐스트 (MESSAGE_ADDED)

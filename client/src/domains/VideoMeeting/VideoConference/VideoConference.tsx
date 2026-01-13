@@ -8,7 +8,7 @@ import { Flex } from '@/ui-components/Layout/Flex';
 import { Grid } from '@/ui-components/Layout/Grid';
 import { Typography } from '@/ui-components/Typography/Typography';
 import { Paper } from '@/ui-components/Paper/Paper';
-import { IconPlayerPlay, IconPlayerStop, IconVideo, IconVideoOff } from '@tabler/icons-preact';
+import { IconPlayerPlay, IconVideo, IconVideoOff } from '@tabler/icons-preact';
 
 interface VideoConferenceProps {
   adapter: VideoConferenceAdapter;
@@ -22,7 +22,6 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
     socketId,
     localVideoRef,
     handleStartLocalStream,
-    handleStopLocalStream,
     handleSetVideoRef,
     localStreamSignal,
     isVideoEnabledSignal,
@@ -37,32 +36,39 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
 
   // 본인 포함 모든 참가자 리스트 구성
   const allParticipants = useMemo(() => {
-    const list = [...effectiveParticipants];
-    const isSelfInList = list.some((p) => p.socketId === effectiveSocketId);
+    // 중복 제거를 위해 Map 사용
+    const participantMap = new Map<string, any>();
 
-    if (!isSelfInList && effectiveSocketId) {
-      // 본인 정보 추가
-      list.unshift({
+    // 원격 참가자 먼저 추가
+    effectiveParticipants.forEach((p) => {
+      if (p.socketId) {
+        participantMap.set(p.socketId, { ...p });
+      }
+    });
+
+    // 본인 정보 추가/업데이트
+    if (effectiveSocketId) {
+      const selfInfo = {
         socketId: effectiveSocketId,
         name: '나',
-        role: 'demander',
+        role: 'demander', // 기본값, 실제 역할은 Store에서 가져올 수도 있음
         isVideoEnabled: effectiveIsVideoEnabled,
         stream: effectiveLocalStream || undefined,
-      });
-    } else if (isSelfInList) {
-      // 이미 있으면 업데이트
-      const selfIndex = list.findIndex((p) => p.socketId === effectiveSocketId);
-      if (selfIndex !== -1) {
-        const self = list[selfIndex];
-        list.splice(selfIndex, 1);
-        list.unshift({
-          ...self,
-          name: '나',
-          isVideoEnabled: effectiveIsVideoEnabled,
-          stream: effectiveLocalStream || undefined,
-        });
-      }
+      };
+
+      // 이미 목록에 있으면 (서버에서 내 정보를 보낸 경우 등) 덮어쓰기
+      participantMap.set(effectiveSocketId, selfInfo);
     }
+
+    // Map을 배열로 변환하되, 본인을 가장 앞으로
+    const list = Array.from(participantMap.values());
+    const selfIndex = list.findIndex((p) => p.socketId === effectiveSocketId);
+
+    if (selfIndex > 0) {
+      const [self] = list.splice(selfIndex, 1);
+      list.unshift(self);
+    }
+
     return list;
   }, [effectiveParticipants, effectiveSocketId, effectiveIsVideoEnabled, effectiveLocalStream]);
 
@@ -71,7 +77,7 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
       {/* 5열 그리드를 사용하여 5개(lg=1), 1개(xs=5) 레이아웃 구현 */}
       <Grid container spacing={2} columns={5}>
         {allParticipants.map((participant) => {
-          const isSelf = participant.socketId === effectiveSocketId;
+          const isSelf = !!effectiveSocketId && participant.socketId === effectiveSocketId;
           const hasVideo = participant.isVideoEnabled !== false && (isSelf ? effectiveLocalStream : participant.stream);
 
           return (
@@ -168,29 +174,6 @@ function VideoConferenceComponent({ adapter }: VideoConferenceProps) {
                     )}
                   </Flex>
                 </Box>
-
-                {/* 본인 비디오 컨트롤 버튼 (오버레이) */}
-                {isSelf && (
-                  <Box
-                    style={{
-                      position: 'absolute',
-                      top: '8px',
-                      right: '8px',
-                      zIndex: 3,
-                    }}
-                  >
-                    <IconButton
-                      size="small"
-                      onClick={effectiveIsVideoEnabled ? handleStopLocalStream : handleStartLocalStream}
-                      style={{
-                        backgroundColor: effectiveIsVideoEnabled ? 'rgba(255, 77, 79, 0.8)' : 'rgba(82, 196, 26, 0.8)',
-                        color: 'white',
-                      }}
-                    >
-                      {effectiveIsVideoEnabled ? <IconPlayerStop size={16} /> : <IconPlayerPlay size={16} />}
-                    </IconButton>
-                  </Box>
-                )}
               </Paper>
             </Grid>
           );
