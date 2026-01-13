@@ -53,8 +53,27 @@ export function ChatProvider({ children }: { children: any }) {
   });
 
   const updateRoomList = (rooms: ChatRoom[]) => {
-    chatRoomList.value = rooms as any;
-    setRoomList(rooms);
+    // v2.4.0: 소켓 우선 정책 (Socket-First Policy)
+    // API에서 가져온 방 목록을 적용할 때, 소켓으로 이미 받은 최신 뱃지 정보를 잃지 않도록 병합함
+    const currentRooms = chatRoomList.value;
+
+    const mergedRooms = rooms.map((newRoom) => {
+      const existingRoom = currentRooms.find((r: any) => r._id === (newRoom as any)._id);
+      if (existingRoom) {
+        return {
+          ...newRoom,
+          // API 카운트보다 현재 메모리 카운트가 높으면 소켓 데이터가 더 최신이라고 판단하여 유지
+          unreadCount:
+            existingRoom.unreadCount > (newRoom as any).unreadCount
+              ? existingRoom.unreadCount
+              : (newRoom as any).unreadCount,
+        };
+      }
+      return newRoom;
+    });
+
+    chatRoomList.value = [...mergedRooms] as any;
+    setRoomList([...mergedRooms]);
   };
   const [debugEnabled, setDebugEnabled] = useState(localStorage.getItem('chat_debug_mode') === 'true');
 
@@ -135,7 +154,14 @@ export function ChatProvider({ children }: { children: any }) {
       setIsConnected(false);
     });
 
-    const unsubRoomMessage = roomService.onMessage(() => {
+    // v2.4.0: 방 목록 전체 새로고침 리스너 최적화
+    const unsubRoomMessage = roomService.onMessage((msg: any) => {
+      // 메시지 타입이 일반 채팅('text', 'file', 'image')인 경우 refreshRoomList를 호출하지 않음
+      // 이미 'ROOM_LIST_UPDATED' 소켓 이벤트가 마지막 메시지와 unreadCount를 완성된 형태로 보내주기 때문
+      if (msg && (msg.type === 'text' || msg.type === 'file' || msg.type === 'image')) {
+        console.log('[ChatContext] Ignoring redundant refresh for message type:', msg.type);
+        return;
+      }
       refreshRoomList();
     });
 
@@ -147,28 +173,18 @@ export function ChatProvider({ children }: { children: any }) {
 
         console.log('[ChatContext] Received ROOM_LIST_UPDATED:', updateData);
 
+        // v2.4.0: 대상 유저 필터링 (내 정보만 처리하여 깜빡임 및 이름 바뀜 방지)
+        const currentUserId = user?.id || (user as any)?._id;
+        if (updateData.targetUserId && updateData.targetUserId !== currentUserId) {
+          console.log('[ChatContext] Skipping update for other user:', updateData.targetUserId);
+          return;
+        }
+
         // v2.3.0: 서버 주도 상태 (Server-Side Authority)
         // 백엔드에서 완성된 room 객체를 보내주므로, 프론트엔드는 이를 그대로 반영함
         if (updateData._id) {
           const roomId = updateData._id;
           const currentRooms = chatRoomList.value;
-
-          // v2.3.0: 새 메시지 토스트 알림 (내가 보낸 것이 아니고, 메시지가 있는 경우)
-          if (updateData.lastMessage && updateData.lastMessage.senderId !== user?.id && updateData.unreadCount > 0) {
-            // 현재 활성화된 방인지 체크 (간단히 URL로 체크하거나 전역 상태 활용)
-            const isActiveRoom = window.location.pathname.includes(`/chat/${roomId}`);
-
-            if (!isActiveRoom) {
-              window.dispatchEvent(
-                new CustomEvent('api-info', {
-                  detail: {
-                    message: `[채팅] ${updateData.displayName}: ${updateData.lastMessage.content}`,
-                    actionUrl: `/chat/${roomId}`,
-                  },
-                }),
-              );
-            }
-          }
 
           // 방이 이미 목록에 있으면 업데이트, 없으면 추가 (새 방 생성 등)
           const roomExists = currentRooms.some((r: any) => r._id === roomId);
@@ -177,11 +193,16 @@ export function ChatProvider({ children }: { children: any }) {
           if (roomExists) {
             updatedRooms = currentRooms.map((room: any) => {
               if (room._id === roomId) {
-                // v2.4.0: 서버에서 온 데이터로 덮어쓰되, unreadCount가 없으면 기존 값 유지
+                // v2.4.0: 서버 데이터 반영 시 unreadCount 보존 및 확실한 업데이트
+                const newUnreadCount = updateData.unreadCount !== undefined ? updateData.unreadCount : room.unreadCount;
+                console.log(
+                  `[ChatContext] Updating room ${roomId} unreadCount: ${room.unreadCount} -> ${newUnreadCount}`,
+                );
+
                 return {
                   ...room,
                   ...updateData,
-                  unreadCount: updateData.unreadCount !== undefined ? updateData.unreadCount : room.unreadCount,
+                  unreadCount: newUnreadCount,
                   updatedAt: updateData.updatedAt || new Date().toISOString(),
                 };
               }

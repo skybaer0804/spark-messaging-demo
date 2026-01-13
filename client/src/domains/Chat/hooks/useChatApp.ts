@@ -30,11 +30,6 @@ export function useChatApp() {
 
   const { room: roomService, fileTransfer: fileTransferService, chat: chatService } = services;
 
-  // 전역 사이드바 동기화
-  useEffect(() => {
-    setChatRoomList(roomList);
-  }, [roomList]);
-
   useEffect(() => {
     setChatCurrentRoom(currentRoom?.name || null);
   }, [currentRoom]);

@@ -340,6 +340,7 @@ exports.uploadFile = async (req, res) => {
 
         socketService.notifyRoomListUpdated(userId, {
           ...roomObj,
+          targetUserId: userId, // [v2.4.0] 이 데이터의 수신 대상 명시
           unreadCount: userChatRoom ? userChatRoom.unreadCount : 0,
           lastMessage: messageData,
         });
@@ -432,6 +433,7 @@ exports.sendMessage = async (req, res) => {
 
         socketService.notifyRoomListUpdated(userId, {
           ...roomObj,
+          targetUserId: userId, // [v2.4.0] 이 데이터의 수신 대상 명시
           unreadCount: userChatRoom ? userChatRoom.unreadCount : 0,
           lastMessage: messageData,
         });
