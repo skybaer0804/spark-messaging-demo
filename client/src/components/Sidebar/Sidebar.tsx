@@ -2,10 +2,9 @@ import { useMemo, useEffect, useState } from 'preact/hooks';
 import { IconSparkles, IconPlus, IconUser } from '@tabler/icons-preact';
 import { useRouterState } from '@/routes/RouterState';
 import { appRoutes, type AppRouteNode } from '@/routes/appRoutes';
-import { currentWorkspaceId, setCurrentWorkspaceId } from '@/stores/chatRoomsStore';
+import { currentWorkspaceId, setCurrentWorkspaceId, chatRoomList } from '@/stores/chatRoomsStore';
 import { workspaceApi } from '@/core/api/ApiService';
 import { useAuth } from '@/core/hooks/useAuth';
-import { useChat } from '@/domains/Chat/context/ChatContext';
 import { Badge } from '@/ui-components/Badge/Badge';
 import { Avatar } from '@/ui-components/Avatar/Avatar';
 import './Sidebar.scss';
@@ -13,12 +12,11 @@ import './Sidebar.scss';
 export function Sidebar() {
   const { pathname, navigate } = useRouterState();
   const { user } = useAuth();
-  const { roomList } = useChat();
   const [workspaces, setWorkspaces] = useState<any[]>([]);
 
   const totalUnreadCount = useMemo(() => {
-    return roomList.reduce((acc, room) => acc + (room.unreadCount || 0), 0);
-  }, [roomList]);
+    return chatRoomList.value.reduce((acc, room) => acc + (room.unreadCount || 0), 0);
+  }, [chatRoomList.value]);
 
   const lnbRouteIds = ['chatapp', 'notification', 'video-meeting'];
 
@@ -113,9 +111,19 @@ export function Sidebar() {
         </nav>
 
         <div className="lnb__footer">
-          <div className="lnb__item" onClick={() => navigate('/profile')} title="Profile">
-            <Avatar src={user?.profileImage} variant="rounded" size="md" className="lnb__profile-avatar">
-              {user?.username?.substring(0, 1).toUpperCase() || <IconUser size={20} />}
+          <div
+            className={`lnb__workspace-item ${pathname.startsWith('/profile') ? 'lnb__workspace-item--active' : ''}`}
+            onClick={() => navigate('/profile')}
+            title="Profile"
+          >
+            <Avatar
+              src={user?.profileImage}
+              variant="circular"
+              size="lg"
+              className="lnb__workspace-icon"
+              style={{ backgroundColor: 'var(--color-interactive-primary)' }}
+            >
+              {user?.username?.substring(0, 1).toUpperCase() || <IconUser size={24} />}
             </Avatar>
           </div>
         </div>
