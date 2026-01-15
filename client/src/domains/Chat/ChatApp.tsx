@@ -41,10 +41,8 @@ import { ChatDataProvider } from './context/ChatDataProvider';
 import { useRouterState } from '@/routes/RouterState';
 import { getDirectChatName } from './utils/chatUtils';
 import { ChatSidebarHeader } from './components/ChatSidebar/ChatSidebarHeader';
-import { DialogChatGroup } from './components/DialogChatGroup';
-import { DialogChatTeam } from './components/DialogChatTeam';
 import { ChatEmptyState } from './components/ChatEmptyState';
-import { DirectoryView } from './components/DirectoryView/DirectoryView';
+import { DirectoryView } from './components/Directory/DirectoryView';
 import './ChatApp.scss';
 
 import type { ChatRoom, ChatUser, Workspace } from './types';
@@ -89,8 +87,6 @@ const ChatRoomSidebar = memo(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     toggleWorkspaceSelection: _toggleWorkspaceSelection,
   }: ChatRoomSidebarProps) => {
-    const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false);
-    const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false);
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; roomId: string } | null>(null);
     const [isSearching, setIsSearching] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -306,8 +302,6 @@ const ChatRoomSidebar = memo(
                 handleCreateRoom={handleCreateRoom}
                 roomIdInput={roomIdInput}
                 setRoomIdInput={setRoomIdInput}
-                setShowCreateChannelDialog={setShowCreateChannelDialog}
-                setShowCreateTeamDialog={setShowCreateTeamDialog}
               />
             )}
           </Flex>
@@ -326,20 +320,6 @@ const ChatRoomSidebar = memo(
           {renderSection('private', 'Private Groups')}
           {renderSection('discussion', 'Discussion')}
         </div>
-
-        {/* 채널 생성 다이얼로그 */}
-        <DialogChatGroup
-          open={showCreateChannelDialog}
-          onClose={() => setShowCreateChannelDialog(false)}
-          handleCreateRoom={handleCreateRoom}
-        />
-
-        {/* 팀 생성 다이얼로그 */}
-        <DialogChatTeam
-          open={showCreateTeamDialog}
-          onClose={() => setShowCreateTeamDialog(false)}
-          handleCreateRoom={handleCreateRoom}
-        />
 
         {contextMenu && (
           <Paper

@@ -28,11 +28,9 @@ interface ChatSidebarHeaderProps {
   userList: any[];
   selectedUserIds: string[];
   toggleUserSelection: (userId: string) => void;
-  handleCreateRoom: (type: 'direct' | 'discussion') => void;
+  handleCreateRoom: (type: any, extraData?: any) => void;
   roomIdInput: string;
   setRoomIdInput: (val: string) => void;
-  setShowCreateChannelDialog: (val: boolean) => void;
-  setShowCreateTeamDialog: (val: boolean) => void;
 }
 
 export const ChatSidebarHeader = ({
@@ -43,8 +41,6 @@ export const ChatSidebarHeader = ({
   handleCreateRoom,
   roomIdInput,
   setRoomIdInput,
-  setShowCreateChannelDialog,
-  setShowCreateTeamDialog,
 }: ChatSidebarHeaderProps) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { user: currentUser, signOut } = useAuth();
@@ -222,8 +218,6 @@ export const ChatSidebarHeader = ({
           handleCreateRoom={handleCreateRoom}
           roomIdInput={roomIdInput}
           setRoomIdInput={setRoomIdInput}
-          setShowCreateChannelDialog={setShowCreateChannelDialog}
-          setShowCreateTeamDialog={setShowCreateTeamDialog}
         />
         <IconButton
           size="small"

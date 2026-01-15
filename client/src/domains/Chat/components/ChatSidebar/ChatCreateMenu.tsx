@@ -2,17 +2,17 @@ import { useState, useEffect } from 'preact/hooks';
 import { IconButton } from '@/ui-components/Button/IconButton';
 import { IconMessageCircle, IconHash, IconHierarchy, IconEdit } from '@tabler/icons-preact';
 import { DialogChatOne } from '../DialogChatOne';
-import type { ChatUser } from '../../types';
+import { DialogChatGroup } from '../DialogChatGroup';
+import { DialogChatTeam } from '../DialogChatTeam';
+import type { ChatUser, ChatRoom } from '../../types';
 
 interface ChatCreateMenuProps {
   userList: ChatUser[];
   selectedUserIds: string[];
   toggleUserSelection: (userId: string) => void;
-  handleCreateRoom: (type: 'direct' | 'discussion') => void;
+  handleCreateRoom: (type: ChatRoom['type'], extraData?: any) => void;
   roomIdInput: string;
   setRoomIdInput: (val: string) => void;
-  setShowCreateChannelDialog: (val: boolean) => void;
-  setShowCreateTeamDialog: (val: boolean) => void;
 }
 
 export const ChatCreateMenu = ({
@@ -22,11 +22,11 @@ export const ChatCreateMenu = ({
   handleCreateRoom,
   roomIdInput,
   setRoomIdInput,
-  setShowCreateChannelDialog,
-  setShowCreateTeamDialog,
 }: ChatCreateMenuProps) => {
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showInviteList, setShowInviteList] = useState(false);
+  const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false);
+  const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false);
 
   useEffect(() => {
     const handleClick = () => {
@@ -90,9 +90,19 @@ export const ChatCreateMenu = ({
         userList={userList}
         selectedUserIds={selectedUserIds}
         toggleUserSelection={toggleUserSelection}
-        handleCreateRoom={handleCreateRoom}
+        handleCreateRoom={(type) => handleCreateRoom(type, {})}
         roomIdInput={roomIdInput}
         setRoomIdInput={setRoomIdInput}
+      />
+      <DialogChatGroup
+        open={showCreateChannelDialog}
+        onClose={() => setShowCreateChannelDialog(false)}
+        handleCreateRoom={handleCreateRoom}
+      />
+      <DialogChatTeam
+        open={showCreateTeamDialog}
+        onClose={() => setShowCreateTeamDialog(false)}
+        handleCreateRoom={handleCreateRoom}
       />
     </>
   );
