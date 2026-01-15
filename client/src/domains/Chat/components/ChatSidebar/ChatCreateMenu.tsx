@@ -100,7 +100,9 @@ export const ChatCreateMenu = ({
       <DialogChatTeam
         open={showCreateTeamDialog}
         onClose={() => setShowCreateTeamDialog(false)}
-        handleCreateRoom={handleCreateRoom}
+        onTeamCreated={() => {
+          // 팀 생성 후 필요한 경우 여기서 처리
+        }}
       />
     </>
   );

@@ -41,6 +41,7 @@ app.use('/api/push', require('./routes/push'));
 app.use('/api/workspace', require('./routes/workspace'));
 app.use('/api/notification', require('./routes/notification'));
 app.use('/api/video-meeting', require('./routes/videoMeeting'));
+app.use('/api/team', require('./routes/team'));
 
 // Global Error Handler
 app.use((err, req, res, next) => {

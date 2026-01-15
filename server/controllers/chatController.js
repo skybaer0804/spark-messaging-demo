@@ -46,6 +46,42 @@ exports.createRoom = async (req, res) => {
       }
     }
 
+    // 팀 채팅방인 경우 기존 방이 있는지 확인 및 멤버십 보장
+    if (type === 'team' && teamId) {
+      const existingRoom = await ChatRoom.findOne({ teamId, type: 'team' });
+      if (existingRoom) {
+        // 멤버십 확인 및 추가
+        const isMember = existingRoom.members.some((m) => m.toString() === currentUserId.toString());
+        if (!isMember) {
+          existingRoom.members.push(currentUserId);
+          await existingRoom.save();
+        }
+
+        // UserChatRoom 레코드 보장
+        await UserChatRoom.findOneAndUpdate(
+          { userId: currentUserId, roomId: existingRoom._id },
+          {
+            userId: currentUserId,
+            roomId: existingRoom._id,
+          },
+          { upsert: true, new: true },
+        );
+
+        // 멤버들에게 방 목록 업데이트 알림
+        socketService.notifyRoomListUpdated(currentUserId);
+
+        const populatedRoom = await ChatRoom.findById(existingRoom._id).populate(
+          'members',
+          'username profileImage status statusText',
+        );
+        
+        const roomObj = populatedRoom.toObject();
+        roomObj.displayName = roomObj.name;
+        
+        return res.status(200).json(roomObj);
+      }
+    }
+
     const roomData = {
       name: type === 'direct' ? null : name || 'New Room',
       description,

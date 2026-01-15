@@ -159,4 +159,23 @@ export const pushApi = {
   checkStatus: (deviceId: string) => api.get('/push/status', { params: { deviceId } }),
 };
 
+export const teamApi = {
+  getTeams: (workspaceId?: string) => api.get('/team', { params: { workspaceId } }),
+  getTeam: (teamId: string) => api.get(`/team/${teamId}`),
+  createTeam: (data: {
+    teamName: string;
+    teamDesc?: string;
+    private?: boolean;
+    members?: string[];
+    workspaceId?: string;
+  }) => api.post('/team', data),
+  updateTeam: (
+    teamId: string,
+    data: { teamName?: string; teamDesc?: string; private?: boolean },
+  ) => api.patch(`/team/${teamId}`, data),
+  deleteTeam: (teamId: string) => api.delete(`/team/${teamId}`),
+  inviteMembers: (teamId: string, userIds: string[]) => api.post(`/team/${teamId}/invite`, { userIds }),
+  removeMember: (teamId: string, userId: string) => api.delete(`/team/${teamId}/member/${userId}`),
+};
+
 export default api;
