@@ -1,6 +1,4 @@
 import { useChatApp } from './hooks/useChatApp';
-import { formatTimestamp } from '@/core/utils/messageUtils';
-import { formatFileSize, downloadFile } from '@/core/utils/fileUtils';
 import { useRef, useEffect, useState, useMemo } from 'preact/hooks';
 import { memo } from 'preact/compat';
 import { IconButton } from '@/ui-components/Button/IconButton';
@@ -15,8 +13,6 @@ import { Avatar } from '@/ui-components/Avatar/Avatar';
 import { Divider } from '@/ui-components/Divider/Divider';
 import {
   IconX,
-  IconFile,
-  IconDownload,
   IconHash,
   IconLock,
   IconMessageCircle,
@@ -38,6 +34,7 @@ import { DirectoryView } from './components/Directory/DirectoryView';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMemberPanel } from './components/ChatMemberPanel';
 import { ChatInput } from './components/ChatInput';
+import { ChatMessagesArea } from './components/ChatMessagesArea';
 import './ChatApp.scss';
 
 import type { ChatRoom, ChatUser, Workspace } from './types';
@@ -640,139 +637,14 @@ function ChatAppContent() {
 
         <Box style={{ flex: 1, display: 'flex', minHeight: 0, overflow: 'hidden' }}>
           {/* Messages Area - Slack 스타일 배경 적용 */}
-          <Box
-            style={{
-              flex: 1,
-              minHeight: 0,
-              overflowY: 'auto',
-              overflowX: 'hidden',
-              padding: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              backgroundColor: '#ffffff', // 메시지 영역은 다시 밝게
-            }}
-            ref={messagesRef}
-          >
-            <Stack spacing="md" style={{ flex: 1, minHeight: 0 }}>
-              {messages.map((msg) => {
-                const senderIdStr =
-                  typeof msg.senderId === 'object' ? (msg.senderId as any)?._id?.toString() : msg.senderId?.toString();
-                const currentUserIdStr = currentUser?.id?.toString() || (currentUser as any)?._id?.toString();
-
-                const isOwnMessage =
-                  (senderIdStr && currentUserIdStr && senderIdStr === currentUserIdStr) || msg.status === 'sending';
-                return (
-                  <Flex
-                    key={msg._id}
-                    direction="column"
-                    align={isOwnMessage ? 'flex-end' : 'flex-start'}
-                    style={{ width: '100%' }}
-                  >
-                    <Flex
-                      direction="column"
-                      align={isOwnMessage ? 'flex-end' : 'flex-start'}
-                      style={{ maxWidth: '70%' }}
-                    >
-                      <Flex align="center" gap="sm" style={{ marginBottom: '4px' }}>
-                        {!isOwnMessage && (
-                          <Typography variant="caption" color="text-secondary">
-                            {msg.senderName ||
-                              (typeof msg.senderId === 'string' ? msg.senderId.substring(0, 6) : 'Unknown')}
-                          </Typography>
-                        )}
-                        <Typography variant="caption" color="text-tertiary">
-                          {formatTimestamp(msg.timestamp)}
-                        </Typography>
-                      </Flex>
-                      <Paper
-                        elevation={1}
-                        padding="sm"
-                        style={{
-                          borderRadius: isOwnMessage ? '12px 0 12px 12px' : '0 12px 12px 12px',
-                          backgroundColor: isOwnMessage
-                            ? 'var(--color-interactive-primary)'
-                            : 'var(--color-surface-level-1)',
-                          color: isOwnMessage ? 'var(--primitive-gray-0)' : 'inherit',
-                          alignSelf: isOwnMessage ? 'flex-end' : 'flex-start',
-                          position: 'relative',
-                        }}
-                      >
-                        {/* v2.4.0: 안읽음 카운트 표시 (Slack/Kakao 스타일) */}
-                        {(() => {
-                          const totalMembers = currentRoom.members?.length || 0;
-                          const readCount = msg.readBy?.length || 0;
-                          const unreadCount = totalMembers - readCount;
-
-                          if (unreadCount > 0) {
-                            return (
-                              <Typography
-                                variant="caption"
-                                style={{
-                                  position: 'absolute',
-                                  [isOwnMessage ? 'left' : 'right']: '-24px',
-                                  bottom: '2px',
-                                  color: 'var(--primitive-yellow-600)',
-                                  fontWeight: 'bold',
-                                }}
-                              >
-                                {unreadCount}
-                              </Typography>
-                            );
-                          }
-                          return null;
-                        })()}
-                        {msg.fileData ? (
-                          <Box>
-                            {msg.fileData.fileType === 'image' && msg.fileData.data ? (
-                              <Box>
-                                <img
-                                  src={msg.fileData.data}
-                                  alt={msg.fileData.fileName}
-                                  style={{
-                                    maxWidth: '100%',
-                                    maxHeight: '200px',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                  }}
-                                  onClick={() => handleImageClick(msg.fileData!.data!, msg.fileData!.fileName)}
-                                />
-                              </Box>
-                            ) : (
-                              <Flex align="center" gap="sm">
-                                <IconFile size={24} />
-                                <Box>
-                                  <Typography variant="body-small" style={{ fontWeight: 'bold' }}>
-                                    {msg.fileData.fileName}
-                                  </Typography>
-                                  <Typography variant="caption">{formatFileSize(msg.fileData.size)}</Typography>
-                                </Box>
-                                <IconButton
-                                  size="small"
-                                  onClick={() =>
-                                    downloadFile(
-                                      msg.fileData!.fileName,
-                                      msg.fileData!.data || '',
-                                      msg.fileData!.mimeType,
-                                    )
-                                  }
-                                >
-                                  <IconDownload size={16} />
-                                </IconButton>
-                              </Flex>
-                            )}
-                          </Box>
-                        ) : (
-                          <Typography variant="body-medium">{msg.content}</Typography>
-                        )}
-                      </Paper>
-                    </Flex>
-                  </Flex>
-                );
-              })}
-              {/* v2.2.0: 하단 앵커 요소 */}
-              <div ref={messagesEndRef} style={{ height: '1px', width: '100%' }} />
-            </Stack>
-          </Box>
+          <ChatMessagesArea
+            messages={messages}
+            currentUser={currentUser as any}
+            currentRoom={currentRoom}
+            messagesRef={messagesRef}
+            messagesEndRef={messagesEndRef}
+            onImageClick={handleImageClick}
+          />
 
           {/* User List Sidebar */}
           {showUserList && <ChatMemberPanel members={currentRoom.members} />}

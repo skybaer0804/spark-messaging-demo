@@ -1,9 +1,10 @@
 import type { ChatAdapter, ChatConfig, ChatMessage } from './types';
 import type { Signal } from '@preact/signals';
-import { ChatMessages } from './ChatMessages';
+import { ChatMessagesArea } from './ChatMessagesArea';
 import { ChatInput } from './ChatInput';
 import { ImageModal } from './ImageModal';
 import { useChatCore } from './hooks/useChatCore';
+import { useAuth } from '@/core/hooks/useAuth';
 import { Box } from '@/ui-components/Layout/Box';
 import { Flex } from '@/ui-components/Layout/Flex';
 import { Typography } from '@/ui-components/Typography/Typography';
@@ -21,6 +22,7 @@ interface ChatProps {
 
 function ChatComponent({ adapter, config = {}, classNamePrefix = 'chat', roomName, onVideoMeetingClick }: ChatProps) {
   const baseClass = config.classNamePrefix || classNamePrefix;
+  const { user: currentUser } = useAuth();
 
   // Signal 기반 input 가져오기 (반응형 업데이트)
   const inputSignal = (adapter as any).getInputSignal?.() as Signal<string> | undefined;
@@ -105,8 +107,9 @@ function ChatComponent({ adapter, config = {}, classNamePrefix = 'chat', roomNam
           </Flex>
         </Flex>
       )}
-      <ChatMessages
+      <ChatMessagesArea
         messages={messages}
+        currentUser={currentUser as any}
         onImageClick={handleImageClick}
         emptyMessage={adapter.getEmptyMessage?.() || config.emptyMessage}
         classNamePrefix={baseClass}
