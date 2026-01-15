@@ -1,19 +1,32 @@
 import { useState, useEffect } from 'preact/hooks';
 import { IconButton } from '@/ui-components/Button/IconButton';
 import { IconMessageCircle, IconHash, IconHierarchy, IconEdit } from '@tabler/icons-preact';
+import { DialogChatOne } from '../DialogChatOne';
+import type { ChatUser } from '../../types';
 
 interface ChatCreateMenuProps {
-  setShowInviteList: (val: boolean) => void;
+  userList: ChatUser[];
+  selectedUserIds: string[];
+  toggleUserSelection: (userId: string) => void;
+  handleCreateRoom: (type: 'direct' | 'discussion') => void;
+  roomIdInput: string;
+  setRoomIdInput: (val: string) => void;
   setShowCreateChannelDialog: (val: boolean) => void;
   setShowCreateTeamDialog: (val: boolean) => void;
 }
 
 export const ChatCreateMenu = ({
-  setShowInviteList,
+  userList,
+  selectedUserIds,
+  toggleUserSelection,
+  handleCreateRoom,
+  roomIdInput,
+  setRoomIdInput,
   setShowCreateChannelDialog,
   setShowCreateTeamDialog,
 }: ChatCreateMenuProps) => {
   const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [showInviteList, setShowInviteList] = useState(false);
 
   useEffect(() => {
     const handleClick = () => {
@@ -70,6 +83,17 @@ export const ChatCreateMenu = ({
           </div>
         </div>
       )}
+
+      <DialogChatOne
+        open={showInviteList}
+        onClose={() => setShowInviteList(false)}
+        userList={userList}
+        selectedUserIds={selectedUserIds}
+        toggleUserSelection={toggleUserSelection}
+        handleCreateRoom={handleCreateRoom}
+        roomIdInput={roomIdInput}
+        setRoomIdInput={setRoomIdInput}
+      />
     </>
   );
 };

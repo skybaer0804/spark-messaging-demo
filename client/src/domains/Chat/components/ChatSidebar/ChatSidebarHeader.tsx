@@ -25,14 +25,24 @@ import { ChatCreateMenu } from './ChatCreateMenu';
 
 interface ChatSidebarHeaderProps {
   setIsSearching: (val: boolean) => void;
-  setShowInviteList: (val: boolean) => void;
+  userList: any[];
+  selectedUserIds: string[];
+  toggleUserSelection: (userId: string) => void;
+  handleCreateRoom: (type: 'direct' | 'discussion') => void;
+  roomIdInput: string;
+  setRoomIdInput: (val: string) => void;
   setShowCreateChannelDialog: (val: boolean) => void;
   setShowCreateTeamDialog: (val: boolean) => void;
 }
 
 export const ChatSidebarHeader = ({
   setIsSearching,
-  setShowInviteList,
+  userList,
+  selectedUserIds,
+  toggleUserSelection,
+  handleCreateRoom,
+  roomIdInput,
+  setRoomIdInput,
   setShowCreateChannelDialog,
   setShowCreateTeamDialog,
 }: ChatSidebarHeaderProps) => {
@@ -206,7 +216,12 @@ export const ChatSidebarHeader = ({
           <IconArrowsExchange size={20} />
         </IconButton>
         <ChatCreateMenu
-          setShowInviteList={setShowInviteList}
+          userList={userList}
+          selectedUserIds={selectedUserIds}
+          toggleUserSelection={toggleUserSelection}
+          handleCreateRoom={handleCreateRoom}
+          roomIdInput={roomIdInput}
+          setRoomIdInput={setRoomIdInput}
           setShowCreateChannelDialog={setShowCreateChannelDialog}
           setShowCreateTeamDialog={setShowCreateTeamDialog}
         />

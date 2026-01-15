@@ -14,7 +14,6 @@ import { List, ListItem, ListItemText, ListItemAvatar } from '@/ui-components/Li
 import { Avatar } from '@/ui-components/Avatar/Avatar';
 import { Divider } from '@/ui-components/Divider/Divider';
 import { Dialog } from '@/ui-components/Dialog/Dialog';
-import { Checkbox } from '@/ui-components/Checkbox/Checkbox';
 import { Switch } from '@/ui-components/Switch/Switch';
 import {
   IconSend,
@@ -89,7 +88,6 @@ const ChatRoomSidebar = memo(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     toggleWorkspaceSelection: _toggleWorkspaceSelection,
   }: ChatRoomSidebarProps) => {
-    const [showInviteList, setShowInviteList] = useState(false);
     const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false);
     const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false);
     const [newRoomData, setNewRoomData] = useState({ name: '', topic: '', isPrivate: false });
@@ -322,7 +320,12 @@ const ChatRoomSidebar = memo(
             ) : (
               <ChatSidebarHeader
                 setIsSearching={setIsSearching}
-                setShowInviteList={setShowInviteList}
+                userList={userList}
+                selectedUserIds={selectedUserIds}
+                toggleUserSelection={toggleUserSelection}
+                handleCreateRoom={handleCreateRoom}
+                roomIdInput={roomIdInput}
+                setRoomIdInput={setRoomIdInput}
                 setShowCreateChannelDialog={setShowCreateChannelDialog}
                 setShowCreateTeamDialog={setShowCreateTeamDialog}
               />
@@ -343,58 +346,6 @@ const ChatRoomSidebar = memo(
           {renderSection('private', 'Private Groups')}
           {renderSection('discussion', 'Discussion')}
         </div>
-
-        {/* 1:1 대화방 개설 다이얼로그 */}
-        <Dialog
-          open={showInviteList}
-          onClose={() => setShowInviteList(false)}
-          title="새 1:1 대화"
-          maxWidth="sm"
-          fullWidth
-          actions={
-            <Flex gap="sm">
-              <Button onClick={() => setShowInviteList(false)}>취소</Button>
-              <Button
-                variant="primary"
-                disabled={selectedUserIds.length === 0}
-                onClick={() => {
-                  handleCreateRoom(selectedUserIds.length > 1 ? 'discussion' : 'direct');
-                  setShowInviteList(false);
-                }}
-              >
-                개설
-              </Button>
-            </Flex>
-          }
-        >
-          <Typography variant="body-small" color="text-secondary" style={{ marginBottom: '16px' }}>
-            대화하고 싶은 사용자를 선택하세요. 여러 명을 선택하면 토론방이 생성됩니다.
-          </Typography>
-          <Input
-            fullWidth
-            placeholder="사용자 검색"
-            value={roomIdInput}
-            onInput={(e) => setRoomIdInput(e.currentTarget.value)}
-            style={{ marginBottom: '16px' }}
-          />
-          <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-            <List>
-              {userList
-                .filter((u) => u.username.includes(roomIdInput))
-                .map((user) => (
-                  <ListItem key={user._id} onClick={() => toggleUserSelection(user._id)} style={{ cursor: 'pointer' }}>
-                    <ListItemAvatar>
-                      <Avatar src={user.profileImage || user.avatar} size="sm">
-                        {user.username.substring(0, 1)}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={user.username} secondary={`@${user.username}`} />
-                    <Checkbox checked={selectedUserIds.includes(user._id)} />
-                  </ListItem>
-                ))}
-            </List>
-          </div>
-        </Dialog>
 
         {/* 채널 생성 다이얼로그 */}
         <Dialog
