@@ -10,7 +10,7 @@ import { Flex } from '@/ui-components/Layout/Flex';
 import { Stack } from '@/ui-components/Layout/Stack';
 import { Typography } from '@/ui-components/Typography/Typography';
 import { Paper } from '@/ui-components/Paper/Paper';
-import { List, ListItem, ListItemText, ListItemAvatar } from '@/ui-components/List/List';
+import { List, ListItem } from '@/ui-components/List/List';
 import { Avatar } from '@/ui-components/Avatar/Avatar';
 import { Divider } from '@/ui-components/Divider/Divider';
 import {
@@ -38,6 +38,7 @@ import { ChatSidebarHeader } from './components/ChatSidebar/ChatSidebarHeader';
 import { ChatEmptyState } from './components/ChatEmptyState';
 import { DirectoryView } from './components/Directory/DirectoryView';
 import { ChatHeader } from './components/ChatHeader';
+import { ChatMemberPanel } from './components/ChatMemberPanel';
 import './ChatApp.scss';
 
 import type { ChatRoom, ChatUser, Workspace } from './types';
@@ -781,49 +782,7 @@ function ChatAppContent() {
           </Box>
 
           {/* User List Sidebar */}
-          {showUserList && (
-            <Paper
-              elevation={0}
-              square
-              style={{
-                width: '240px',
-                borderLeft: '1px solid var(--color-border-default)',
-                display: 'flex',
-                flexDirection: 'column',
-                backgroundColor: 'var(--color-bg-secondary)',
-              }}
-            >
-              <Box padding="md" style={{ borderBottom: '1px solid var(--color-border-default)' }}>
-                <Typography variant="h4">참여자 ({currentRoom.members?.length || 0})</Typography>
-              </Box>
-              <Box style={{ flex: 1, overflowY: 'auto' }}>
-                <List>
-                  {currentRoom.members?.map((member) => (
-                    <ListItem key={member._id}>
-                      <ListItemAvatar>
-                        <Avatar
-                          src={member.avatar}
-                          variant="circular"
-                          size="sm"
-                          style={{
-                            border: `2px solid ${
-                              member.status === 'online' ? 'var(--color-success-main)' : 'var(--color-text-tertiary)'
-                            }`,
-                          }}
-                        >
-                          {member.username.substring(0, 1).toUpperCase()}
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={member.username}
-                        secondary={member.status === 'online' ? 'Online' : 'Offline'}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-              </Box>
-            </Paper>
-          )}
+          {showUserList && <ChatMemberPanel members={currentRoom.members} />}
         </Box>
 
         {/* Input Area */}
