@@ -1,5 +1,6 @@
-﻿export * from './Accordion';
+export * from './Accordion';
 export * from './Alert';
+export * from './Autocomplete';
 export * from './Avatar';
 export * from './Badge';
 export * from './BottomNavigation';
@@ -8,6 +9,7 @@ export * from './Button';
 export * from './ButtonGroup';
 export * from './Card';
 export * from './Checkbox';
+export * from './Chip';
 export * from './CircularProgress';
 export * from './Collapsible';
 export * from './Dialog';
