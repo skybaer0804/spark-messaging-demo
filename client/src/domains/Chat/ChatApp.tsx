@@ -44,7 +44,7 @@ import { useToast } from '@/core/context/ToastContext';
 import { ChatDataProvider } from './context/ChatDataProvider';
 import { useRouterState } from '@/routes/RouterState';
 import { getDirectChatName } from './utils/chatUtils';
-import { ChatSidebarProfile } from './components/ChatSidebarProfile';
+import { ChatSidebarHeader } from './components/ChatSidebar/ChatSidebarHeader';
 import './ChatApp.scss';
 
 import type { ChatRoom, ChatUser, Workspace } from './types';
@@ -90,481 +90,446 @@ const ChatRoomSidebar = memo(
     toggleWorkspaceSelection: _toggleWorkspaceSelection,
   }: ChatRoomSidebarProps) => {
     const [showInviteList, setShowInviteList] = useState(false);
-  const [showCreateMenu, setShowCreateMenu] = useState(false);
-  const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false);
-  const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false);
-  const [newRoomData, setNewRoomData] = useState({ name: '', topic: '', isPrivate: false });
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; roomId: string } | null>(null);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    direct: true,
-    team: true,
-    public: true,
-    private: true,
-    discussion: true,
-  });
-  const { user: currentUser } = useAuth();
+    const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false);
+    const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false);
+    const [newRoomData, setNewRoomData] = useState({ name: '', topic: '', isPrivate: false });
+    const [contextMenu, setContextMenu] = useState<{ x: number; y: number; roomId: string } | null>(null);
+    const [isSearching, setIsSearching] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+      direct: true,
+      team: true,
+      public: true,
+      private: true,
+      discussion: true,
+    });
+    const { user: currentUser } = useAuth();
 
-  const handleContextMenu = (e: MouseEvent, roomId: string) => {
-    e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY, roomId });
-  };
-
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
-
-  useEffect(() => {
-    const handleClick = () => {
-      setContextMenu(null);
-      setShowCreateMenu(false);
+    const handleContextMenu = (e: MouseEvent, roomId: string) => {
+      e.preventDefault();
+      setContextMenu({ x: e.clientX, y: e.clientY, roomId });
     };
-    window.addEventListener('click', handleClick);
-    return () => window.removeEventListener('click', handleClick);
-  }, []);
 
-  const getRoomIcon = (room: ChatRoom) => {
-    switch (room.type) {
-      case 'direct':
-        return null;
-      case 'public':
-        return <IconHash size={18} />;
-      case 'private':
-        return <IconLock size={18} />;
-      case 'team':
-        return <IconHierarchy size={18} />;
-      case 'discussion':
-        return <IconMessageCircle size={18} />;
-      default:
-        return <IconHash size={18} />;
-    }
-  };
-
-  // 검색 필터링된 룸 및 사용자 목록
-  const { filteredRoomList, filteredUserList } = useMemo(() => {
-    if (!searchQuery.trim()) return { filteredRoomList: roomList, filteredUserList: [] };
-    const lowerQuery = searchQuery.toLowerCase();
-    const currentUserId = currentUser?.id || (currentUser as any)?._id;
-
-    const filteredRooms = roomList.filter((r) => {
-      const roomName = r.type === 'direct' ? getDirectChatName(r, currentUserId) : r.name;
-      return roomName?.toLowerCase().includes(lowerQuery);
-    });
-
-    // 이미 채팅방이 있는 유저는 제외하고 검색 (또는 포함해서 검색 결과에 노출)
-    const filteredUsers = userList.filter((u) => {
-      if (u._id === currentUserId) return false;
-      return u.username.toLowerCase().includes(lowerQuery);
-    });
-
-    return { filteredRoomList: filteredRooms, filteredUserList: filteredUsers };
-  }, [roomList, userList, searchQuery, currentUser]);
-
-  const groupedRooms = useMemo(() => {
-    const directRooms = filteredRoomList.filter((r) => r.type === 'direct');
-
-    return {
-      direct: directRooms,
-      team: filteredRoomList.filter((r) => r.type === 'team'),
-      public: filteredRoomList.filter((r) => r.type === 'public'),
-      private: filteredRoomList.filter((r) => r.type === 'private'),
-      discussion: filteredRoomList.filter((r) => r.type === 'discussion'),
+    const toggleSection = (section: string) => {
+      setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
     };
-  }, [filteredRoomList]);
 
-  const renderRoomItem = (room: ChatRoom) => {
-    const isActive = currentRoom?._id === room._id;
-    const currentUserId = currentUser?.id || (currentUser as any)?._id;
-    const roomName = room.displayName || getDirectChatName(room, currentUserId);
-    const displayAvatar = room.type === 'direct' ? room.displayAvatar : null;
-    const displayStatus = room.type === 'direct' ? room.displayStatus : 'offline';
-    const directMember =
-      room.type === 'direct'
-        ? room.members?.find((m: any) => (m._id?.toString() || m.toString()) !== currentUserId?.toString())
-        : null;
+    useEffect(() => {
+      const handleClick = () => {
+        setContextMenu(null);
+      };
+      window.addEventListener('click', handleClick);
+      return () => window.removeEventListener('click', handleClick);
+    }, []);
 
-    return (
-      <div
-        key={room._id}
-        className={`chat-app__sidebar-item ${isActive ? 'chat-app__sidebar-item--active' : ''}`}
-        onClick={() => {
-          handleRoomSelect(room._id);
-          setIsSearching(false);
-          setSearchQuery('');
-        }}
-        onContextMenu={(e) => handleContextMenu(e, room._id)}
-      >
-        <div className="avatar">
-          {room.type === 'direct' ? (
-            <>
-              <Avatar src={displayAvatar || directMember?.profileImage || directMember?.avatar} size="sm">
-                {roomName?.substring(0, 1)}
-              </Avatar>
-              <div className={`avatar-status avatar-status--${displayStatus || directMember?.status || 'offline'}`} />
-            </>
-          ) : (
-            <Avatar
-              variant="rounded"
-              size="sm"
-              style={{ backgroundColor: room.type === 'team' ? '#e11d48' : '#64748b' }}
-            >
-              {room.type === 'team' ? roomName?.substring(0, 1).toUpperCase() : getRoomIcon(room)}
-            </Avatar>
-          )}
-        </div>
-        <div className="chat-app__sidebar-item-content">
-          <div className="chat-app__sidebar-item-name">{room.unreadCount ? <strong>{roomName}</strong> : roomName}</div>
-          {room.type === 'direct' && (room.displayStatusText || directMember?.statusText) && (
-            <div className="chat-app__sidebar-item-status-text">
-              {room.displayStatusText || directMember?.statusText}
-            </div>
-          )}
-        </div>
-        {room.unreadCount ? <div className="chat-app__sidebar-item-badge">{room.unreadCount}</div> : null}
-      </div>
-    );
-  };
+    const getRoomIcon = (room: ChatRoom) => {
+      switch (room.type) {
+        case 'direct':
+          return null;
+        case 'public':
+          return <IconHash size={18} />;
+        case 'private':
+          return <IconLock size={18} />;
+        case 'team':
+          return <IconHierarchy size={18} />;
+        case 'discussion':
+          return <IconMessageCircle size={18} />;
+        default:
+          return <IconHash size={18} />;
+      }
+    };
 
-  const renderUserItem = (user: ChatUser) => {
-    return (
-      <div
-        key={user._id}
-        className="chat-app__sidebar-item"
-        onClick={() => {
-          onUserClick?.(user._id);
-          setIsSearching(false);
-          setSearchQuery('');
-        }}
-      >
-        <div className="avatar">
-          <Avatar src={user.profileImage || user.avatar} size="sm">
-            {user.username.substring(0, 1)}
-          </Avatar>
-          <div className={`avatar-status avatar-status--${user.status || 'offline'}`} />
-        </div>
-        <div className="chat-app__sidebar-item-content">
-          <div className="chat-app__sidebar-item-name">{user.username}</div>
-          <div className="chat-app__sidebar-item-sub">
-            {user.status || 'offline'} • {user.role || 'Member'}
-          </div>
-        </div>
-      </div>
-    );
-  };
+    // 검색 필터링된 룸 및 사용자 목록
+    const { filteredRoomList, filteredUserList } = useMemo(() => {
+      if (!searchQuery.trim()) return { filteredRoomList: roomList, filteredUserList: [] };
+      const lowerQuery = searchQuery.toLowerCase();
+      const currentUserId = currentUser?.id || (currentUser as any)?._id;
 
-  const renderSection = (type: keyof typeof groupedRooms, label: string) => {
-    const rooms = groupedRooms[type];
-    // 검색 중일 때는 결과가 있는 섹션만 표시, 평상시에는 1:1 대화방 섹션은 항상 표시
-    if (rooms.length === 0 && (isSearching || type !== 'direct')) return null;
+      const filteredRooms = roomList.filter((r) => {
+        const roomName = r.type === 'direct' ? getDirectChatName(r, currentUserId) : r.name;
+        return roomName?.toLowerCase().includes(lowerQuery);
+      });
 
-    const isExpanded = expandedSections[type] !== false;
+      // 이미 채팅방이 있는 유저는 제외하고 검색 (또는 포함해서 검색 결과에 노출)
+      const filteredUsers = userList.filter((u) => {
+        if (u._id === currentUserId) return false;
+        return u.username.toLowerCase().includes(lowerQuery);
+      });
 
-    return (
-      <div key={type}>
-        <div className="chat-app__sidebar-section-header" onClick={() => toggleSection(type)}>
-          <span className="icon">{isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}</span>
-          {label}
-        </div>
-        {isExpanded && <div className="chat-app__sidebar-section-content">{rooms.map(renderRoomItem)}</div>}
-      </div>
-    );
-  };
+      return { filteredRoomList: filteredRooms, filteredUserList: filteredUsers };
+    }, [roomList, userList, searchQuery, currentUser]);
 
-  const handleCreateChannelSubmit = () => {
-    handleCreateRoom(newRoomData.isPrivate ? 'private' : 'public', {
-      name: newRoomData.name,
-      description: newRoomData.topic,
-      isPrivate: newRoomData.isPrivate,
-    });
-    setShowCreateChannelDialog(false);
-    setNewRoomData({ name: '', topic: '', isPrivate: false });
-  };
+    const groupedRooms = useMemo(() => {
+      const directRooms = filteredRoomList.filter((r) => r.type === 'direct');
 
-  const handleCreateTeamSubmit = () => {
-    handleCreateRoom('team', {
-      name: newRoomData.name,
-      description: newRoomData.topic,
-      isPrivate: newRoomData.isPrivate,
-    });
-    setShowCreateTeamDialog(false);
-    setNewRoomData({ name: '', topic: '', isPrivate: false });
-  };
+      return {
+        direct: directRooms,
+        team: filteredRoomList.filter((r) => r.type === 'team'),
+        public: filteredRoomList.filter((r) => r.type === 'public'),
+        private: filteredRoomList.filter((r) => r.type === 'private'),
+        discussion: filteredRoomList.filter((r) => r.type === 'discussion'),
+      };
+    }, [filteredRoomList]);
 
-  return (
-    <div
-      className="chat-app__sidebar"
-      style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}
-    >
-      {/* 2.2.0: 채팅 사이드바 헤더 - 프로필 및 툴바 */}
-      <div className="chat-app__sidebar-header">
-        <Flex align="center" justify="space-between" style={{ padding: '12px 16px' }}>
-          {isSearching ? (
-            <Flex align="center" style={{ flex: 1, gap: '8px' }}>
-              <Input
-                fullWidth
-                autoFocus
-                placeholder="검색어를 입력하세요..."
-                value={searchQuery}
-                onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#fff' }}
-              />
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setIsSearching(false);
-                  setSearchQuery('');
-                }}
+    const renderRoomItem = (room: ChatRoom) => {
+      const isActive = currentRoom?._id === room._id;
+      const currentUserId = currentUser?.id || (currentUser as any)?._id;
+      const roomName = room.displayName || getDirectChatName(room, currentUserId);
+      const displayAvatar = room.type === 'direct' ? room.displayAvatar : null;
+      const displayStatus = room.type === 'direct' ? room.displayStatus : 'offline';
+      const directMember =
+        room.type === 'direct'
+          ? room.members?.find((m: any) => (m._id?.toString() || m.toString()) !== currentUserId?.toString())
+          : null;
+
+      return (
+        <div
+          key={room._id}
+          className={`chat-app__sidebar-item ${isActive ? 'chat-app__sidebar-item--active' : ''}`}
+          onClick={() => {
+            handleRoomSelect(room._id);
+            setIsSearching(false);
+            setSearchQuery('');
+          }}
+          onContextMenu={(e) => handleContextMenu(e, room._id)}
+        >
+          <div className="avatar">
+            {room.type === 'direct' ? (
+              <>
+                <Avatar src={displayAvatar || directMember?.profileImage || directMember?.avatar} size="sm">
+                  {roomName?.substring(0, 1)}
+                </Avatar>
+                <div className={`avatar-status avatar-status--${displayStatus || directMember?.status || 'offline'}`} />
+              </>
+            ) : (
+              <Avatar
+                variant="rounded"
+                size="sm"
+                style={{ backgroundColor: room.type === 'team' ? '#e11d48' : '#64748b' }}
               >
-                <IconX size={20} />
-              </IconButton>
-            </Flex>
-          ) : (
-            <ChatSidebarProfile
-              setIsSearching={setIsSearching}
-              showCreateMenu={showCreateMenu}
-              setShowCreateMenu={setShowCreateMenu}
-            />
-          )}
-        </Flex>
-      </div>
-
-      {/* Create Menu Dropdown */}
-      {showCreateMenu && (
-        <div className="chat-app__create-menu" onClick={(e) => e.stopPropagation()}>
-          <div className="chat-app__create-menu-header">새로 만들기</div>
-          <div
-            className="chat-app__create-menu-item"
-            onClick={() => {
-              setShowInviteList(true);
-              setShowCreateMenu(false);
-            }}
-          >
-            <IconMessageCircle size={18} className="icon" /> 1:1 대화방
+                {room.type === 'team' ? roomName?.substring(0, 1).toUpperCase() : getRoomIcon(room)}
+              </Avatar>
+            )}
           </div>
-          <div className="chat-app__create-menu-item">
-            <IconMessageCircle size={18} className="icon" /> 토론
+          <div className="chat-app__sidebar-item-content">
+            <div className="chat-app__sidebar-item-name">
+              {room.unreadCount ? <strong>{roomName}</strong> : roomName}
+            </div>
+            {room.type === 'direct' && (room.displayStatusText || directMember?.statusText) && (
+              <div className="chat-app__sidebar-item-status-text">
+                {room.displayStatusText || directMember?.statusText}
+              </div>
+            )}
           </div>
-          <div
-            className="chat-app__create-menu-item"
-            onClick={() => {
-              setShowCreateChannelDialog(true);
-              setShowCreateMenu(false);
-            }}
-          >
-            <IconHash size={18} className="icon" /> 채널
-          </div>
-          <div
-            className="chat-app__create-menu-item"
-            onClick={() => {
-              setShowCreateTeamDialog(true);
-              setShowCreateMenu(false);
-            }}
-          >
-            <IconHierarchy size={18} className="icon" /> 팀
-          </div>
+          {room.unreadCount ? <div className="chat-app__sidebar-item-badge">{room.unreadCount}</div> : null}
         </div>
-      )}
+      );
+    };
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        {isSearching && filteredUserList.length > 0 && (
-          <div>
-            <div className="chat-app__sidebar-section-header">사용자</div>
-            <div className="chat-app__sidebar-section-content">{filteredUserList.map(renderUserItem)}</div>
-          </div>
-        )}
-        {renderSection('direct', '개인 대화방')}
-        {renderSection('team', 'Teams')}
-        {renderSection('public', 'Channels')}
-        {renderSection('private', 'Private Groups')}
-        {renderSection('discussion', 'Discussion')}
-      </div>
-
-      {/* 1:1 대화방 개설 다이얼로그 */}
-      <Dialog
-        open={showInviteList}
-        onClose={() => setShowInviteList(false)}
-        title="새 1:1 대화"
-        maxWidth="sm"
-        fullWidth
-        actions={
-          <Flex gap="sm">
-            <Button onClick={() => setShowInviteList(false)}>취소</Button>
-            <Button
-              variant="primary"
-              disabled={selectedUserIds.length === 0}
-              onClick={() => {
-                handleCreateRoom(selectedUserIds.length > 1 ? 'discussion' : 'direct');
-                setShowInviteList(false);
-              }}
-            >
-              개설
-            </Button>
-          </Flex>
-        }
-      >
-        <Typography variant="body-small" color="text-secondary" style={{ marginBottom: '16px' }}>
-          대화하고 싶은 사용자를 선택하세요. 여러 명을 선택하면 토론방이 생성됩니다.
-        </Typography>
-        <Input
-          fullWidth
-          placeholder="사용자 검색"
-          value={roomIdInput}
-          onInput={(e) => setRoomIdInput(e.currentTarget.value)}
-          style={{ marginBottom: '16px' }}
-        />
-        <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-          <List>
-            {userList
-              .filter((u) => u.username.includes(roomIdInput))
-              .map((user) => (
-                <ListItem key={user._id} onClick={() => toggleUserSelection(user._id)} style={{ cursor: 'pointer' }}>
-                  <ListItemAvatar>
-                    <Avatar src={user.profileImage || user.avatar} size="sm">
-                      {user.username.substring(0, 1)}
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText primary={user.username} secondary={`@${user.username}`} />
-                  <Checkbox checked={selectedUserIds.includes(user._id)} />
-                </ListItem>
-              ))}
-          </List>
-        </div>
-      </Dialog>
-
-      {/* 채널 생성 다이얼로그 */}
-      <Dialog
-        open={showCreateChannelDialog}
-        onClose={() => setShowCreateChannelDialog(false)}
-        title="채널 만들기"
-        maxWidth="sm"
-        fullWidth
-        actions={
-          <Flex gap="sm">
-            <Button onClick={() => setShowCreateChannelDialog(false)}>취소</Button>
-            <Button variant="primary" disabled={!newRoomData.name} onClick={handleCreateChannelSubmit}>
-              개설
-            </Button>
-          </Flex>
-        }
-      >
-        <Stack spacing="md">
-          <Box>
-            <Typography variant="body-small" style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-              이름 *
-            </Typography>
-            <Input
-              fullWidth
-              placeholder="예: 프로젝트-공지"
-              value={newRoomData.name}
-              onInput={(e) => setNewRoomData((prev) => ({ ...prev, name: e.currentTarget.value }))}
-            />
-          </Box>
-          <Box>
-            <Typography variant="body-small" style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-              주제
-            </Typography>
-            <Input
-              fullWidth
-              placeholder="채널의 목적을 입력하세요"
-              value={newRoomData.topic}
-              onInput={(e) => setNewRoomData((prev) => ({ ...prev, topic: e.currentTarget.value }))}
-            />
-          </Box>
-          <Flex justify="space-between" align="center">
-            <Box>
-              <Typography variant="body-medium" style={{ fontWeight: 'bold' }}>
-                비공개
-              </Typography>
-              <Typography variant="caption" color="text-secondary">
-                초대된 사람만 참여할 수 있습니다.
-              </Typography>
-            </Box>
-            <Switch
-              checked={newRoomData.isPrivate}
-              onChange={(e: any) => setNewRoomData((prev) => ({ ...prev, isPrivate: e.target.checked }))}
-            />
-          </Flex>
-        </Stack>
-      </Dialog>
-
-      {/* 팀 생성 다이얼로그 */}
-      <Dialog
-        open={showCreateTeamDialog}
-        onClose={() => setShowCreateTeamDialog(false)}
-        title="팀 만들기"
-        maxWidth="sm"
-        fullWidth
-        actions={
-          <Flex gap="sm">
-            <Button onClick={() => setShowCreateTeamDialog(false)}>취소</Button>
-            <Button variant="primary" disabled={!newRoomData.name} onClick={handleCreateTeamSubmit}>
-              개설
-            </Button>
-          </Flex>
-        }
-      >
-        <Stack spacing="md">
-          <Box>
-            <Typography variant="body-small" style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-              팀 이름 *
-            </Typography>
-            <Input
-              fullWidth
-              placeholder="예: 마케팅팀"
-              value={newRoomData.name}
-              onInput={(e) => setNewRoomData((prev) => ({ ...prev, name: e.currentTarget.value }))}
-            />
-          </Box>
-          <Box>
-            <Typography variant="body-small" style={{ fontWeight: 'bold', marginBottom: '4px' }}>
-              설명
-            </Typography>
-            <Input
-              fullWidth
-              placeholder="팀에 대한 설명을 입력하세요"
-              value={newRoomData.topic}
-              onInput={(e) => setNewRoomData((prev) => ({ ...prev, topic: e.currentTarget.value }))}
-            />
-          </Box>
-        </Stack>
-      </Dialog>
-
-      {contextMenu && (
-        <Paper
-          elevation={4}
-          style={{
-            position: 'fixed',
-            top: contextMenu.y,
-            left: contextMenu.x,
-            zIndex: 1000,
-            padding: '4px 0',
-            minWidth: '160px',
-            backgroundColor: 'var(--color-bg-elevated, #fff)', // v2.4.0: 투명도 해결을 위해 고정 배경색 적용
-            border: '1px solid var(--color-border-default)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+    const renderUserItem = (user: ChatUser) => {
+      return (
+        <div
+          key={user._id}
+          className="chat-app__sidebar-item"
+          onClick={() => {
+            onUserClick?.(user._id);
+            setIsSearching(false);
+            setSearchQuery('');
           }}
         >
-          <List style={{ padding: 0 }}>
-            <ListItem
-              onClick={(e) => {
-                e.stopPropagation();
-                // v2.4.0: 선택한 방에서 즉시 나가기 가능하도록 개선
-                leaveRoom(contextMenu.roomId);
-                setContextMenu(null);
-              }}
-              style={{ cursor: 'pointer', padding: '8px 16px' }}
-            >
-              <Typography variant="body-medium" style={{ color: 'var(--color-text-error, #ff4d4f)' }}>
-                방 나가기
+          <div className="avatar">
+            <Avatar src={user.profileImage || user.avatar} size="sm">
+              {user.username.substring(0, 1)}
+            </Avatar>
+            <div className={`avatar-status avatar-status--${user.status || 'offline'}`} />
+          </div>
+          <div className="chat-app__sidebar-item-content">
+            <div className="chat-app__sidebar-item-name">{user.username}</div>
+            <div className="chat-app__sidebar-item-sub">
+              {user.status || 'offline'} • {user.role || 'Member'}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const renderSection = (type: keyof typeof groupedRooms, label: string) => {
+      const rooms = groupedRooms[type];
+      // 검색 중일 때는 결과가 있는 섹션만 표시, 평상시에는 1:1 대화방 섹션은 항상 표시
+      if (rooms.length === 0 && (isSearching || type !== 'direct')) return null;
+
+      const isExpanded = expandedSections[type] !== false;
+
+      return (
+        <div key={type}>
+          <div className="chat-app__sidebar-section-header" onClick={() => toggleSection(type)}>
+            <span className="icon">{isExpanded ? <IconChevronDown size={14} /> : <IconChevronRight size={14} />}</span>
+            {label}
+          </div>
+          {isExpanded && <div className="chat-app__sidebar-section-content">{rooms.map(renderRoomItem)}</div>}
+        </div>
+      );
+    };
+
+    const handleCreateChannelSubmit = () => {
+      handleCreateRoom(newRoomData.isPrivate ? 'private' : 'public', {
+        name: newRoomData.name,
+        description: newRoomData.topic,
+        isPrivate: newRoomData.isPrivate,
+      });
+      setShowCreateChannelDialog(false);
+      setNewRoomData({ name: '', topic: '', isPrivate: false });
+    };
+
+    const handleCreateTeamSubmit = () => {
+      handleCreateRoom('team', {
+        name: newRoomData.name,
+        description: newRoomData.topic,
+        isPrivate: newRoomData.isPrivate,
+      });
+      setShowCreateTeamDialog(false);
+      setNewRoomData({ name: '', topic: '', isPrivate: false });
+    };
+
+    return (
+      <div
+        className="chat-app__sidebar"
+        style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}
+      >
+        {/* 2.2.0: 채팅 사이드바 헤더 - 프로필 및 툴바 */}
+        <div className="chat-app__sidebar-header">
+          <Flex align="center" justify="space-between" style={{ padding: '12px 16px' }}>
+            {isSearching ? (
+              <Flex align="center" style={{ flex: 1, gap: '8px' }}>
+                <Input
+                  fullWidth
+                  autoFocus
+                  placeholder="검색어를 입력하세요..."
+                  value={searchQuery}
+                  onInput={(e) => setSearchQuery(e.currentTarget.value)}
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#fff' }}
+                />
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setIsSearching(false);
+                    setSearchQuery('');
+                  }}
+                >
+                  <IconX size={20} />
+                </IconButton>
+              </Flex>
+            ) : (
+              <ChatSidebarHeader
+                setIsSearching={setIsSearching}
+                setShowInviteList={setShowInviteList}
+                setShowCreateChannelDialog={setShowCreateChannelDialog}
+                setShowCreateTeamDialog={setShowCreateTeamDialog}
+              />
+            )}
+          </Flex>
+        </div>
+
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {isSearching && filteredUserList.length > 0 && (
+            <div>
+              <div className="chat-app__sidebar-section-header">사용자</div>
+              <div className="chat-app__sidebar-section-content">{filteredUserList.map(renderUserItem)}</div>
+            </div>
+          )}
+          {renderSection('direct', '개인 대화방')}
+          {renderSection('team', 'Teams')}
+          {renderSection('public', 'Channels')}
+          {renderSection('private', 'Private Groups')}
+          {renderSection('discussion', 'Discussion')}
+        </div>
+
+        {/* 1:1 대화방 개설 다이얼로그 */}
+        <Dialog
+          open={showInviteList}
+          onClose={() => setShowInviteList(false)}
+          title="새 1:1 대화"
+          maxWidth="sm"
+          fullWidth
+          actions={
+            <Flex gap="sm">
+              <Button onClick={() => setShowInviteList(false)}>취소</Button>
+              <Button
+                variant="primary"
+                disabled={selectedUserIds.length === 0}
+                onClick={() => {
+                  handleCreateRoom(selectedUserIds.length > 1 ? 'discussion' : 'direct');
+                  setShowInviteList(false);
+                }}
+              >
+                개설
+              </Button>
+            </Flex>
+          }
+        >
+          <Typography variant="body-small" color="text-secondary" style={{ marginBottom: '16px' }}>
+            대화하고 싶은 사용자를 선택하세요. 여러 명을 선택하면 토론방이 생성됩니다.
+          </Typography>
+          <Input
+            fullWidth
+            placeholder="사용자 검색"
+            value={roomIdInput}
+            onInput={(e) => setRoomIdInput(e.currentTarget.value)}
+            style={{ marginBottom: '16px' }}
+          />
+          <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            <List>
+              {userList
+                .filter((u) => u.username.includes(roomIdInput))
+                .map((user) => (
+                  <ListItem key={user._id} onClick={() => toggleUserSelection(user._id)} style={{ cursor: 'pointer' }}>
+                    <ListItemAvatar>
+                      <Avatar src={user.profileImage || user.avatar} size="sm">
+                        {user.username.substring(0, 1)}
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText primary={user.username} secondary={`@${user.username}`} />
+                    <Checkbox checked={selectedUserIds.includes(user._id)} />
+                  </ListItem>
+                ))}
+            </List>
+          </div>
+        </Dialog>
+
+        {/* 채널 생성 다이얼로그 */}
+        <Dialog
+          open={showCreateChannelDialog}
+          onClose={() => setShowCreateChannelDialog(false)}
+          title="채널 만들기"
+          maxWidth="sm"
+          fullWidth
+          actions={
+            <Flex gap="sm">
+              <Button onClick={() => setShowCreateChannelDialog(false)}>취소</Button>
+              <Button variant="primary" disabled={!newRoomData.name} onClick={handleCreateChannelSubmit}>
+                개설
+              </Button>
+            </Flex>
+          }
+        >
+          <Stack spacing="md">
+            <Box>
+              <Typography variant="body-small" style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                이름 *
               </Typography>
-            </ListItem>
-          </List>
-        </Paper>
-      )}
-    </div>
-  );
-});
+              <Input
+                fullWidth
+                placeholder="예: 프로젝트-공지"
+                value={newRoomData.name}
+                onInput={(e) => setNewRoomData((prev) => ({ ...prev, name: e.currentTarget.value }))}
+              />
+            </Box>
+            <Box>
+              <Typography variant="body-small" style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                주제
+              </Typography>
+              <Input
+                fullWidth
+                placeholder="채널의 목적을 입력하세요"
+                value={newRoomData.topic}
+                onInput={(e) => setNewRoomData((prev) => ({ ...prev, topic: e.currentTarget.value }))}
+              />
+            </Box>
+            <Flex justify="space-between" align="center">
+              <Box>
+                <Typography variant="body-medium" style={{ fontWeight: 'bold' }}>
+                  비공개
+                </Typography>
+                <Typography variant="caption" color="text-secondary">
+                  초대된 사람만 참여할 수 있습니다.
+                </Typography>
+              </Box>
+              <Switch
+                checked={newRoomData.isPrivate}
+                onChange={(e: any) => setNewRoomData((prev) => ({ ...prev, isPrivate: e.target.checked }))}
+              />
+            </Flex>
+          </Stack>
+        </Dialog>
+
+        {/* 팀 생성 다이얼로그 */}
+        <Dialog
+          open={showCreateTeamDialog}
+          onClose={() => setShowCreateTeamDialog(false)}
+          title="팀 만들기"
+          maxWidth="sm"
+          fullWidth
+          actions={
+            <Flex gap="sm">
+              <Button onClick={() => setShowCreateTeamDialog(false)}>취소</Button>
+              <Button variant="primary" disabled={!newRoomData.name} onClick={handleCreateTeamSubmit}>
+                개설
+              </Button>
+            </Flex>
+          }
+        >
+          <Stack spacing="md">
+            <Box>
+              <Typography variant="body-small" style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                팀 이름 *
+              </Typography>
+              <Input
+                fullWidth
+                placeholder="예: 마케팅팀"
+                value={newRoomData.name}
+                onInput={(e) => setNewRoomData((prev) => ({ ...prev, name: e.currentTarget.value }))}
+              />
+            </Box>
+            <Box>
+              <Typography variant="body-small" style={{ fontWeight: 'bold', marginBottom: '4px' }}>
+                설명
+              </Typography>
+              <Input
+                fullWidth
+                placeholder="팀에 대한 설명을 입력하세요"
+                value={newRoomData.topic}
+                onInput={(e) => setNewRoomData((prev) => ({ ...prev, topic: e.currentTarget.value }))}
+              />
+            </Box>
+          </Stack>
+        </Dialog>
+
+        {contextMenu && (
+          <Paper
+            elevation={4}
+            style={{
+              position: 'fixed',
+              top: contextMenu.y,
+              left: contextMenu.x,
+              zIndex: 1000,
+              padding: '4px 0',
+              minWidth: '160px',
+              backgroundColor: 'var(--color-bg-elevated, #fff)', // v2.4.0: 투명도 해결을 위해 고정 배경색 적용
+              border: '1px solid var(--color-border-default)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            }}
+          >
+            <List style={{ padding: 0 }}>
+              <ListItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // v2.4.0: 선택한 방에서 즉시 나가기 가능하도록 개선
+                  leaveRoom(contextMenu.roomId);
+                  setContextMenu(null);
+                }}
+                style={{ cursor: 'pointer', padding: '8px 16px' }}
+              >
+                <Typography variant="body-medium" style={{ color: 'var(--color-text-error, #ff4d4f)' }}>
+                  방 나가기
+                </Typography>
+              </ListItem>
+            </List>
+          </Paper>
+        )}
+      </div>
+    );
+  },
+);
 
 // 2.2.0: Empty State for Chat Area - 컴포넌트 외부로 이동하여 리렌더링 시 애니메이션 중복 방지
 const EmptyState = () => (

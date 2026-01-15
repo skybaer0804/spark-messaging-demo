@@ -10,7 +10,6 @@ import {
   IconSearch,
   IconAddressBook,
   IconArrowsExchange,
-  IconEdit,
   IconDotsVertical,
   IconCircleFilled,
   IconCircle,
@@ -22,17 +21,21 @@ import { authApi } from '@/core/api/ApiService';
 import { useToast } from '@/core/context/ToastContext';
 import { useRouterState } from '@/routes/RouterState';
 
-interface ChatSidebarProfileProps {
+import { ChatCreateMenu } from './ChatCreateMenu';
+
+interface ChatSidebarHeaderProps {
   setIsSearching: (val: boolean) => void;
-  showCreateMenu: boolean;
-  setShowCreateMenu: (val: boolean | ((prev: boolean) => boolean)) => void;
+  setShowInviteList: (val: boolean) => void;
+  setShowCreateChannelDialog: (val: boolean) => void;
+  setShowCreateTeamDialog: (val: boolean) => void;
 }
 
-export const ChatSidebarProfile = ({
+export const ChatSidebarHeader = ({
   setIsSearching,
-  showCreateMenu,
-  setShowCreateMenu,
-}: ChatSidebarProfileProps) => {
+  setShowInviteList,
+  setShowCreateChannelDialog,
+  setShowCreateTeamDialog,
+}: ChatSidebarHeaderProps) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { user: currentUser, signOut } = useAuth();
   const { showInfo, showSuccess } = useToast();
@@ -42,7 +45,13 @@ export const ChatSidebarProfile = ({
     try {
       await authApi.updateProfile({ status });
       setShowProfileMenu(false);
-      showSuccess(`상태가 ${status}로 변경되었습니다.`);
+      const statusMap: Record<string, string> = {
+        online: '온라인',
+        away: '자리비움',
+        busy: '바쁨',
+        offline: '오프라인',
+      };
+      showSuccess(`상태가 ${statusMap[status] || status}로 변경되었습니다.`);
       if (currentUser) {
         currentUser.status = status as any;
       }
@@ -196,15 +205,11 @@ export const ChatSidebarProfile = ({
         >
           <IconArrowsExchange size={20} />
         </IconButton>
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowCreateMenu(!showCreateMenu);
-          }}
-        >
-          <IconEdit size={20} />
-        </IconButton>
+        <ChatCreateMenu
+          setShowInviteList={setShowInviteList}
+          setShowCreateChannelDialog={setShowCreateChannelDialog}
+          setShowCreateTeamDialog={setShowCreateTeamDialog}
+        />
         <IconButton
           size="small"
           onClick={(e) => {
