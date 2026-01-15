@@ -14,8 +14,6 @@ import { List, ListItem } from '@/ui-components/List/List';
 import { Avatar } from '@/ui-components/Avatar/Avatar';
 import { Divider } from '@/ui-components/Divider/Divider';
 import {
-  IconSend,
-  IconPaperclip,
   IconX,
   IconFile,
   IconDownload,
@@ -39,6 +37,7 @@ import { ChatEmptyState } from './components/ChatEmptyState';
 import { DirectoryView } from './components/Directory/DirectoryView';
 import { ChatHeader } from './components/ChatHeader';
 import { ChatMemberPanel } from './components/ChatMemberPanel';
+import { ChatInput } from './components/ChatInput';
 import './ChatApp.scss';
 
 import type { ChatRoom, ChatUser, Workspace } from './types';
@@ -445,11 +444,8 @@ function ChatAppContent() {
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null); // v2.2.0: 하단 앵커용
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const inputWrapperRef = useRef<HTMLDivElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imageModal, setImageModal] = useState<{ url: string; fileName: string } | null>(null);
-  const [isComposing, setIsComposing] = useState(false);
   const [showUserList, setShowUserList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const { user: currentUser } = useAuth();
@@ -499,9 +495,6 @@ function ChatAppContent() {
     const files = Array.from(target.files || []);
     if (files.length > 0) {
       setSelectedFiles((prev) => [...prev, ...files]);
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
     }
   };
 
@@ -786,104 +779,29 @@ function ChatAppContent() {
         </Box>
 
         {/* Input Area */}
-        <Paper square elevation={4} padding="md" style={{ flexShrink: 0 }}>
-          <Stack spacing="sm">
-            {/* File Previews */}
-            {selectedFiles.length > 0 && (
-              <Flex gap="sm" wrap="wrap">
-                {selectedFiles.map((file, index) => (
-                  <Paper
-                    key={index}
-                    variant="outlined"
-                    padding="sm"
-                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-                  >
-                    <IconFile size={16} />
-                    <Typography variant="caption">{file.name}</Typography>
-                    <IconButton size="small" onClick={() => handleFileRemove(index)}>
-                      <IconX size={14} />
-                    </IconButton>
-                  </Paper>
-                ))}
-              </Flex>
-            )}
-            {uploadingFile && (
-              <Box>
-                <Typography variant="caption">
-                  Uploading {uploadingFile.name}... {Math.round(uploadProgress)}%
-                </Typography>
-                <div
-                  style={{
-                    height: '4px',
-                    width: '100%',
-                    backgroundColor: 'var(--primitive-gray-200)',
-                    borderRadius: '2px',
-                    marginTop: '4px',
-                  }}
-                >
-                  <div
-                    style={{
-                      height: '100%',
-                      width: `${uploadProgress}%`,
-                      backgroundColor: 'var(--primitive-primary-500)',
-                      borderRadius: '2px',
-                    }}
-                  ></div>
-                </div>
-              </Box>
-            )}
-
-            <Flex gap="sm" align="center">
-              <input ref={fileInputRef} type="file" onChange={handleFileSelect} style={{ display: 'none' }} multiple />
-              <IconButton onClick={() => fileInputRef.current?.click()} color="secondary">
-                <IconPaperclip />
-              </IconButton>
-              <Box style={{ flex: 1 }} ref={inputWrapperRef}>
-                <Input
-                  value={input}
-                  onCompositionStart={() => setIsComposing(true)}
-                  onCompositionEnd={() => setIsComposing(false)}
-                  onInput={(e) => {
-                    const target = e.currentTarget as HTMLInputElement;
-                    setInput(target.value);
-                    // 한글 입력 시 포커스 유지 로직 최적화
-                    if (isComposing) {
-                      const inputElement = e.currentTarget;
-                      requestAnimationFrame(() => {
-                        if (document.activeElement !== inputElement) {
-                          inputElement.focus();
-                        }
-                      });
-                    }
-                  }}
-                  onKeyPress={(e) => {
-                    if (!isComposing) {
-                      handleKeyPress(e);
-                    }
-                  }}
-                  placeholder={
-                    !isConnected
-                      ? 'Connecting...'
-                      : `Message #${
-                          currentRoom.displayName ||
-                          getDirectChatName(currentRoom, currentUser?.id || (currentUser as any)?._id)
-                        }`
-                  }
-                  disabled={!isConnected}
-                  fullWidth
-                  className="chat-app__input"
-                />
-              </Box>
-              <IconButton
-                onClick={selectedFiles.length > 0 ? handleFileSend : sendMessage}
-                color="primary"
-                disabled={!isConnected || (!input.trim() && selectedFiles.length === 0)}
-              >
-                <IconSend />
-              </IconButton>
-            </Flex>
-          </Stack>
-        </Paper>
+        <ChatInput
+          input={input}
+          setInput={setInput}
+          selectedFiles={selectedFiles}
+          uploadingFile={uploadingFile}
+          uploadProgress={uploadProgress}
+          isConnected={isConnected}
+          placeholder={
+            !isConnected
+              ? 'Connecting...'
+              : `Message #${
+                  currentRoom.displayName ||
+                  getDirectChatName(currentRoom, currentUser?.id || (currentUser as any)?._id)
+                }`
+          }
+          showFileUpload={true}
+          onSendMessage={sendMessage}
+          onSendFile={handleFileSend}
+          onFileSelect={handleFileSelect}
+          onFileRemove={handleFileRemove}
+          onKeyPress={handleKeyPress}
+          classNamePrefix="chat-app"
+        />
 
         {/* Image Modal */}
         {imageModal && (

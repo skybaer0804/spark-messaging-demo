@@ -1,4 +1,4 @@
-import { useRef } from 'preact/hooks';
+import { useRef, useState } from 'preact/hooks';
 import { memo } from 'preact/compat';
 import { FilePreview } from './FilePreview';
 import { Input } from '@/ui-components/Input/Input';
@@ -43,6 +43,8 @@ function ChatInputComponent({
   onKeyPress,
 }: ChatInputProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputWrapperRef = useRef<HTMLDivElement>(null);
+  const [isComposing, setIsComposing] = useState(false);
 
   return (
     <Paper
@@ -58,10 +60,12 @@ function ChatInputComponent({
           uploadProgress={uploadProgress}
           onRemove={onFileRemove}
         />
-        <Box style={{ position: 'relative', width: '100%' }}>
+        <Box style={{ position: 'relative', width: '100%' }} ref={inputWrapperRef}>
           <Input
             multiline
             value={input}
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={() => setIsComposing(false)}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement;
               setInput(target.value);
@@ -73,8 +77,21 @@ function ChatInputComponent({
               const maxHeight = lineHeight * 5 + 24;
               const targetHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
               target.style.height = `${targetHeight}px`;
+              // 한글 입력 시 포커스 유지 로직 최적화
+              if (isComposing) {
+                const inputElement = e.currentTarget;
+                requestAnimationFrame(() => {
+                  if (document.activeElement !== inputElement) {
+                    inputElement.focus();
+                  }
+                });
+              }
             }}
-            onKeyPress={onKeyPress}
+            onKeyPress={(e) => {
+              if (!isComposing) {
+                onKeyPress(e);
+              }
+            }}
             placeholder={placeholder || (isConnected ? '메시지를 입력하세요...' : '연결 중...')}
             disabled={!isConnected}
             fullWidth
