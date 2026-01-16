@@ -8,6 +8,7 @@ import { Flex } from '@/ui-components/Layout/Flex';
 import { Box } from '@/ui-components/Layout/Box';
 import { IconButton } from '@/ui-components/Button/IconButton';
 import { IconDownload, IconCheck, IconClock, IconAlertCircle } from '@tabler/icons-preact';
+import { MarkdownRenderer } from './MarkdownRenderer/MarkdownRenderer';
 import './Chat.scss';
 
 interface ChatMessageItemProps {
@@ -144,7 +145,11 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
               )}
             </Box>
           ) : (
-            <Typography variant="body-medium">{message.content}</Typography>
+            <MarkdownRenderer
+              content={message.content}
+              variant="default"
+              className={isOwnMessage ? 'markdown-renderer--own-message' : ''}
+            />
           )}
         </Paper>
       </Flex>

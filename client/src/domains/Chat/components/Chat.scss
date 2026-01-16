@@ -18,3 +18,26 @@
     }
   }
 }
+
+// 마크다운 렌더러 스타일 (자신의 메시지)
+.markdown-renderer--own-message {
+  // 자신의 메시지에서는 링크 색상을 밝게 조정
+  .markdown-link {
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: underline;
+
+    &:hover {
+      color: rgba(255, 255, 255, 1);
+    }
+  }
+
+  // 코드 블록 배경 조정
+  .markdown-code-block {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  // 인라인 코드 배경 조정
+  .markdown-inline-code {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+}
