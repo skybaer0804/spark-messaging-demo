@@ -145,7 +145,7 @@ export const DialogChatTeam = ({ open, onClose, onTeamCreated, team }: DialogCha
     <Dialog
       open={open}
       onClose={handleClose}
-      title={isEditMode ? '팀 수정' : 'Create team'}
+      title={isEditMode ? '팀 수정' : '팀 개설'}
       maxWidth={false}
       style={{ maxWidth: '800px' }}
       fullWidth
@@ -207,7 +207,10 @@ export const DialogChatTeam = ({ open, onClose, onTeamCreated, team }: DialogCha
                 People can only join by being invited
               </Typography>
             </Flex>
-            <Switch checked={teamData.private} onChange={(checked) => setTeamData((prev) => ({ ...prev, private: checked }))} />
+            <Switch
+              checked={teamData.private}
+              onChange={(checked) => setTeamData((prev) => ({ ...prev, private: checked }))}
+            />
           </Flex>
         </Box>
       </Stack>

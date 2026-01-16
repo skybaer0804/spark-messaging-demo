@@ -74,6 +74,7 @@
       transition: background-color 0.2s;
       border-radius: 4px;
       margin: 0 8px;
+      position: relative;
 
       &:hover {
         background-color: rgba(255, 255, 255, 0.05);
@@ -148,11 +149,20 @@
       }
 
       &-name {
-        font-size: 14px;
+        font-size: 13px;
         color: rgba(255, 255, 255, 0.9);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+
+      &-status-text {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.6);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-top: 2px;
       }
 
       &-icon {
@@ -166,6 +176,8 @@
         transition: opacity 0.2s;
         color: rgba(255, 255, 255, 0.5) !important;
         padding: 4px !important;
+        margin-left: auto;
+        flex-shrink: 0;
 
         &:hover {
           color: #ffffff !important;

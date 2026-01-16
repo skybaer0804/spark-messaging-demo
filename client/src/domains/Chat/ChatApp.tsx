@@ -10,7 +10,7 @@ import { Divider } from '@/ui-components/Divider/Divider';
 import { Button } from '@/ui-components/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
 import { useAuth } from '@/core/hooks/useAuth';
-import { authApi } from '@/core/api/ApiService';
+import { authApi, chatApi } from '@/core/api/ApiService';
 import { useToast } from '@/core/context/ToastContext';
 import { ChatDataProvider } from './context/ChatDataProvider';
 import { useRouterState } from '@/routes/RouterState';
@@ -54,11 +54,37 @@ function ChatAppContent() {
 
   const view = useMemo(() => {
     if (pathname === '/chatapp/directory') return 'directory';
+    if (pathname.startsWith('/chatapp/invite/')) return 'invite';
     if (pathname.startsWith('/chatapp/chat/')) return 'chat';
     return 'home';
   }, [pathname]);
 
   const [directoryTab, setDirectoryTab] = useState<'channel' | 'team' | 'user'>('channel');
+  const { showSuccess, showError } = useToast();
+
+  // 초대 링크로 입장 처리
+  useEffect(() => {
+    if (view === 'invite') {
+      const slug = pathname.split('/').pop();
+      if (slug) {
+        chatApi
+          .joinRoomByInvite(slug)
+          .then((response) => {
+            const room = response.data;
+            if (room && room._id) {
+              showSuccess('채널에 입장했습니다.');
+              handleRoomSelectRaw(room);
+              navigate(`/chatapp/chat/${room._id}`);
+            }
+          })
+          .catch((error) => {
+            console.error('Failed to join room by invite:', error);
+            showError(error.response?.data?.message || '채널 입장에 실패했습니다.');
+            navigate('/chatapp');
+          });
+      }
+    }
+  }, [view, pathname]);
 
   useEffect(() => {
     if (view === 'chat') {
@@ -109,12 +135,11 @@ function ChatAppContent() {
   const [showUserList, setShowUserList] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const { user: currentUser } = useAuth();
-  const { showSuccess } = useToast();
 
   const toggleGlobalNotifications = async (enabled: boolean) => {
     try {
       await authApi.updateNotificationSettings({ globalEnabled: enabled });
-      showSuccess(`Notifications ${enabled ? 'enabled' : 'disabled'}`);
+      showSuccess(`알림이 ${enabled ? '활성화' : '비활성화'}되었습니다.`);
     } catch (err) {
       console.error('Failed to update settings:', err);
     }

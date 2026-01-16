@@ -7,11 +7,22 @@ import { Typography } from '@/ui-components/Typography/Typography';
 import { Paper } from '@/ui-components/Paper/Paper';
 import { Avatar } from '@/ui-components/Avatar/Avatar';
 import { Button } from '@/ui-components/Button/Button';
-import { IconHash, IconUsers, IconEdit, IconTrash, IconMessageCircle, IconSearch } from '@tabler/icons-preact';
+import {
+  IconHash,
+  IconUsers,
+  IconEdit,
+  IconTrash,
+  IconMessageCircle,
+  IconSearch,
+  IconCopy,
+} from '@tabler/icons-preact';
 import { teamApi, chatApi } from '@/core/api/ApiService';
 import { currentWorkspaceId } from '@/stores/chatRoomsStore';
 import { useAuth } from '@/core/hooks/useAuth';
 import { useToast } from '@/core/context/ToastContext';
+import { useChat } from '../../context/ChatContext';
+import { Dialog } from '@/ui-components/Dialog/Dialog';
+import { Input } from '@/ui-components/Input/Input';
 import { DialogChatTeam } from '../DialogChatTeam';
 import { DialogChatGroup } from '../DialogChatGroup';
 import type { ChatRoom, ChatUser } from '../../types';
@@ -124,16 +135,18 @@ export const DirectoryView = ({
 }: DirectoryViewProps) => {
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { refreshRoomList } = useChat();
   const [teamList, setTeamList] = useState<Team[]>([]);
   const [isLoadingTeams, setIsLoadingTeams] = useState(false);
   const [editTeam, setEditTeam] = useState<Team | null>(null);
   const [editChannel, setEditChannel] = useState<ChatRoom | null>(null);
+  const [inviteChannel, setInviteChannel] = useState<ChatRoom | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // 검색어에 따른 필터링된 목록
+  // 검색어에 따른 필터링된 목록 (public과 private 모두 표시)
   const filteredChannels = useMemo(() => {
     return roomList
-      .filter((r) => r.type === 'public')
+      .filter((r) => r.type === 'public' || r.type === 'private')
       .filter(
         (r) =>
           (r.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -224,10 +237,8 @@ export const DirectoryView = ({
     return false;
   };
 
-  // 현재 사용자가 채널의 Owner인지 확인
-  // TODO: 서버에서 createdBy 정보를 제공하면 더 정확하게 확인 가능
-  // 임시로 모든 채널에 버튼을 표시하도록 수정 (디버깅용)
-  const isChannelOwner = (room: ChatRoom) => {
+  // 현재 사용자가 채널의 멤버인지 확인
+  const isChannelMember = (room: ChatRoom) => {
     if (!user) {
       return false;
     }
@@ -238,17 +249,58 @@ export const DirectoryView = ({
 
     // members 배열에서 현재 사용자가 포함되어 있는지 확인
     if (room.members && room.members.length > 0) {
-      const isMember = room.members.some((member) => {
+      return room.members.some((member) => {
         if (member && typeof member === 'object') {
           const memberId = (member as any)?._id || (member as any)?.id;
           return memberId && memberId.toString() === currentUserId.toString();
         }
         return false;
       });
+    }
 
-      // 임시: 멤버인 경우 모두 버튼 표시
-      // 실제로는 서버에서 createdBy 정보를 받아서 확인해야 함
-      return isMember;
+    return false;
+  };
+
+  // 현재 사용자가 채널의 Owner인지 확인
+  const isChannelOwner = (room: ChatRoom) => {
+    if (!user) {
+      return false;
+    }
+    const currentUserId = (user as any).id || (user as any)._id;
+    if (!currentUserId) {
+      return false;
+    }
+
+    // 1. createdBy 필드가 있는 경우 (우선 순위)
+    if (room.createdBy) {
+      if (typeof room.createdBy === 'string') {
+        return room.createdBy === currentUserId.toString();
+      }
+      if (typeof room.createdBy === 'object') {
+        const creatorId = (room.createdBy as any)?._id || (room.createdBy as any)?.id;
+        return creatorId && creatorId.toString() === currentUserId.toString();
+      }
+    }
+
+    // 2. createdBy가 없는 경우 기존 로직 유지 (하위 호환성)
+    if (room.members && room.members.length > 0) {
+      const firstMember = room.members[0];
+      if (firstMember) {
+        const firstMemberId =
+          typeof firstMember === 'string' ? firstMember : (firstMember as any)?._id || (firstMember as any)?.id;
+        if (firstMemberId && firstMemberId.toString() === currentUserId.toString()) {
+          return true;
+        }
+      }
+
+      const isMember = room.members.some((member) => {
+        const memberId = typeof member === 'string' ? member : (member as any)?._id || (member as any)?.id;
+        return memberId && memberId.toString() === currentUserId.toString();
+      });
+
+      if (isMember && room.members.length === 1) {
+        return true;
+      }
     }
 
     return false;
@@ -279,6 +331,24 @@ export const DirectoryView = ({
     }
   };
 
+  // 채널 클릭 처리 (멤버 여부 확인)
+  const handleChannelClick = async (room: ChatRoom) => {
+    // 이미 멤버인 경우 바로 입장
+    if (isChannelMember(room)) {
+      onRoomSelect(room._id);
+      return;
+    }
+
+    // Private 채널이고 멤버가 아닌 경우 초대 링크 표시
+    if (room.type === 'private') {
+      setInviteChannel(room);
+      return;
+    }
+
+    // Public 채널은 바로 입장
+    onRoomSelect(room._id);
+  };
+
   // 채널 수정
   const handleEditChannel = (room: ChatRoom) => {
     setEditChannel(room);
@@ -291,8 +361,9 @@ export const DirectoryView = ({
     }
 
     try {
-      // TODO: 채널 삭제 API 호출 (현재 서버에 없을 수 있음)
-      showError('채널 삭제 기능은 아직 준비 중입니다.');
+      await chatApi.deleteRoom(room._id);
+      showSuccess('채널이 삭제되었습니다.');
+      // TODO: 채널 목록 새로고침
     } catch (error: any) {
       console.error('[handleDeleteChannel] Failed to delete channel:', error);
       showError(error.response?.data?.message || '채널 삭제에 실패했습니다.');
@@ -381,19 +452,17 @@ export const DirectoryView = ({
           <Grid container spacing={2} columns={4}>
             {filteredChannels.map((room) => {
               const isOwner = isChannelOwner(room);
-              // 디버깅용: 임시로 모든 채널에 버튼 표시
-              const showActions = true; // isOwner 대신 true로 임시 설정
               return (
                 <Grid item key={room._id} xs={4} sm={2} md={1}>
                   <DirectoryItemCard
                     title={room.name || '채널'}
                     description={room.description}
                     icon={<IconHash size={20} />}
-                    color="#509EE3"
-                    onClick={() => onRoomSelect(room._id)}
-                    badge="Public"
+                    color={room.type === 'private' ? '#E73C7E' : '#509EE3'}
+                    onClick={() => handleChannelClick(room)}
+                    badge={room.type === 'private' ? 'Private' : room.isPrivate ? 'Private' : 'Public'}
                     actions={
-                      showActions ? (
+                      isOwner ? (
                         <>
                           <Button
                             variant="secondary"
@@ -569,9 +638,9 @@ export const DirectoryView = ({
         <DialogChatGroup
           open={!!editChannel}
           onClose={() => setEditChannel(null)}
-          onGroupCreated={() => {
+          onGroupCreated={async () => {
             setEditChannel(null);
-            // TODO: 채널 목록 새로고침
+            await refreshRoomList();
           }}
           group={
             editChannel
@@ -586,6 +655,64 @@ export const DirectoryView = ({
               : undefined
           }
         />
+      )}
+
+      {/* 초대 링크 다이얼로그 */}
+      {inviteChannel && (
+        <Dialog
+          open={!!inviteChannel}
+          onClose={() => setInviteChannel(null)}
+          title="채널 초대"
+          maxWidth="sm"
+          fullWidth
+          actions={
+            <Flex gap="sm">
+              <Button onClick={() => setInviteChannel(null)}>닫기</Button>
+            </Flex>
+          }
+        >
+          <Stack spacing="md">
+            {isChannelOwner(inviteChannel) ? (
+              <>
+                <Typography variant="body-medium">
+                  이 채널의 초대 링크를 공유하세요. 링크를 가진 사용자만 채널에 입장할 수 있습니다.
+                </Typography>
+                <Box>
+                  <Flex gap="sm" align="center">
+                    <Input
+                      fullWidth
+                      disabled
+                      value={
+                        inviteChannel.slug
+                          ? `${window.location.origin}/chatapp/invite/${inviteChannel.slug}`
+                          : '초대 링크 생성 중...'
+                      }
+                      style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}
+                    />
+                    <Button
+                      variant="secondary"
+                      onClick={async () => {
+                        const inviteLink = inviteChannel.slug
+                          ? `${window.location.origin}/chatapp/invite/${inviteChannel.slug}`
+                          : '';
+                        if (inviteLink) {
+                          await navigator.clipboard.writeText(inviteLink);
+                          showSuccess('초대 링크가 클립보드에 복사되었습니다.');
+                        }
+                      }}
+                    >
+                      <IconCopy size={18} />
+                    </Button>
+                  </Flex>
+                </Box>
+              </>
+            ) : (
+              <Typography variant="body-medium" color="text-secondary">
+                이 채널은 비공개 채널입니다. 채널 Owner에게 초대 링크를 요청하세요.
+              </Typography>
+            )}
+          </Stack>
+        </Dialog>
       )}
     </Box>
   );

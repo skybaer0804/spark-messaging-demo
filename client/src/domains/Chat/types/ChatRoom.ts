@@ -32,6 +32,8 @@ export interface ChatRoom {
   teamId?: string;
   parentId?: string;
   isPrivate?: boolean;
+  slug?: string; // 초대 링크용 slug
+  createdBy?: string | ChatUser; // 채널 생성자
   lastMessage?: Message;
   lastSequenceNumber?: number;
   displayName?: string; // v2.2.0: 서버에서 계산된 표시용 이름

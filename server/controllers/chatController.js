@@ -82,6 +82,26 @@ exports.createRoom = async (req, res) => {
       }
     }
 
+    // Private 채널인 경우 slug 생성
+    let slug = null;
+    if ((type === 'private' || isPrivate) && type !== 'direct') {
+      // 이름 기반으로 slug 생성 (영문, 숫자, 하이픈, 언더스코어만 허용)
+      const baseSlug = (name || 'channel')
+        .toLowerCase()
+        .replace(/[^a-z0-9가-힣_-]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+      
+      // 고유한 slug 생성 (중복 방지)
+      let uniqueSlug = baseSlug;
+      let counter = 1;
+      while (await ChatRoom.findOne({ slug: uniqueSlug, workspaceId })) {
+        uniqueSlug = `${baseSlug}-${counter}`;
+        counter++;
+      }
+      slug = uniqueSlug;
+    }
+
     const roomData = {
       name: type === 'direct' ? null : name || 'New Room',
       description,
@@ -91,7 +111,9 @@ exports.createRoom = async (req, res) => {
       teamId,
       parentId,
       isPrivate: !!isPrivate,
+      createdBy: currentUserId,
       identifier: roomIdentifier || undefined, // null 대신 undefined 사용하여 sparse index 활용
+      slug: slug || undefined,
     };
 
     const newRoom = new ChatRoom(roomData);
@@ -197,6 +219,219 @@ exports.getRooms = async (req, res) => {
     res.json(formattedRooms);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch rooms', error: error.message });
+  }
+};
+
+// 채팅방 수정
+exports.updateRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { name, description, members, isPrivate, type } = req.body;
+    const currentUserId = req.user.id;
+
+    const room = await ChatRoom.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ message: 'Room not found' });
+    }
+
+    // 권한 확인: 현재 사용자가 방의 멤버인지 확인
+    const isMember = room.members.some((m) => m.toString() === currentUserId.toString());
+    if (!isMember) {
+      return res.status(403).json({ message: 'You are not a member of this room' });
+    }
+
+    // 업데이트할 데이터 구성
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (description !== undefined) updateData.description = description;
+    if (isPrivate !== undefined) {
+      updateData.isPrivate = isPrivate;
+      // Private로 변경 시 slug 생성
+      if (isPrivate && !room.slug && room.type !== 'direct') {
+        const baseSlug = (name || room.name || 'channel')
+          .toLowerCase()
+          .replace(/[^a-z0-9가-힣_-]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+        
+        let uniqueSlug = baseSlug;
+        let counter = 1;
+        while (await ChatRoom.findOne({ slug: uniqueSlug, workspaceId: room.workspaceId, _id: { $ne: roomId } })) {
+          uniqueSlug = `${baseSlug}-${counter}`;
+          counter++;
+        }
+        updateData.slug = uniqueSlug;
+      }
+    }
+    if (type !== undefined) updateData.type = type;
+    if (members !== undefined && Array.isArray(members)) {
+      // 멤버 목록에 현재 사용자 포함 (방장은 항상 멤버여야 함)
+      const roomMembers = [...new Set([...members, currentUserId])];
+      updateData.members = roomMembers;
+    }
+
+    // 방 정보 업데이트
+    const updatedRoom = await ChatRoom.findByIdAndUpdate(roomId, updateData, { new: true }).populate(
+      'members',
+      'username profileImage status statusText',
+    );
+
+    // 멤버 목록이 변경된 경우 UserChatRoom 레코드 업데이트
+    if (members !== undefined && Array.isArray(members)) {
+      const roomMembers = [...new Set([...members, currentUserId])];
+      
+      // 기존 멤버들의 UserChatRoom 레코드 유지
+      const existingUserChatRooms = await UserChatRoom.find({ roomId });
+      const existingUserIds = existingUserChatRooms.map((ucr) => ucr.userId.toString());
+      
+      // 새로 추가된 멤버들에 대한 UserChatRoom 레코드 생성
+      const newMemberIds = roomMembers.filter((id) => !existingUserIds.includes(id.toString()));
+      for (const userId of newMemberIds) {
+        await UserChatRoom.findOneAndUpdate(
+          { userId, roomId },
+          {
+            userId,
+            roomId,
+            lastReadSequenceNumber: updatedRoom.lastSequenceNumber || 0,
+            unreadCount: 0,
+          },
+          { upsert: true, new: true },
+        );
+      }
+
+      // 제거된 멤버들의 UserChatRoom 레코드 삭제
+      const removedUserIds = existingUserIds.filter((id) => !roomMembers.some((m) => m.toString() === id));
+      for (const userId of removedUserIds) {
+        await UserChatRoom.findOneAndDelete({ userId, roomId });
+      }
+
+      // 모든 멤버에게 방 목록 업데이트 알림
+      roomMembers.forEach((userId) => {
+        socketService.notifyRoomListUpdated(userId.toString());
+      });
+    } else {
+      // 멤버 목록이 변경되지 않은 경우에도 방 목록 업데이트 알림
+      updatedRoom.members.forEach((member) => {
+        socketService.notifyRoomListUpdated(member._id.toString());
+      });
+    }
+
+    const roomObj = updatedRoom.toObject();
+    if (roomObj.type === 'direct') {
+      const otherMember = roomObj.members.find((m) => m._id.toString() !== currentUserId.toString());
+      roomObj.displayName = otherMember ? otherMember.username : 'Unknown';
+      roomObj.displayAvatar = otherMember ? otherMember.profileImage || otherMember.avatar : null;
+      roomObj.displayStatus = otherMember ? otherMember.status : 'offline';
+      roomObj.displayStatusText = otherMember ? otherMember.statusText : '';
+    } else {
+      roomObj.displayName = roomObj.name;
+    }
+
+    res.json(roomObj);
+  } catch (error) {
+    console.error('Error updating room:', error);
+    res.status(500).json({ message: 'Failed to update room', error: error.message });
+  }
+};
+
+// 초대 링크로 채팅방 입장
+exports.joinRoomByInvite = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const currentUserId = req.user.id;
+    const workspaceId = req.headers['x-workspace-id'] || req.body.workspaceId;
+
+    if (!workspaceId) {
+      return res.status(400).json({ message: 'workspaceId is required' });
+    }
+
+    // slug로 채팅방 찾기
+    const room = await ChatRoom.findOne({ slug, workspaceId, type: 'private' });
+    if (!room) {
+      return res.status(404).json({ message: 'Room not found or invalid invite link' });
+    }
+
+    // 이미 멤버인지 확인
+    const isMember = room.members.some((m) => m.toString() === currentUserId.toString());
+    if (isMember) {
+      // 이미 멤버인 경우 방 정보 반환
+      const populatedRoom = await ChatRoom.findById(room._id).populate(
+        'members',
+        'username profileImage status statusText',
+      );
+      const roomObj = populatedRoom.toObject();
+      roomObj.displayName = roomObj.name;
+      return res.json(roomObj);
+    }
+
+    // 멤버 추가
+    room.members.push(currentUserId);
+    await room.save();
+
+    // UserChatRoom 레코드 생성
+    await UserChatRoom.findOneAndUpdate(
+      { userId: currentUserId, roomId: room._id },
+      {
+        userId: currentUserId,
+        roomId: room._id,
+        lastReadSequenceNumber: room.lastSequenceNumber || 0,
+        unreadCount: 0,
+      },
+      { upsert: true, new: true },
+    );
+
+    // 모든 멤버에게 방 목록 업데이트 알림
+    room.members.forEach((memberId) => {
+      socketService.notifyRoomListUpdated(memberId.toString());
+    });
+
+    const populatedRoom = await ChatRoom.findById(room._id).populate(
+      'members',
+      'username profileImage status statusText',
+    );
+    const roomObj = populatedRoom.toObject();
+    roomObj.displayName = roomObj.name;
+
+    res.json(roomObj);
+  } catch (error) {
+    console.error('Error joining room by invite:', error);
+    res.status(500).json({ message: 'Failed to join room', error: error.message });
+  }
+};
+
+// 채팅방 삭제
+exports.deleteRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const currentUserId = req.user.id;
+
+    const room = await ChatRoom.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ message: 'Room not found' });
+    }
+
+    // 권한 확인: 현재 사용자가 방의 멤버인지 확인
+    const isMember = room.members.some((m) => m.toString() === currentUserId.toString());
+    if (!isMember) {
+      return res.status(403).json({ message: 'You are not a member of this room' });
+    }
+
+    // 모든 멤버의 UserChatRoom 레코드 삭제
+    await UserChatRoom.deleteMany({ roomId });
+
+    // 방 삭제 (실제로는 아카이브 처리)
+    room.isArchived = true;
+    await room.save();
+
+    // 모든 멤버에게 방 목록 업데이트 알림
+    room.members.forEach((memberId) => {
+      socketService.notifyRoomListUpdated(memberId.toString());
+    });
+
+    res.json({ message: 'Room deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting room:', error);
+    res.status(500).json({ message: 'Failed to delete room', error: error.message });
   }
 };
 

@@ -123,7 +123,7 @@ export const ChatSidebar = memo(() => {
             <div className="chat-app__sidebar-item-status-text">{statusText}</div>
           )}
         </div>
-        <Flex align="center" gap="xs">
+        <Flex align="center" gap="xs" style={{ marginLeft: 'auto', flexShrink: 0 }}>
           {room.unreadCount ? <div className="chat-app__sidebar-item-badge">{room.unreadCount}</div> : null}
           <IconButton
             size="small"

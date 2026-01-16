@@ -71,8 +71,18 @@ export const DialogChatGroup = ({ open, onClose, onGroupCreated, group }: Dialog
     setIsSubmitting(true);
     try {
       if (isEditMode && group) {
-        // 수정 모드 (서버에 updateRoom 라우트가 현재 없음)
-        showError('채널 수정 기능은 아직 준비 중입니다.');
+        // 수정 모드
+        const memberIds = groupData.members.map((m) => m._id);
+        await chatApi.updateRoom(group._id, {
+          name: groupData.name.trim(),
+          description: groupData.description.trim() || undefined,
+          isPrivate: groupData.isPrivate,
+          type: groupData.isPrivate ? 'private' : 'public',
+          members: memberIds.length > 0 ? memberIds : undefined,
+        });
+        
+        await refreshRoomList();
+        showSuccess('채널이 수정되었습니다.');
       } else {
         // 생성 모드
         const memberIds = groupData.members.map((m) => m._id);
@@ -86,6 +96,7 @@ export const DialogChatGroup = ({ open, onClose, onGroupCreated, group }: Dialog
         });
         
         await refreshRoomList();
+        showSuccess('채널이 생성되었습니다.');
       }
 
       // 성공 시 초기화 및 닫기
@@ -95,7 +106,6 @@ export const DialogChatGroup = ({ open, onClose, onGroupCreated, group }: Dialog
         isPrivate: false,
         members: [],
       });
-      showSuccess(isEditMode ? '채널이 수정되었습니다.' : '채널이 생성되었습니다.');
       onGroupCreated?.();
       onClose();
     } catch (error: any) {

@@ -3,6 +3,9 @@ const router = express.Router();
 const {
   createRoom,
   getRooms,
+  updateRoom,
+  deleteRoom,
+  joinRoomByInvite,
   sendMessage,
   getMessages,
   uploadFile,
@@ -19,6 +22,9 @@ router.use(auth); // 모든 채팅 라우트는 인증 필요
 
 router.post('/rooms', workspaceAuth, createRoom);
 router.get('/rooms', getRooms);
+router.put('/rooms/:roomId', workspaceAuth, updateRoom);
+router.delete('/rooms/:roomId', workspaceAuth, deleteRoom);
+router.post('/invite/:slug', workspaceAuth, joinRoomByInvite);
 router.post('/leave/:roomId', leaveRoom);
 router.post('/messages', workspaceAuth, sendMessage);
 router.get('/messages/:roomId', getMessages);

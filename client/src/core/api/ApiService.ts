@@ -84,6 +84,18 @@ export const chatApi = {
     parentId?: string;
     isPrivate?: boolean;
   }) => api.post('/chat/rooms', data),
+  updateRoom: (
+    roomId: string,
+    data: {
+      name?: string;
+      members?: string[];
+      description?: string;
+      type?: string;
+      isPrivate?: boolean;
+    },
+  ) => api.put(`/chat/rooms/${roomId}`, data),
+  deleteRoom: (roomId: string) => api.delete(`/chat/rooms/${roomId}`),
+  joinRoomByInvite: (slug: string) => api.post(`/chat/invite/${slug}`),
   leaveRoom: (roomId: string) => api.post(`/chat/leave/${roomId}`),
   getMessages: (roomId: string) => api.get(`/chat/messages/${roomId}`),
   sendMessage: (data: { roomId: string; content: string; type?: string; tempId?: string }) =>
