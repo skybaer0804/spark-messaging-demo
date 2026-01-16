@@ -10,11 +10,11 @@ import {
   IconSearch,
   IconAddressBook,
   IconArrowsExchange,
-  IconDotsVertical,
   IconCircleFilled,
   IconCircle,
   IconUser,
   IconLogout,
+  IconHome,
 } from '@tabler/icons-preact';
 import { useAuth } from '@/core/hooks/useAuth';
 import { authApi } from '@/core/api/ApiService';
@@ -31,6 +31,7 @@ interface ChatSidebarHeaderProps {
   handleCreateRoom: (type: any, extraData?: any) => void;
   roomIdInput: string;
   setRoomIdInput: (val: string) => void;
+  setActiveView: (view: 'chat' | 'directory' | 'home') => void;
 }
 
 export const ChatSidebarHeader = ({
@@ -41,6 +42,7 @@ export const ChatSidebarHeader = ({
   handleCreateRoom,
   roomIdInput,
   setRoomIdInput,
+  setActiveView,
 }: ChatSidebarHeaderProps) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { user: currentUser, signOut } = useAuth();
@@ -196,6 +198,15 @@ export const ChatSidebarHeader = ({
       )}
 
       <div className="chat-app__sidebar-actions">
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            setActiveView('home');
+          }}
+        >
+          <IconHome size={20} />
+        </IconButton>
         <IconButton size="small" onClick={() => setIsSearching(true)}>
           <IconSearch size={20} />
         </IconButton>
@@ -219,7 +230,7 @@ export const ChatSidebarHeader = ({
           roomIdInput={roomIdInput}
           setRoomIdInput={setRoomIdInput}
         />
-        <IconButton
+        {/* <IconButton
           size="small"
           onClick={(e) => {
             e.stopPropagation();
@@ -227,7 +238,7 @@ export const ChatSidebarHeader = ({
           }}
         >
           <IconDotsVertical size={20} />
-        </IconButton>
+        </IconButton> */}
       </div>
     </>
   );

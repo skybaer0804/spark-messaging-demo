@@ -55,6 +55,7 @@ interface ChatRoomSidebarProps {
   handleRoomSelect: (roomId: string) => void;
   leaveRoom: (roomId?: string) => void; // v2.4.0: roomId 선택 사항 추가
   onUserClick?: (userId: string) => void;
+  setActiveView: (view: 'chat' | 'directory' | 'home') => void;
 }
 
 const ChatRoomSidebar = memo(
@@ -69,7 +70,8 @@ const ChatRoomSidebar = memo(
     currentRoom,
     handleRoomSelect,
     leaveRoom,
-    onUserClick, // 추가
+    onUserClick,
+    setActiveView,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     isConnected: _isConnected,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -294,6 +296,7 @@ const ChatRoomSidebar = memo(
                 handleCreateRoom={handleCreateRoom}
                 roomIdInput={roomIdInput}
                 setRoomIdInput={setRoomIdInput}
+                setActiveView={setActiveView}
               />
             )}
           </Flex>
@@ -554,6 +557,7 @@ function ChatAppContent() {
             handleRoomSelect={onRoomSelect}
             leaveRoom={leaveRoom}
             onUserClick={startDirectChat}
+            setActiveView={setActiveView}
           />
         </Box>
         {!isMobile && (
@@ -610,6 +614,7 @@ function ChatAppContent() {
             handleRoomSelect={onRoomSelect}
             leaveRoom={leaveRoom}
             onUserClick={startDirectChat}
+            setActiveView={setActiveView}
           />
         </Box>
       )}
