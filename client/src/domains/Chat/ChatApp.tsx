@@ -2,15 +2,9 @@ import { useChatApp } from './hooks/useChatApp';
 import { useRef, useEffect, useState, useMemo } from 'preact/hooks';
 import { useChat } from './context/ChatContext';
 import { Box } from '@/ui-components/Layout/Box';
-import { Flex } from '@/ui-components/Layout/Flex';
-import { Stack } from '@/ui-components/Layout/Stack';
-import { Typography } from '@/ui-components/Typography/Typography';
-import { Paper } from '@/ui-components/Paper/Paper';
-import { Divider } from '@/ui-components/Divider/Divider';
-import { Button } from '@/ui-components/Button/Button';
 import { chatPendingJoinRoom, clearPendingJoinChatRoom } from '@/stores/chatRoomsStore';
 import { useAuth } from '@/core/hooks/useAuth';
-import { authApi, chatApi } from '@/core/api/ApiService';
+import { chatApi } from '@/core/api/ApiService';
 import { useToast } from '@/core/context/ToastContext';
 import { ChatDataProvider } from './context/ChatDataProvider';
 import { useRouterState } from '@/routes/RouterState';
@@ -22,6 +16,7 @@ import { ChatHeader } from './components/ChatHeader';
 import { ChatMemberPanel } from './components/ChatMemberPanel';
 import { ChatInput } from './components/ChatInput';
 import { ChatMessages } from './components/ChatMessages';
+import { ChatSetting } from './components/ChatSetting/ChatSetting';
 import './ChatApp.scss';
 
 function ChatAppContent() {
@@ -91,6 +86,8 @@ function ChatAppContent() {
       const roomId = pathname.split('/').pop();
       if (roomId && currentRoom?._id !== roomId && roomList.length > 0) {
         onRoomSelect(roomId);
+        // 방이 변경되면 우측 패널 닫기
+        setRightPanel('none');
       }
     }
   }, [pathname, currentRoom?._id, roomList, view]);
@@ -132,18 +129,8 @@ function ChatAppContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null); // v2.2.0: 하단 앵커용
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [imageModal, setImageModal] = useState<{ url: string; fileName: string } | null>(null);
-  const [showUserList, setShowUserList] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [rightPanel, setRightPanel] = useState<'none' | 'members' | 'settings'>('none');
   const { user: currentUser } = useAuth();
-
-  const toggleGlobalNotifications = async (enabled: boolean) => {
-    try {
-      await authApi.updateNotificationSettings({ globalEnabled: enabled });
-      showSuccess(`알림이 ${enabled ? '활성화' : '비활성화'}되었습니다.`);
-    } catch (err) {
-      console.error('Failed to update settings:', err);
-    }
-  };
 
   // Auto-scroll to bottom (Anchor-based)
   useEffect(() => {
@@ -264,9 +251,10 @@ function ChatAppContent() {
                 isMobile={isMobile}
                 goToHome={goToHome}
                 currentRoom={currentRoom}
-                showUserList={showUserList}
-                setShowUserList={setShowUserList}
-                setShowSettings={setShowSettings}
+                showUserList={rightPanel === 'members'}
+                showSettings={rightPanel === 'settings'}
+                setShowUserList={(show: boolean) => setRightPanel(show ? 'members' : 'none')}
+                setShowSettings={(show: boolean) => setRightPanel(show ? 'settings' : 'none')}
                 toggleDebug={toggleDebug}
                 debugEnabled={debugEnabled}
               />
@@ -282,8 +270,9 @@ function ChatAppContent() {
                   onImageClick={handleImageClick}
                 />
 
-                {/* User List Sidebar */}
-                {showUserList && <ChatMemberPanel members={currentRoom.members} />}
+                {/* Right Sidebar */}
+                {rightPanel === 'members' && <ChatMemberPanel members={currentRoom.members} />}
+                {rightPanel === 'settings' && <ChatSetting roomId={currentRoom._id} currentRoom={currentRoom} />}
               </Box>
 
               {/* Input Area */}
@@ -335,51 +324,6 @@ function ChatAppContent() {
           onClick={handleCloseImageModal}
         >
           <img src={imageModal.url} alt={imageModal.fileName} style={{ maxWidth: '90%', maxHeight: '90%' }} />
-        </div>
-      )}
-
-      {showSettings && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            zIndex: 3000,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-          onClick={() => setShowSettings(false)}
-        >
-          <Paper
-            padding="lg"
-            style={{ width: '400px', backgroundColor: 'var(--color-bg-default)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Typography variant="h3" style={{ marginBottom: '16px' }}>
-              Notification Settings
-            </Typography>
-            <Stack spacing="md">
-              <Flex justify="space-between" align="center">
-                <Typography variant="body-medium">Global Notifications</Typography>
-                <input
-                  type="checkbox"
-                  checked={(currentUser as any)?.notificationSettings?.globalEnabled !== false}
-                  onChange={(e) => toggleGlobalNotifications(e.currentTarget.checked)}
-                />
-              </Flex>
-              <Divider />
-              <Typography variant="caption" color="text-secondary">
-                More detailed per-room settings coming soon...
-              </Typography>
-              <Button fullWidth onClick={() => setShowSettings(false)}>
-                Close
-              </Button>
-            </Stack>
-          </Paper>
         </div>
       )}
     </Box>

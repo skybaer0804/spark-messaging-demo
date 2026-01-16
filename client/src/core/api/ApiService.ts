@@ -109,6 +109,9 @@ export const chatApi = {
       },
     }),
   setActiveRoom: (roomId: string | null) => api.post('/chat/active-room', { roomId }),
+  getRoomNotificationSettings: (roomId: string) => api.get(`/chat/rooms/${roomId}/notification-settings`),
+  updateRoomNotificationSettings: (roomId: string, settings: { notificationMode: 'default' | 'none' | 'mention' }) =>
+    api.put(`/chat/rooms/${roomId}/notification-settings`, settings),
 };
 
 export const workspaceApi = {

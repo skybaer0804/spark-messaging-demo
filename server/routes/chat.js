@@ -13,6 +13,8 @@ const {
   syncMessages,
   markAsRead,
   leaveRoom,
+  getRoomNotificationSettings,
+  updateRoomNotificationSettings,
 } = require('../controllers/chatController');
 const auth = require('../middleware/auth');
 const workspaceAuth = require('../middleware/workspaceAuth');
@@ -31,6 +33,8 @@ router.get('/messages/:roomId', getMessages);
 router.get('/sync/:roomId', syncMessages);
 router.post('/read/:roomId', markAsRead);
 router.post('/active-room', setActiveRoom);
+router.get('/rooms/:roomId/notification-settings', getRoomNotificationSettings);
+router.put('/rooms/:roomId/notification-settings', updateRoomNotificationSettings);
 
 // 파일 업로드 라우트 추가 (파일 업로드 시에도 workspaceId 확인 권장되지만 일단 인증만)
 router.post('/upload', upload.single('file'), uploadFile);

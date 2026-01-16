@@ -31,6 +31,12 @@ const userChatRoomSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  // 채팅방별 알림 모드: 'default' (모든 메시지), 'none' (알림 없음), 'mention' (멘션만)
+  notificationMode: {
+    type: String,
+    enum: ['default', 'none', 'mention'],
+    default: 'default',
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -15,6 +15,7 @@ interface ChatHeaderProps {
   goToHome: () => void;
   currentRoom: ChatRoom;
   showUserList: boolean;
+  showSettings: boolean;
   setShowUserList: (val: boolean) => void;
   setShowSettings: (val: boolean) => void;
   toggleDebug: () => void;
@@ -26,6 +27,7 @@ export const ChatHeader = ({
   goToHome,
   currentRoom,
   showUserList,
+  showSettings,
   setShowUserList,
   setShowSettings,
   toggleDebug,
@@ -74,13 +76,32 @@ export const ChatHeader = ({
           <IconVideo size={20} />
         </IconButton>
         <IconButton
-          onClick={() => setShowUserList(!showUserList)}
+          onClick={() => {
+            if (showUserList) {
+              setShowUserList(false);
+            } else {
+              setShowSettings(false);
+              setShowUserList(true);
+            }
+          }}
           color={showUserList ? 'primary' : 'secondary'}
           title="참여자 목록"
         >
           <IconUsers size={20} />
         </IconButton>
-        <IconButton onClick={() => setShowSettings(true)} color="secondary" title="설정">
+        <IconButton
+          onClick={() => {
+            const isSettingsOpen = !showUserList && (window as any).__chatSettingsOpen;
+            if (isSettingsOpen) {
+              setShowSettings(false);
+            } else {
+              setShowUserList(false);
+              setShowSettings(true);
+            }
+          }}
+          color="secondary"
+          title="설정"
+        >
           <IconSettings size={20} />
         </IconButton>
         <IconButton onClick={toggleDebug} color={debugEnabled ? 'primary' : 'secondary'} title="디버그 모드 토글">

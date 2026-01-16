@@ -3,9 +3,10 @@ const User = require('../models/User');
 const PushSubscription = require('../models/PushSubscription');
 
 class NotificationService {
-  async sendPushNotification(userId, payload, roomId = null) {
+  async sendPushNotification(userId, payload, roomId = null, messageData = null) {
     try {
       const User = require('../models/User');
+      const UserChatRoom = require('../models/UserChatRoom');
       const userService = require('./userService');
 
       const user = await User.findById(userId);
@@ -16,11 +17,41 @@ class NotificationService {
         return;
       }
 
-      // 2. 방별 알림 설정 확인
-      if (roomId && user.notificationSettings && user.notificationSettings.roomPreferences) {
-        const roomPref = user.notificationSettings.roomPreferences.get(roomId.toString());
-        if (roomPref === false) {
-          return;
+      // 2. 방별 알림 설정 확인 (UserChatRoom 기반)
+      if (roomId) {
+        const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
+        if (userChatRoom) {
+          const mode = userChatRoom.notificationMode || 'default';
+          
+          if (mode === 'none') {
+            return; // 알림 차단
+          }
+          
+          if (mode === 'mention') {
+            // 멘션 체크
+            if (messageData) {
+              const userIdStr = userId.toString();
+              const mentions = messageData.mentions || [];
+              const isMentioned = 
+                mentions.some(m => m.toString() === userIdStr) ||
+                messageData.mentionAll ||
+                messageData.mentionHere;
+              
+              if (!isMentioned) {
+                return; // 멘션되지 않았으면 알림 차단
+              }
+            } else {
+              return; // 메시지 데이터가 없으면 차단
+            }
+          }
+        }
+        
+        // 기존 roomPreferences 체크 (하위 호환성)
+        if (user.notificationSettings && user.notificationSettings.roomPreferences) {
+          const roomPref = user.notificationSettings.roomPreferences.get(roomId.toString());
+          if (roomPref === false) {
+            return;
+          }
         }
       }
 
@@ -64,7 +95,7 @@ class NotificationService {
   }
 
   // 채팅 메시지 알림 전송 유틸리티
-  async notifyNewMessage(recipientIds, senderName, messageContent, roomId) {
+  async notifyNewMessage(recipientIds, senderName, messageContent, roomId, messageData = null) {
     console.log(`[Push] Notifying new message to recipients: ${recipientIds.join(', ')}`);
     const payload = {
       title: `${senderName}님의 메시지`,
@@ -76,7 +107,16 @@ class NotificationService {
       },
     };
 
-    const pushPromises = recipientIds.map((userId) => this.sendPushNotification(userId, payload, roomId));
+    // messageData에 mentions 정보 포함하여 전달
+    const mentionData = messageData ? {
+      mentions: messageData.mentions || [],
+      mentionAll: messageData.mentionAll || false,
+      mentionHere: messageData.mentionHere || false,
+    } : null;
+
+    const pushPromises = recipientIds.map((userId) => 
+      this.sendPushNotification(userId, payload, roomId, mentionData)
+    );
 
     await Promise.all(pushPromises);
   }

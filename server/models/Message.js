@@ -23,6 +23,10 @@ const messageSchema = new mongoose.Schema({
   fileUrl: { type: String },
   fileName: { type: String },
   readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  // 멘션 정보
+  mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // @멘션된 사용자 ID 배열
+  mentionAll: { type: Boolean, default: false }, // @all 사용 여부
+  mentionHere: { type: Boolean, default: false }, // @here 사용 여부
   timestamp: { type: Date, default: Date.now },
 });
 

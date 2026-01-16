@@ -7,6 +7,41 @@ const notificationService = require('../services/notificationService');
 const userService = require('../services/userService');
 const imageService = require('../services/imageService');
 
+// 멘션 파싱 유틸리티 함수
+function parseMentions(content, roomMembers) {
+  const mentions = [];
+  let mentionAll = false;
+  let mentionHere = false;
+
+  if (!content || typeof content !== 'string') {
+    return { mentions, mentionAll, mentionHere };
+  }
+
+  // @username 패턴 찾기 (한글, 영문, 숫자, 언더스코어 지원)
+  const mentionPattern = /@([가-힣a-zA-Z0-9_]+)/g;
+  let match;
+  const foundUsernames = new Set();
+
+  while ((match = mentionPattern.exec(content)) !== null) {
+    const username = match[1];
+    foundUsernames.add(username);
+  }
+
+  // 찾은 username을 member ID로 변환
+  for (const username of foundUsernames) {
+    const member = roomMembers.find((m) => m.username === username);
+    if (member) {
+      mentions.push(member._id);
+    }
+  }
+
+  // @all, @here 체크 (단어 경계 고려)
+  if (/\b@all\b/i.test(content)) mentionAll = true;
+  if (/\b@here\b/i.test(content)) mentionHere = true;
+
+  return { mentions, mentionAll, mentionHere };
+}
+
 // 채팅방 생성
 exports.createRoom = async (req, res) => {
   try {
@@ -74,10 +109,10 @@ exports.createRoom = async (req, res) => {
           'members',
           'username profileImage status statusText',
         );
-        
+
         const roomObj = populatedRoom.toObject();
         roomObj.displayName = roomObj.name;
-        
+
         return res.status(200).json(roomObj);
       }
     }
@@ -91,7 +126,7 @@ exports.createRoom = async (req, res) => {
         .replace(/[^a-z0-9가-힣_-]/g, '-')
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '');
-      
+
       // 고유한 slug 생성 (중복 방지)
       let uniqueSlug = baseSlug;
       let counter = 1;
@@ -253,7 +288,7 @@ exports.updateRoom = async (req, res) => {
           .replace(/[^a-z0-9가-힣_-]/g, '-')
           .replace(/-+/g, '-')
           .replace(/^-|-$/g, '');
-        
+
         let uniqueSlug = baseSlug;
         let counter = 1;
         while (await ChatRoom.findOne({ slug: uniqueSlug, workspaceId: room.workspaceId, _id: { $ne: roomId } })) {
@@ -279,11 +314,11 @@ exports.updateRoom = async (req, res) => {
     // 멤버 목록이 변경된 경우 UserChatRoom 레코드 업데이트
     if (members !== undefined && Array.isArray(members)) {
       const roomMembers = [...new Set([...members, currentUserId])];
-      
+
       // 기존 멤버들의 UserChatRoom 레코드 유지
       const existingUserChatRooms = await UserChatRoom.find({ roomId });
       const existingUserIds = existingUserChatRooms.map((ucr) => ucr.userId.toString());
-      
+
       // 새로 추가된 멤버들에 대한 UserChatRoom 레코드 생성
       const newMemberIds = roomMembers.filter((id) => !existingUserIds.includes(id.toString()));
       for (const userId of newMemberIds) {
@@ -671,7 +706,10 @@ exports.sendMessage = async (req, res) => {
 
     const sequenceNumber = room.lastSequenceNumber;
 
-    // 2. DB에 메시지 저장
+    // 2. 멘션 파싱
+    const { mentions, mentionAll, mentionHere } = parseMentions(content, room.members);
+
+    // 3. DB에 메시지 저장
     const newMessage = new Message({
       roomId,
       senderId,
@@ -680,6 +718,9 @@ exports.sendMessage = async (req, res) => {
       sequenceNumber,
       tempId,
       readBy: [senderId], // [v2.4.0] 보낸 사람은 자동으로 읽음 처리
+      mentions,
+      mentionAll,
+      mentionHere,
     });
     await newMessage.save();
 
@@ -705,6 +746,9 @@ exports.sendMessage = async (req, res) => {
       sequenceNumber,
       tempId,
       readBy: newMessage.readBy,
+      mentions: newMessage.mentions,
+      mentionAll: newMessage.mentionAll,
+      mentionHere: newMessage.mentionHere,
       timestamp: newMessage.timestamp,
     };
 
@@ -757,12 +801,42 @@ exports.sendMessage = async (req, res) => {
       console.log(`[Push] Filtered recipients to notify: ${recipientIdsToNotify}`);
 
       if (recipientIdsToNotify.length > 0) {
-        notificationService.notifyNewMessage(
-          recipientIdsToNotify,
-          sender ? sender.username : 'Unknown',
-          content,
-          roomId,
-        );
+        // 각 수신자별로 알림 설정 확인하여 필터링
+        const finalRecipients = [];
+        for (const userId of recipientIdsToNotify) {
+          const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
+
+          if (!userChatRoom) {
+            // UserChatRoom이 없으면 기본값으로 알림 전송
+            finalRecipients.push(userId);
+            continue;
+          }
+
+          const mode = userChatRoom.notificationMode || 'default';
+
+          if (mode === 'none') {
+            continue; // 알림 차단
+          }
+
+          if (mode === 'mention') {
+            // 멘션 체크
+            const isMentioned = mentions.some((m) => m.toString() === userId) || mentionAll || mentionHere;
+
+            if (!isMentioned) {
+              continue; // 멘션되지 않았으면 스킵
+            }
+          }
+
+          finalRecipients.push(userId);
+        }
+
+        if (finalRecipients.length > 0) {
+          notificationService.notifyNewMessage(finalRecipients, sender ? sender.username : 'Unknown', content, roomId, {
+            mentions: mentions.map((m) => m.toString()),
+            mentionAll,
+            mentionHere,
+          });
+        }
       }
     }
 
@@ -791,6 +865,53 @@ exports.syncMessages = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Failed to sync messages', error: error.message });
+  }
+};
+
+// 채팅방 알림 설정 조회
+exports.getRoomNotificationSettings = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const userId = req.user.id;
+
+    const userChatRoom = await UserChatRoom.findOne({ userId, roomId });
+
+    if (!userChatRoom) {
+      return res.status(404).json({ message: 'UserChatRoom not found' });
+    }
+
+    res.json({
+      notificationMode: userChatRoom.notificationMode || 'default',
+      notificationEnabled: userChatRoom.notificationEnabled !== false,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to get notification settings', error: error.message });
+  }
+};
+
+// 채팅방 알림 설정 업데이트
+exports.updateRoomNotificationSettings = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { notificationMode } = req.body;
+    const userId = req.user.id;
+
+    if (!['default', 'none', 'mention'].includes(notificationMode)) {
+      return res.status(400).json({ message: 'Invalid notificationMode. Must be one of: default, none, mention' });
+    }
+
+    const userChatRoom = await UserChatRoom.findOneAndUpdate(
+      { userId, roomId },
+      { notificationMode },
+      { new: true, upsert: true },
+    );
+
+    res.json({
+      notificationMode: userChatRoom.notificationMode,
+      notificationEnabled: userChatRoom.notificationEnabled !== false,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update notification settings', error: error.message });
   }
 };
 

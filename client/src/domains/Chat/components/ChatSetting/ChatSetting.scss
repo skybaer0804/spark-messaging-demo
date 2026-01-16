@@ -1,0 +1,12 @@
+@use '/src/styles/tokens/index';
+
+.chat-setting {
+  &__panel {
+    width: 240px;
+    border-left: 1px solid var(--color-border-default);
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-bg-secondary);
+    height: 100%;
+  }
+}
