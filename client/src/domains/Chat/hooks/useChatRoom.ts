@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'preact/hooks';
+import { useCallback, useEffect } from 'preact/hooks';
 import type { ChatRoom, Message } from '../types';
 import { useChat } from '../context/ChatContext';
 import { useOptimisticUpdate } from './useOptimisticUpdate';
@@ -8,10 +8,9 @@ import { chatRoomList } from '@/stores/chatRoomsStore';
 
 export function useChatRoom() {
   const { user } = useAuth();
-  const { services, isConnected } = useChat();
+  const { services, isConnected, currentRoom, setCurrentRoom } = useChat();
   const { chat: chatService, room: roomService } = services;
 
-  const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
   const { messages, setMessages, sendOptimisticMessage, updateMessageStatus } = useOptimisticUpdate();
   const { syncMessages } = useMessageSync();
 

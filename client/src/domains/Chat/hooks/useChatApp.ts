@@ -91,7 +91,16 @@ export function useChatApp() {
       setRoomIdInput('');
       setSelectedUserIds([]);
       setSelectedWorkspaceIds([]);
-      showSuccess(`${type} 채팅방이 생성되었습니다.`);
+
+      const typeMap: Record<string, string> = {
+        direct: '1:1 대화방',
+        public: '채널',
+        private: '비공개 채널',
+        team: '팀',
+        discussion: '토론',
+      };
+
+      showSuccess(`${typeMap[type] || type}이 생성되었습니다.`);
     } catch (error) {
       console.error('Failed to create room:', error);
       showError('Room 생성 실패');

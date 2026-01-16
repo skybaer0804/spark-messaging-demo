@@ -18,6 +18,7 @@ interface ChatContextType {
   roomList: ChatRoom[];
   userList: ChatUser[];
   workspaceList: Workspace[];
+  currentRoom: ChatRoom | null; // 현재 선택된 룸 추가
   services: {
     connection: ConnectionService;
     chat: ChatService;
@@ -27,6 +28,7 @@ interface ChatContextType {
   refreshRoomList: () => Promise<void>;
   refreshUserList: () => Promise<void>;
   refreshWorkspaceList: () => Promise<void>;
+  setCurrentRoom: (room: ChatRoom | null) => void; // 설정 함수 추가
   isLoading: boolean;
   debugEnabled: boolean;
   toggleDebug: () => void;
@@ -42,6 +44,7 @@ export function ChatProvider({ children }: { children: any }) {
   const [userList, setUserList] = useState<ChatUser[]>([]);
   const [workspaceList, setWorkspaceList] = useState<Workspace[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
 
   // v2.2.0: 전역 Signal과 로컬 상태 동기화 (Reactivity 보장)
   // Signal이 변경될 때마다 Context의 roomList 상태를 업데이트하여 구독 중인 컴포넌트들을 리렌더링함
@@ -345,6 +348,7 @@ export function ChatProvider({ children }: { children: any }) {
       roomList,
       userList,
       workspaceList,
+      currentRoom,
       services: {
         connection: connectionServiceRef.current,
         chat: chatServiceRef.current,
@@ -354,6 +358,7 @@ export function ChatProvider({ children }: { children: any }) {
       refreshRoomList,
       refreshUserList,
       refreshWorkspaceList,
+      setCurrentRoom,
       isLoading,
       debugEnabled,
       toggleDebug,
@@ -364,6 +369,7 @@ export function ChatProvider({ children }: { children: any }) {
       roomList,
       userList,
       workspaceList,
+      currentRoom,
       refreshRoomList,
       refreshUserList,
       refreshWorkspaceList,

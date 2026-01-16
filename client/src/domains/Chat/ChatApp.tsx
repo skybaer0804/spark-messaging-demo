@@ -1,5 +1,6 @@
 import { useChatApp } from './hooks/useChatApp';
 import { useRef, useEffect, useState, useMemo } from 'preact/hooks';
+import { useChat } from './context/ChatContext';
 import { Box } from '@/ui-components/Layout/Box';
 import { Flex } from '@/ui-components/Layout/Flex';
 import { Stack } from '@/ui-components/Layout/Stack';
@@ -14,7 +15,7 @@ import { useToast } from '@/core/context/ToastContext';
 import { ChatDataProvider } from './context/ChatDataProvider';
 import { useRouterState } from '@/routes/RouterState';
 import { getDirectChatName } from './utils/chatUtils';
-import { ChatRoomSidebar } from './components/ChatSidebar/ChatRoomSidebar';
+import { ChatSidebar } from './components/ChatSidebar/ChatSidebar';
 import { ChatEmptyState } from './components/ChatEmptyState';
 import { DirectoryView } from './components/Directory/DirectoryView';
 import { ChatHeader } from './components/ChatHeader';
@@ -36,27 +37,20 @@ function ChatAppContent() {
     messages,
     input,
     setInput,
-    roomIdInput,
-    setRoomIdInput,
     currentRoom,
     roomList,
     userList,
-    workspaceList,
-    selectedUserIds,
-    selectedWorkspaceIds,
-    toggleUserSelection,
-    toggleWorkspaceSelection,
     sendMessage,
     handleRoomSelect: handleRoomSelectRaw,
     handleCreateRoom,
-    leaveRoom,
     sendFile,
     uploadingFile,
     uploadProgress,
     debugEnabled,
     toggleDebug,
-    setCurrentRoom, // useChatRoom에서 받아오도록 확인 필요
   } = useChatApp();
+
+  const { setCurrentRoom } = useChat();
 
   const view = useMemo(() => {
     if (pathname === '/chatapp/directory') return 'directory';
@@ -217,23 +211,7 @@ function ChatAppContent() {
           }}
           className="chat-app__sidebar-wrapper"
         >
-          <ChatRoomSidebar
-            isConnected={isConnected}
-            roomIdInput={roomIdInput}
-            setRoomIdInput={setRoomIdInput}
-            handleCreateRoom={handleCreateRoom}
-            roomList={roomList}
-            userList={userList}
-            workspaceList={workspaceList}
-            selectedUserIds={selectedUserIds}
-            selectedWorkspaceIds={selectedWorkspaceIds}
-            toggleUserSelection={toggleUserSelection}
-            toggleWorkspaceSelection={toggleWorkspaceSelection}
-            currentRoom={currentRoom}
-            handleRoomSelect={onRoomSelect}
-            leaveRoom={leaveRoom}
-            onUserClick={startDirectChat}
-          />
+          <ChatSidebar />
         </Box>
         {!isMobile && (
           <Box style={{ flex: 1, backgroundColor: 'var(--color-background-default)', height: '100%', minHeight: 0 }}>
@@ -260,23 +238,7 @@ function ChatAppContent() {
     <Box style={{ display: 'flex', height: '100%', minHeight: 0 }} className="chat-app__container">
       {!isMobile && (
         <Box style={{ width: '300px', flexShrink: 0 }} className="chat-app__sidebar-wrapper">
-          <ChatRoomSidebar
-            isConnected={isConnected}
-            roomIdInput={roomIdInput}
-            setRoomIdInput={setRoomIdInput}
-            handleCreateRoom={handleCreateRoom}
-            roomList={roomList}
-            userList={userList}
-            workspaceList={workspaceList}
-            selectedUserIds={selectedUserIds}
-            selectedWorkspaceIds={selectedWorkspaceIds}
-            toggleUserSelection={toggleUserSelection}
-            toggleWorkspaceSelection={toggleWorkspaceSelection}
-            currentRoom={currentRoom}
-            handleRoomSelect={onRoomSelect}
-            leaveRoom={leaveRoom}
-            onUserClick={startDirectChat}
-          />
+          <ChatSidebar />
         </Box>
       )}
       <Flex
