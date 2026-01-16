@@ -6,17 +6,10 @@ import { useToast } from '@/core/context/ToastContext';
 import { useRouterState } from '@/routes/RouterState';
 import { authApi } from '@/core/api/ApiService';
 import { getDirectChatName } from '../../../utils/chatUtils';
-import { currentWorkspaceId } from '@/stores/chatRoomsStore';
+import { currentWorkspaceId, chatRoomList } from '@/stores/chatRoomsStore';
 
 export const useChatSidebar = () => {
-  const {
-    roomList,
-    userList,
-    services,
-    refreshRoomList,
-    isConnected,
-    currentRoom,
-  } = useChat();
+  const { roomList, userList, services, refreshRoomList, isConnected, currentRoom, setCurrentRoom } = useChat();
 
   const { handleRoomSelect: handleRoomSelectRaw } = useChatRoom();
   const { chat: chatService, room: roomService } = services;
@@ -28,7 +21,7 @@ export const useChatSidebar = () => {
   const [roomIdInput, setRoomIdInput] = useState('chat');
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [selectedWorkspaceIds, setSelectedWorkspaceIds] = useState<string[]>([]);
-  
+
   const [showInviteList, setShowInviteList] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -38,6 +31,7 @@ export const useChatSidebar = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; roomId: string } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchFocusIndex, setSearchFocusIndex] = useState(-1);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     direct: true,
     team: true,
@@ -126,8 +120,54 @@ export const useChatSidebar = () => {
     };
   }, [filteredRoomList, currentUser]);
 
-  const handleRoomSelect = (roomId: string) => {
-    const room = roomList.find((r) => r._id === roomId);
+  const allSearchResults = useMemo(() => {
+    if (!isSearching || !searchQuery.trim()) return [];
+    const results: { type: 'user' | 'room'; data: any }[] = [];
+
+    // 1. Users
+    filteredUserList.forEach((u) => results.push({ type: 'user', data: u }));
+
+    // 2. Rooms by section
+    const sections: (keyof typeof groupedRooms)[] = ['direct', 'team', 'public', 'private', 'discussion'];
+    sections.forEach((section) => {
+      const rooms = groupedRooms[section];
+      rooms.forEach((r) => results.push({ type: 'room', data: r }));
+    });
+
+    return results;
+  }, [isSearching, searchQuery, filteredUserList, groupedRooms]);
+
+  useEffect(() => {
+    setSearchFocusIndex(-1);
+  }, [searchQuery, isSearching]);
+
+  const handleSearchKeyDown = async (e: KeyboardEvent) => {
+    if (!isSearching || allSearchResults.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSearchFocusIndex((prev) => (prev < allSearchResults.length - 1 ? prev + 1 : prev));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSearchFocusIndex((prev) => (prev > 0 ? prev - 1 : prev));
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      const index = searchFocusIndex >= 0 ? searchFocusIndex : 0;
+      const target = allSearchResults[index];
+      if (target) {
+        if (target.type === 'user') {
+          await startDirectChat(target.data._id);
+        } else {
+          handleRoomSelect(target.data._id, target.data);
+        }
+        setIsSearching(false);
+        setSearchQuery('');
+      }
+    }
+  };
+
+  const handleRoomSelect = (roomId: string, roomObj?: any) => {
+    const room = roomObj || roomList.find((r) => r._id === roomId);
     if (room) {
       handleRoomSelectRaw(room);
       if (pathname !== `/chatapp/chat/${roomId}`) {
@@ -155,7 +195,7 @@ export const useChatSidebar = () => {
       await refreshRoomList();
 
       if (newRoom && newRoom._id) {
-        handleRoomSelect(newRoom._id);
+        handleRoomSelect(newRoom._id, newRoom);
       }
 
       setRoomIdInput('');
@@ -183,12 +223,20 @@ export const useChatSidebar = () => {
 
     try {
       if (currentRoom?._id === targetRoomId) {
+        setCurrentRoom(null);
         navigate('/chatapp');
       }
 
       await chatService.leaveRoom(targetRoomId);
       await roomService.leaveRoom(targetRoomId);
-      await refreshRoomList();
+
+      // v2.4.0: 낙관적 업데이트 - 목록에서 즉시 제거하여 반응성 향상
+      chatRoomList.value = chatRoomList.value.filter((r: any) => r._id !== targetRoomId);
+
+      // 서버 DB 반영 시간을 고려하여 약간의 지연 후 새로고침 (Race Condition 방지)
+      setTimeout(() => {
+        refreshRoomList();
+      }, 500);
 
       showSuccess('채팅방을 나갔습니다.');
     } catch (error) {
@@ -253,6 +301,10 @@ export const useChatSidebar = () => {
     setIsSearching,
     searchQuery,
     setSearchQuery,
+    searchFocusIndex,
+    setSearchFocusIndex,
+    allSearchResults,
+    handleSearchKeyDown,
     expandedSections,
     handleContextMenu,
     toggleSection,

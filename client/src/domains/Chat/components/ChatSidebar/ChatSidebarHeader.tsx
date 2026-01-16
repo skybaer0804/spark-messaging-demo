@@ -15,6 +15,7 @@ import {
   IconUser,
   IconLogout,
   IconHome,
+  IconSortDescending,
 } from '@tabler/icons-preact';
 import { useAuth } from '@/core/hooks/useAuth';
 import { authApi } from '@/core/api/ApiService';
@@ -225,7 +226,7 @@ export const ChatSidebarHeader = ({
             showInfo('준비 중입니다.');
           }}
         >
-          <IconArrowsExchange size={20} />
+          <IconSortDescending size={20} />
         </IconButton>
         <ChatCreateMenu
           userList={userList}

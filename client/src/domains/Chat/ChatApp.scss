@@ -70,6 +70,11 @@
         background-color: rgba(255, 255, 255, 0.15) !important;
       }
 
+      &--focused {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        outline: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
       .avatar {
         position: relative;
         &-status {
@@ -110,6 +115,36 @@
         color: rgba(255, 255, 255, 0.5);
         display: flex;
         align-items: center;
+      }
+
+      &-more {
+        opacity: 0;
+        transition: opacity 0.2s;
+        color: rgba(255, 255, 255, 0.5) !important;
+        padding: 4px !important;
+
+        &:hover {
+          color: #ffffff !important;
+          background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+      }
+
+      &:hover &-more {
+        opacity: 1;
+      }
+
+      &-badge {
+        background-color: #e11d48;
+        color: white;
+        font-size: 11px;
+        font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 10px;
+        min-width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   }

@@ -15,6 +15,7 @@ import {
   IconHierarchy,
   IconChevronDown,
   IconChevronRight,
+  IconDotsVertical,
 } from '@tabler/icons-preact';
 import { ChatSidebarHeader } from './ChatSidebarHeader';
 
@@ -27,15 +28,18 @@ export const ChatSidebar = memo(() => {
     handleRoomSelect,
     leaveRoom,
     startDirectChat,
-    isConnected,
     handleCreateRoom,
     roomIdInput,
     setRoomIdInput,
     contextMenu,
+    setContextMenu,
     isSearching,
     setIsSearching,
     searchQuery,
     setSearchQuery,
+    searchFocusIndex,
+    allSearchResults,
+    handleSearchKeyDown,
     expandedSections,
     handleContextMenu,
     toggleSection,
@@ -62,6 +66,7 @@ export const ChatSidebar = memo(() => {
 
   const renderRoomItem = (room: any) => {
     const isActive = currentRoom?._id === room._id;
+    const isFocused = searchFocusIndex >= 0 && allSearchResults[searchFocusIndex]?.data?._id === room._id;
     const roomName = room.displayName;
     const displayAvatar = room.displayAvatar;
     const displayStatus = room.displayStatus;
@@ -70,9 +75,11 @@ export const ChatSidebar = memo(() => {
     return (
       <div
         key={room._id}
-        className={`chat-app__sidebar-item ${isActive ? 'chat-app__sidebar-item--active' : ''}`}
+        className={`chat-app__sidebar-item ${isActive ? 'chat-app__sidebar-item--active' : ''} ${
+          isFocused ? 'chat-app__sidebar-item--focused' : ''
+        }`}
         onClick={() => {
-          handleRoomSelect(room._id);
+          handleRoomSelect(room._id, room);
           setIsSearching(false);
           setSearchQuery('');
         }}
@@ -102,16 +109,29 @@ export const ChatSidebar = memo(() => {
             <div className="chat-app__sidebar-item-status-text">{statusText}</div>
           )}
         </div>
-        {room.unreadCount ? <div className="chat-app__sidebar-item-badge">{room.unreadCount}</div> : null}
+        <Flex align="center" gap="xs">
+          {room.unreadCount ? <div className="chat-app__sidebar-item-badge">{room.unreadCount}</div> : null}
+          <IconButton
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleContextMenu(e as any, room._id);
+            }}
+            className="chat-app__sidebar-item-more"
+          >
+            <IconDotsVertical size={18} />
+          </IconButton>
+        </Flex>
       </div>
     );
   };
 
   const renderUserItem = (user: any) => {
+    const isFocused = searchFocusIndex >= 0 && allSearchResults[searchFocusIndex]?.data?._id === user._id;
     return (
       <div
         key={user._id}
-        className="chat-app__sidebar-item"
+        className={`chat-app__sidebar-item ${isFocused ? 'chat-app__sidebar-item--focused' : ''}`}
         onClick={() => {
           startDirectChat(user._id);
           setIsSearching(false);
@@ -166,6 +186,7 @@ export const ChatSidebar = memo(() => {
                 placeholder="검색어를 입력하세요..."
                 value={searchQuery}
                 onInput={(e) => setSearchQuery(e.currentTarget.value)}
+                onKeyDown={handleSearchKeyDown}
                 style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', color: '#fff' }}
               />
               <IconButton
@@ -226,6 +247,7 @@ export const ChatSidebar = memo(() => {
               onClick={(e) => {
                 e.stopPropagation();
                 leaveRoom(contextMenu.roomId);
+                setContextMenu(null);
               }}
               style={{ cursor: 'pointer', padding: '8px 16px' }}
             >
