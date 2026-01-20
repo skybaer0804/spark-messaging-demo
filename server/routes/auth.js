@@ -6,7 +6,6 @@ const {
   logout,
   getMe,
   getAllUsers,
-  updateNotificationSettings,
   updateProfile,
 } = require('../controllers/authController');
 const auth = require('../middleware/auth');
@@ -17,6 +16,5 @@ router.post('/logout', auth, logout);
 router.get('/me', auth, getMe);
 router.get('/users', auth, getAllUsers);
 router.put('/profile', auth, updateProfile);
-router.post('/notification-settings', auth, updateNotificationSettings);
 
 module.exports = router;

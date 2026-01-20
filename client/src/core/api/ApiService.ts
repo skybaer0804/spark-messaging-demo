@@ -68,8 +68,6 @@ export const authApi = {
     statusText?: string;
     role?: string;
   }) => api.put('/auth/profile', data),
-  updateNotificationSettings: (data: { globalEnabled?: boolean; roomPreferences?: Record<string, boolean> }) =>
-    api.post('/auth/notification-settings', data),
 };
 
 export const chatApi = {

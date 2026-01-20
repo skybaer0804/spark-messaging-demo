@@ -12,10 +12,7 @@ class NotificationService {
       const user = await User.findById(userId);
       if (!user) return;
 
-      // 1. 전역 알림 설정 확인
-      if (user.notificationSettings && user.notificationSettings.globalEnabled === false) {
-        return;
-      }
+      // 1. [제거됨] 전역 알림 설정 확인 (UserChatRoom 기반 모드로 통합)
 
       // 2. 방별 알림 설정 확인 (UserChatRoom 기반)
       if (roomId) {
@@ -43,14 +40,6 @@ class NotificationService {
             } else {
               return; // 메시지 데이터가 없으면 차단
             }
-          }
-        }
-        
-        // 기존 roomPreferences 체크 (하위 호환성)
-        if (user.notificationSettings && user.notificationSettings.roomPreferences) {
-          const roomPref = user.notificationSettings.roomPreferences.get(roomId.toString());
-          if (roomPref === false) {
-            return;
           }
         }
       }

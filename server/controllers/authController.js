@@ -150,28 +150,6 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-exports.updateNotificationSettings = async (req, res) => {
-  try {
-    const { globalEnabled, roomPreferences } = req.body;
-    const userId = req.user.id;
-
-    const updateData = {};
-    if (globalEnabled !== undefined) updateData['notificationSettings.globalEnabled'] = globalEnabled;
-    if (roomPreferences !== undefined) {
-      // roomPreferences is expected to be { roomId: boolean }
-      for (const [roomId, enabled] of Object.entries(roomPreferences)) {
-        updateData[`notificationSettings.roomPreferences.${roomId}`] = enabled;
-      }
-    }
-
-    await User.findByIdAndUpdate(userId, { $set: updateData });
-    res.json({ message: 'Settings updated successfully' });
-  } catch (error) {
-    console.error('UpdateSettings error:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
 exports.updateProfile = async (req, res) => {
   try {
     const { username, profileImage, status, statusText, role } = req.body;
