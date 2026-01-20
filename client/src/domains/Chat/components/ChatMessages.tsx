@@ -4,6 +4,8 @@ import { Box } from '@/ui-components/Layout/Box';
 import { Stack } from '@/ui-components/Layout/Stack';
 import { Typography } from '@/ui-components/Typography/Typography';
 import { ChatMessageItem } from './ChatMessageItem';
+import { DateDivider } from './DateDivider/DateDivider';
+import { groupMessagesByDate } from '../utils/chatUtils';
 import type { Message, ChatRoom, ChatUser } from '../types';
 import './Chat.scss';
 
@@ -80,19 +82,29 @@ function ChatMessagesComponent({
         </Box>
       ) : (
         <Stack spacing="md" style={{ flex: 1, minHeight: 0 }}>
-          {messages.map((msg) => {
+          {groupMessagesByDate(messages).map((item, index) => {
+            if (item.type === 'divider') {
+              return (
+                <DateDivider
+                  key={`divider-${item.date?.getTime() || index}`}
+                  date={item.date!}
+                  classNamePrefix={classNamePrefix}
+                />
+              );
+            }
+
             // 안읽음 카운트 계산 (currentRoom이 있을 때만)
             let unreadCount: number | undefined = undefined;
-            if (currentRoom) {
+            if (currentRoom && item.message) {
               const totalMembers = currentRoom.members?.length || 0;
-              const readCount = msg.readBy?.length || 0;
+              const readCount = item.message.readBy?.length || 0;
               unreadCount = totalMembers - readCount;
             }
 
             return (
               <ChatMessageItem
-                key={msg._id}
-                message={msg}
+                key={item.message?._id || `temp-${index}`}
+                message={item.message!}
                 currentUser={currentUser}
                 onImageClick={onImageClick}
                 unreadCount={unreadCount && unreadCount > 0 ? unreadCount : undefined}
