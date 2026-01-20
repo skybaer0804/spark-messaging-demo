@@ -4,6 +4,7 @@ import { IconMessageCircle, IconHash, IconHierarchy, IconEdit } from '@tabler/ic
 import { DialogChatOne } from '../DialogChatOne';
 import { DialogChatGroup } from '../DialogChatGroup';
 import { DialogChatTeam } from '../DialogChatTeam';
+import { DialogChatDiscussion } from '../DialogChatDiscussion';
 import type { ChatUser, ChatRoom } from '../../types';
 
 interface ChatCreateMenuProps {
@@ -27,6 +28,7 @@ export const ChatCreateMenu = ({
   const [showInviteList, setShowInviteList] = useState(false);
   const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false);
   const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false);
+  const [showCreateDiscussionDialog, setShowCreateDiscussionDialog] = useState(false);
 
   useEffect(() => {
     const handleClick = () => {
@@ -60,7 +62,13 @@ export const ChatCreateMenu = ({
           >
             <IconMessageCircle size={18} className="icon" /> 1:1 대화방
           </div>
-          <div className="chat-app__create-menu-item">
+          <div
+            className="chat-app__create-menu-item"
+            onClick={() => {
+              setShowCreateDiscussionDialog(true);
+              setShowCreateMenu(false);
+            }}
+          >
             <IconMessageCircle size={18} className="icon" /> 토론
           </div>
           <div
@@ -105,6 +113,11 @@ export const ChatCreateMenu = ({
         onTeamCreated={() => {
           // 팀 생성 후 필요한 경우 여기서 처리
         }}
+      />
+      <DialogChatDiscussion
+        open={showCreateDiscussionDialog}
+        onClose={() => setShowCreateDiscussionDialog(false)}
+        handleCreateRoom={handleCreateRoom as any}
       />
     </>
   );
