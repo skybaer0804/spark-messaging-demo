@@ -443,6 +443,58 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                     </Flex>
                   )}
                 </Box>
+              ) : message.fileData.fileType === '3d' ? (
+                // 3D 모델 파일 (다운로드만, 추후 three.js 뷰어 추가 예정)
+                <Flex 
+                  align="center" 
+                  gap="sm" 
+                  style={{ 
+                    padding: 'var(--space-gap-sm)',
+                    borderRadius: 'var(--shape-radius-md)',
+                    backgroundColor: 'var(--color-surface-level-2)',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-surface-level-3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-surface-level-2)';
+                  }}
+                  onClick={handleDownload}
+                >
+                  <Box style={{ fontSize: '2rem' }}>🎲</Box>
+                  <Box style={{ flex: 1, minWidth: 0 }}>
+                    <Typography 
+                      variant="body-medium" 
+                      style={{ 
+                        fontWeight: 500,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {message.fileData.fileName}
+                    </Typography>
+                    <Typography variant="caption" color="text-secondary">
+                      {formatFileSize(message.fileData.size)}
+                      {message.fileData.mimeType && (
+                        <span style={{ marginLeft: 'var(--space-gap-xs)' }}>
+                          • 3D 모델
+                        </span>
+                      )}
+                    </Typography>
+                  </Box>
+                  <IconButton 
+                    size="small" 
+                    onClick={handleDownload}
+                    style={{
+                      flexShrink: 0,
+                    }}
+                  >
+                    <IconDownload size={18} />
+                  </IconButton>
+                </Flex>
               ) : (
                 // 문서 등 기타 파일 (다운로드만)
                 <Flex 

@@ -611,6 +611,7 @@ exports.uploadFile = async (req, res) => {
     if (detectedFileType === 'image') type = 'image';
     else if (detectedFileType === 'video') type = 'video';
     else if (detectedFileType === 'audio') type = 'audio';
+    else if (detectedFileType === 'model3d') type = '3d';
     else if (detectedFileType === 'document') type = 'file';
 
     // ========================================
@@ -663,15 +664,45 @@ exports.uploadFile = async (req, res) => {
 
     const sequenceNumber = room.lastSequenceNumber;
 
+    // 파일명 처리 (fileFilter에서 이미 디코딩되었지만, 안전을 위해 다시 확인)
+    let fileName = file.originalname;
+    const originalFileName = fileName; // 디버깅용
+    
+    // 한글이 포함되어 있는지 확인하고, 없으면 디코딩 시도
+    if (!/[가-힣]/.test(fileName)) {
+      try {
+        // latin1 -> UTF-8 변환 시도
+        const decoded = Buffer.from(fileName, 'latin1').toString('utf8');
+        if (/[가-힣]/.test(decoded)) {
+          fileName = decoded;
+          console.log('📝 [Controller] 파일명 디코딩 성공:', {
+            원본: originalFileName,
+            변환: fileName
+          });
+        } else {
+          // 디코딩해도 한글이 없으면 원본 사용
+          console.log('📝 [Controller] 파일명 디코딩 시도했으나 한글 없음:', {
+            원본: originalFileName,
+            디코딩결과: decoded
+          });
+        }
+      } catch (error) {
+        console.warn('📝 [Controller] 파일명 디코딩 실패:', error, '원본:', originalFileName);
+      }
+    } else {
+      // 이미 한글이 포함되어 있으면 정상
+      console.log('📝 [Controller] 파일명 정상 (한글 포함):', fileName);
+    }
+    
     // 2. DB에 메시지 저장
     const newMessage = new Message({
       roomId,
       senderId,
-      content: `File: ${file.originalname}`,
+      content: `File: ${fileName}`,
       type,
       fileUrl: fileUrl, // HTTP URL로 저장
       thumbnailUrl: thumbnailUrl,
-      fileName: file.originalname,
+      fileName: fileName, // UTF-8로 디코딩된 파일명
       fileSize: file.size,
       mimeType: file.mimetype,
       sequenceNumber,
@@ -722,13 +753,14 @@ exports.uploadFile = async (req, res) => {
     // 4. Socket 브로드캐스트 (파일 정보 포함)
     const sender = room.members.find((m) => m._id.toString() === senderId);
 
+    // DB에 저장된 파일명 사용 (이미 UTF-8로 처리됨)
     const messageData = {
       _id: newMessage._id,
       roomId,
       content: newMessage.content,
       fileUrl: newMessage.fileUrl,
       thumbnailUrl: newMessage.thumbnailUrl,
-      fileName: newMessage.fileName,
+      fileName: newMessage.fileName, // UTF-8로 디코딩된 파일명 (DB에서 가져옴)
       fileSize: newMessage.fileSize,
       mimeType: newMessage.mimeType, // MIME 타입 추가 (동영상/오디오 재생에 필요)
       type: type, // 메시지 타입 (image, video, audio, file)

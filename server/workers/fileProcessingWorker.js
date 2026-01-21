@@ -46,6 +46,10 @@ class FileProcessingWorker {
           case 'document':
             result = await this.processDocument(job, filePath, fileBuffer, fileUrl, filename);
             break;
+          case 'model3d':
+          case '3d':
+            result = await this.processModel3D(job, filePath, fileBuffer, fileUrl, filename);
+            break;
           default:
             throw new Error(`지원하지 않는 파일 타입: ${fileType}`);
         }
@@ -188,6 +192,22 @@ class FileProcessingWorker {
     return {
       processingStatus: 'completed',
       // TODO: previewUrl 등 추가
+    };
+  }
+
+  /**
+   * 3D 모델 처리 (추후 프리뷰 생성 등 구현 예정)
+   */
+  async processModel3D(job, filePath, fileBuffer, fileUrl, filename) {
+    job.progress(10);
+
+    // TODO: Three.js 등을 사용한 프리뷰 이미지 생성
+    // 현재는 기본 정보만 반환
+
+    job.progress(100);
+
+    return {
+      processingStatus: 'completed',
     };
   }
 

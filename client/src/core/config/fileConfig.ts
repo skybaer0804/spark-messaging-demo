@@ -68,18 +68,33 @@ export const FILE_TYPE_CONFIG = {
     ],
     extensions: ['.mp3', '.wav', '.ogg', '.webm'],
   },
+
+  // 3D 모델 파일 설정
+  model3d: {
+    maxSizeMB: getEnv('MAX_3D_SIZE_MB', '300'),
+    maxSizeBytes: getEnv('MAX_3D_SIZE_MB', '300') * 1024 * 1024,
+    allowedMimeTypes: [
+      // 3D 파일은 표준 MIME 타입이 없으므로 확장자 기반으로 처리
+      'application/octet-stream',
+      'model/stl',
+      'application/sla',
+    ],
+    extensions: ['.stl', '.obj', '.ply', '.dxd'],
+  },
 } as const;
 
 /**
  * MIME 타입으로 파일 타입 결정
  */
-export function getFileTypeByMime(mimeType: string): 'image' | 'document' | 'video' | 'audio' | null {
+export function getFileTypeByMime(mimeType: string): 'image' | 'document' | 'video' | 'audio' | '3d' | null {
   if (!mimeType) return null;
 
   if (mimeType.startsWith('image/')) return 'image';
   if (mimeType.startsWith('video/')) return 'video';
   if (mimeType.startsWith('audio/')) return 'audio';
-  if (FILE_TYPE_CONFIG.document.allowedMimeTypes.includes(mimeType)) return 'document';
+  if (mimeType.startsWith('model/')) return '3d'; // model/stl 등
+  if ((FILE_TYPE_CONFIG.document.allowedMimeTypes as readonly string[]).includes(mimeType)) return 'document';
+  // 3D 파일은 MIME 타입이 다양하므로 확장자 기반으로 처리
 
   return null;
 }
@@ -87,14 +102,16 @@ export function getFileTypeByMime(mimeType: string): 'image' | 'document' | 'vid
 /**
  * 파일명 확장자로 파일 타입 결정
  */
-export function getFileTypeByExtension(filename: string): 'image' | 'document' | 'video' | 'audio' | null {
+export function getFileTypeByExtension(filename: string): 'image' | 'document' | 'video' | 'audio' | '3d' | null {
   if (!filename) return null;
 
   const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
   
   for (const [type, config] of Object.entries(FILE_TYPE_CONFIG)) {
-    if (config.extensions.includes(ext)) {
-      return type as 'image' | 'document' | 'video' | 'audio';
+    if ((config.extensions as readonly string[]).includes(ext)) {
+      // model3d를 '3d'로 변환
+      if (type === 'model3d') return '3d';
+      return type as 'image' | 'document' | 'video' | 'audio' | '3d';
     }
   }
 
@@ -104,7 +121,7 @@ export function getFileTypeByExtension(filename: string): 'image' | 'document' |
 /**
  * 파일 타입 결정 (MIME 타입 우선, 없으면 확장자)
  */
-export function getFileType(mimeType: string, filename?: string): 'image' | 'document' | 'video' | 'audio' | null {
+export function getFileType(mimeType: string, filename?: string): 'image' | 'document' | 'video' | 'audio' | '3d' | null {
   return getFileTypeByMime(mimeType) || (filename ? getFileTypeByExtension(filename) : null);
 }
 
@@ -117,7 +134,17 @@ export function getMaxFileSize(mimeType: string, filename?: string): number {
     // 기본값: 문서 크기 제한
     return FILE_TYPE_CONFIG.document.maxSizeBytes;
   }
-  return FILE_TYPE_CONFIG[fileType].maxSizeBytes;
+  
+  // '3d' 타입을 'model3d'로 변환 (FILE_TYPE_CONFIG 키와 일치시키기)
+  const configKey = fileType === '3d' ? 'model3d' : fileType;
+  const config = FILE_TYPE_CONFIG[configKey as keyof typeof FILE_TYPE_CONFIG];
+  
+  if (!config) {
+    // 설정이 없으면 문서 크기 제한 반환
+    return FILE_TYPE_CONFIG.document.maxSizeBytes;
+  }
+  
+  return config.maxSizeBytes;
 }
 
 /**
@@ -127,8 +154,17 @@ export function isFileTypeAllowed(mimeType: string, filename?: string): boolean 
   const fileType = getFileType(mimeType, filename);
   if (!fileType) return false;
 
-  const config = FILE_TYPE_CONFIG[fileType];
-  if (mimeType && !config.allowedMimeTypes.includes(mimeType)) {
+  // 3D 파일은 model3d 키로 저장되어 있음
+  const configKey = fileType === '3d' ? 'model3d' : fileType;
+  const config = FILE_TYPE_CONFIG[configKey as keyof typeof FILE_TYPE_CONFIG];
+  if (!config) return false;
+
+  // 3D 파일은 MIME 타입이 다양하므로 확장자 기반으로만 검증
+  if (fileType === '3d') {
+    return true; // 확장자로 이미 확인했으므로 허용
+  }
+
+  if (mimeType && !(config.allowedMimeTypes as readonly string[]).includes(mimeType)) {
     // MIME 타입이 있으면 정확히 일치해야 함
     return false;
   }
@@ -151,7 +187,17 @@ export function validateFile(file: File): { valid: boolean; error?: string; file
 
   const maxSize = getMaxFileSize(file.type || '', file.name);
   if (file.size > maxSize) {
-    const config = FILE_TYPE_CONFIG[fileType];
+    // '3d' 타입을 'model3d'로 변환
+    const configKey = fileType === '3d' ? 'model3d' : fileType;
+    const config = FILE_TYPE_CONFIG[configKey as keyof typeof FILE_TYPE_CONFIG];
+    
+    if (!config) {
+      return {
+        valid: false,
+        error: '파일 크기가 너무 큽니다.',
+      };
+    }
+    
     return {
       valid: false,
       error: `파일 크기가 너무 큽니다. 최대 ${config.maxSizeMB}MB까지 업로드 가능합니다.`,

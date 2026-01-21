@@ -6,7 +6,7 @@ const messageSchema = new mongoose.Schema({
   content: { type: String, required: true },
   type: {
     type: String,
-    enum: ['text', 'file', 'image', 'video', 'audio', 'system'],
+    enum: ['text', 'file', 'image', 'video', 'audio', '3d', 'system'],
     default: 'text',
   },
   // [필수] 메시지 시퀀스: 방 내에서 1씩 증가하여 메시지 순서 및 누락 확인

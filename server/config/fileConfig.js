@@ -65,12 +65,26 @@ const FILE_TYPE_CONFIG = {
     ],
     extensions: ['.mp3', '.wav', '.ogg', '.webm'],
   },
+
+  // 3D 모델 파일 설정
+  model3d: {
+    maxSizeMB: parseInt(process.env.MAX_3D_SIZE_MB || '300', 10),
+    maxSizeBytes: parseInt(process.env.MAX_3D_SIZE_MB || '300', 10) * 1024 * 1024,
+    timeoutMs: parseInt(process.env.MAX_3D_UPLOAD_TIMEOUT_MS || '300000', 10), // 5분
+    allowedMimeTypes: [
+      // 3D 파일은 표준 MIME 타입이 없으므로 확장자 기반으로 처리
+      'application/octet-stream', // 일반 바이너리 파일
+      'model/stl', // STL (일부 시스템에서 사용)
+      'application/sla', // STL 대체 MIME
+    ],
+    extensions: ['.stl', '.obj', '.ply', '.dxd'],
+  },
 };
 
 /**
  * MIME 타입으로 파일 타입 결정
  * @param {string} mimeType - MIME 타입
- * @returns {string|null} - 'image', 'document', 'video', 'audio' 또는 null
+ * @returns {string|null} - 'image', 'document', 'video', 'audio', 'model3d' 또는 null
  */
 function getFileTypeByMime(mimeType) {
   if (!mimeType) return null;
@@ -78,7 +92,9 @@ function getFileTypeByMime(mimeType) {
   if (mimeType.startsWith('image/')) return 'image';
   if (mimeType.startsWith('video/')) return 'video';
   if (mimeType.startsWith('audio/')) return 'audio';
+  if (mimeType.startsWith('model/')) return 'model3d'; // model/stl 등
   if (FILE_TYPE_CONFIG.document.allowedMimeTypes.includes(mimeType)) return 'document';
+  // 3D 파일은 MIME 타입이 다양하므로 확장자 기반으로 처리 (getFileTypeByExtension에서 처리)
 
   return null;
 }
@@ -86,7 +102,7 @@ function getFileTypeByMime(mimeType) {
 /**
  * 파일명 확장자로 파일 타입 결정
  * @param {string} filename - 파일명
- * @returns {string|null} - 'image', 'document', 'video', 'audio' 또는 null
+ * @returns {string|null} - 'image', 'document', 'video', 'audio', 'model3d' 또는 null
  */
 function getFileTypeByExtension(filename) {
   if (!filename) return null;
@@ -153,6 +169,13 @@ function isFileTypeAllowed(mimeType, filename) {
   if (!fileType) return false;
 
   const config = FILE_TYPE_CONFIG[fileType];
+  
+  // 3D 파일은 MIME 타입이 다양하므로 확장자 기반으로만 검증
+  if (fileType === 'model3d') {
+    // 확장자로 이미 확인했으므로 허용
+    return true;
+  }
+  
   if (mimeType && !config.allowedMimeTypes.includes(mimeType)) {
     // MIME 타입이 있으면 정확히 일치해야 함
     return false;

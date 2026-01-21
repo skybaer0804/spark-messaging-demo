@@ -42,8 +42,66 @@ const getStorage = () => {
   }
 };
 
+/**
+ * 파일명 디코딩 헬퍼 함수
+ * Multer는 파일명을 latin1로 인코딩하여 전달하므로 UTF-8로 변환 필요
+ * 브라우저가 보낸 파일명이 이미 깨진 경우를 대비해 여러 방법 시도
+ */
+function decodeFileName(originalName) {
+  if (!originalName) return originalName;
+  
+  try {
+    // 방법 1: latin1 -> UTF-8 변환 (가장 일반적인 경우)
+    const decoded1 = Buffer.from(originalName, 'latin1').toString('utf8');
+    
+    // 방법 2: 이미 UTF-8인 경우 (변환 후 검증)
+    // 한글이 포함되어 있는지 확인
+    const hasKorean = /[가-힣]/.test(decoded1);
+    if (hasKorean) {
+      return decoded1;
+    }
+    
+    // 방법 3: URL 디코딩 시도 (브라우저가 URL 인코딩한 경우)
+    try {
+      const urlDecoded = decodeURIComponent(originalName);
+      if (/[가-힣]/.test(urlDecoded)) {
+        return urlDecoded;
+      }
+    } catch (e) {
+      // URL 디코딩 실패는 무시
+    }
+    
+    // 방법 4: 원본이 이미 올바른 경우
+    if (/[가-힣]/.test(originalName)) {
+      return originalName;
+    }
+    
+    return decoded1; // 기본적으로 latin1 -> UTF-8 변환 결과 반환
+  } catch (error) {
+    console.warn('파일명 디코딩 실패, 원본 사용:', error, 'originalName:', originalName);
+    return originalName;
+  }
+}
+
 // 파일 필터링 (파일 타입별 허용 여부 확인)
+// 한글 파일명 지원: Multer는 파일명을 latin1로 인코딩하여 전달하므로 UTF-8로 변환
 const fileFilter = (req, file, cb) => {
+  // 원본 파일명 저장 (디버깅용)
+  const originalFileName = file.originalname;
+  
+  // 파일명을 UTF-8로 디코딩 (한글 파일명 지원)
+  const decodedFileName = decodeFileName(file.originalname);
+  file.originalname = decodedFileName; // 원본 파일명을 UTF-8로 변환
+  
+  // 디버깅: 파일명 변환 로그 (변경된 경우만)
+  if (originalFileName !== decodedFileName) {
+    console.log('📝 [Multer] 파일명 디코딩:', {
+      원본: originalFileName,
+      변환: decodedFileName,
+      한글포함: /[가-힣]/.test(decodedFileName)
+    });
+  }
+  
   if (isFileTypeAllowed(file.mimetype, file.originalname)) {
     cb(null, true);
   } else {

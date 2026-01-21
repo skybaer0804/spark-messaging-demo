@@ -96,14 +96,15 @@ export class ChatService {
           if (messageType === 'video') mimeType = 'video/mp4';
           else if (messageType === 'audio') mimeType = 'audio/mpeg';
           else if (messageType === 'image') mimeType = 'image/jpeg';
+          else if (messageType === '3d') mimeType = 'application/octet-stream'; // 3D 파일은 바이너리
         }
         
-        // data 필드 결정 (동영상/오디오는 원본 URL 사용, 이미지는 썸네일 우선)
+        // data 필드 결정 (동영상/오디오/3D는 원본 URL 사용, 이미지는 썸네일 우선)
         let dataUrl = contentData.fileUrl;
         if (messageType === 'image' && contentData.thumbnailUrl) {
           dataUrl = contentData.thumbnailUrl; // 이미지는 썸네일 우선
         } else {
-          dataUrl = contentData.fileUrl; // 동영상/오디오는 원본 URL
+          dataUrl = contentData.fileUrl; // 동영상/오디오/3D는 원본 URL
         }
         
         fileData = {

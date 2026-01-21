@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const connectDB = require('./config/db');
 const { connectRedis } = require('./config/redis');
 const socketService = require('./services/socketService');
@@ -37,13 +38,24 @@ try {
 
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '600mb' }));
+// multipart/form-data는 multer가 처리하므로, urlencoded는 일반 폼 데이터용
+app.use(express.urlencoded({ extended: true, limit: '600mb' })); // 대용량 파일 지원
 
 // Static files for uploads (Local storage)
+// 한글 파일명 지원을 위한 커스텀 미들웨어
 const fileServeUrl = process.env.FILE_SERVE_URL || 'http://localhost:5000/files';
 const fileBasePath = process.env.FILE_UPLOAD_PATH || 'C:/project/file';
-app.use('/files', express.static(fileBasePath));
+const expressStatic = express.static(fileBasePath, {
+  setHeaders: (res, filePath) => {
+    // 한글 파일명을 위한 Content-Disposition 헤더 설정
+    const fileName = path.basename(filePath);
+    // UTF-8 인코딩된 파일명 (RFC 5987 형식)
+    const encodedFileName = encodeURIComponent(fileName);
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"; filename*=UTF-8''${encodedFileName}`);
+  }
+});
+app.use('/files', expressStatic);
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));

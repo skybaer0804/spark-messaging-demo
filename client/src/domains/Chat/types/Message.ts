@@ -1,4 +1,4 @@
-export type MessageType = 'text' | 'file' | 'image' | 'video' | 'audio' | 'system';
+export type MessageType = 'text' | 'file' | 'image' | 'video' | 'audio' | '3d' | 'system';
 export type MessageStatus = 'sending' | 'sent' | 'failed';
 
 export interface FileData {
