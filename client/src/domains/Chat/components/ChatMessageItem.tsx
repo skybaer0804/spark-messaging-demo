@@ -1,6 +1,6 @@
 import { memo } from 'preact/compat';
 import type { Message, ChatUser } from '../types';
-import { useState } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import { formatTimestamp } from '@/core/utils/messageUtils';
 import { formatFileSize, getFileIcon, downloadFile, downloadFileFromUrl } from '@/core/utils/fileUtils';
 import { Paper } from '@/ui-components/Paper/Paper';
@@ -24,7 +24,31 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [videoError, setVideoError] = useState(false);
+  const [videoLoading, setVideoLoading] = useState(true);
   const [audioError, setAudioError] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  
+  // 동영상/오디오 URL이 변경되면 재로드
+  useEffect(() => {
+    if (message.fileData?.fileType === 'video' && videoRef.current) {
+      const videoUrl = message.fileData.url || message.fileData.data;
+      if (videoUrl && videoRef.current.src !== videoUrl) {
+        videoRef.current.load(); // 비디오 재로드
+        setVideoLoading(true);
+        setVideoError(false);
+      }
+    }
+    if (message.fileData?.fileType === 'audio' && audioRef.current) {
+      const audioUrl = message.fileData.url || message.fileData.data;
+      if (audioUrl && audioRef.current.src !== audioUrl) {
+        audioRef.current.load(); // 오디오 재로드
+        setAudioLoading(true);
+        setAudioError(false);
+      }
+    }
+  }, [message.fileData?.url, message.fileData?.data, message.fileData?.fileType]);
   
   // 안전한 senderId 비교 로직
   const senderIdStr =
@@ -253,7 +277,29 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                     </Flex>
                   ) : (
                     <Box style={{ position: 'relative', maxWidth: '100%' }}>
+                      {videoLoading && (
+                        <Box
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: '#000',
+                            borderRadius: 'var(--shape-radius-md)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1,
+                          }}
+                        >
+                          <Typography variant="caption" style={{ color: '#fff' }}>
+                            동영상 로딩 중...
+                          </Typography>
+                        </Box>
+                      )}
                       <video
+                        ref={videoRef}
                         controls
                         style={{
                           width: '100%',
@@ -261,11 +307,33 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                           maxHeight: '400px',
                           borderRadius: 'var(--shape-radius-md)',
                           backgroundColor: '#000',
+                          opacity: videoLoading ? 0 : 1,
+                          transition: 'opacity 0.3s',
                         }}
-                        onError={() => setVideoError(true)}
+                        onLoadedMetadata={() => {
+                          console.log('동영상 메타데이터 로드 완료:', message.fileData?.url || message.fileData?.data);
+                          setVideoLoading(false);
+                        }}
+                        onCanPlay={() => {
+                          console.log('동영상 재생 가능:', message.fileData?.url || message.fileData?.data);
+                          setVideoLoading(false);
+                        }}
+                        onLoadStart={() => {
+                          console.log('동영상 로드 시작:', message.fileData?.url || message.fileData?.data);
+                        }}
+                        onError={(e) => {
+                          console.error('동영상 로드 에러:', e, message.fileData);
+                          setVideoError(true);
+                          setVideoLoading(false);
+                        }}
                         preload="metadata"
                       >
-                        <source src={message.fileData.url || message.fileData.data} type={message.fileData.mimeType} />
+                        {message.fileData?.url || message.fileData?.data ? (
+                          <source 
+                            src={message.fileData.url || message.fileData.data} 
+                            type={message.fileData.mimeType || 'video/mp4'} 
+                          />
+                        ) : null}
                         브라우저가 동영상 태그를 지원하지 않습니다.
                       </video>
                       <IconButton
@@ -277,6 +345,7 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                           right: 'var(--space-gap-xs)',
                           backgroundColor: 'rgba(0,0,0,0.6)',
                           color: 'var(--primitive-gray-0)',
+                          zIndex: 2,
                         }}
                       >
                         <IconDownload size={16} />
@@ -339,15 +408,36 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                         </IconButton>
                       </Flex>
                       <audio
+                        ref={audioRef}
                         controls
                         style={{
                           width: '100%',
                           height: '40px',
                         }}
-                        onError={() => setAudioError(true)}
+                        onLoadedMetadata={() => {
+                          console.log('오디오 메타데이터 로드 완료:', message.fileData?.url || message.fileData?.data);
+                          setAudioLoading(false);
+                        }}
+                        onCanPlay={() => {
+                          console.log('오디오 재생 가능:', message.fileData?.url || message.fileData?.data);
+                          setAudioLoading(false);
+                        }}
+                        onLoadStart={() => {
+                          console.log('오디오 로드 시작:', message.fileData?.url || message.fileData?.data);
+                        }}
+                        onError={(e) => {
+                          console.error('오디오 로드 에러:', e, message.fileData);
+                          setAudioError(true);
+                          setAudioLoading(false);
+                        }}
                         preload="metadata"
                       >
-                        <source src={message.fileData.url || message.fileData.data} type={message.fileData.mimeType} />
+                        {message.fileData?.url || message.fileData?.data ? (
+                          <source 
+                            src={message.fileData.url || message.fileData.data} 
+                            type={message.fileData.mimeType || 'audio/mpeg'} 
+                          />
+                        ) : null}
                         브라우저가 오디오 태그를 지원하지 않습니다.
                       </audio>
                     </Flex>

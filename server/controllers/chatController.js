@@ -730,6 +730,8 @@ exports.uploadFile = async (req, res) => {
       thumbnailUrl: newMessage.thumbnailUrl,
       fileName: newMessage.fileName,
       fileSize: newMessage.fileSize,
+      mimeType: newMessage.mimeType, // MIME 타입 추가 (동영상/오디오 재생에 필요)
+      type: type, // 메시지 타입 (image, video, audio, file)
       senderId,
       senderName: sender ? sender.username : 'Unknown',
       sequenceNumber,

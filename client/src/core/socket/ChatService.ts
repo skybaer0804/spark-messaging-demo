@@ -86,14 +86,34 @@ export class ChatService {
       // 파일 데이터 변환 (fileUrl, thumbnailUrl → fileData)
       let fileData: any = undefined;
       if (contentData.fileUrl || contentData.thumbnailUrl) {
+        // 메시지 타입 결정 (contentData.type 우선, 없으면 msg.type 사용)
+        const messageType = (contentData.type || msg.type) as MessageType;
+        
+        // MIME 타입 결정
+        let mimeType = contentData.mimeType || 'application/octet-stream';
+        if (!contentData.mimeType && messageType) {
+          // MIME 타입이 없으면 메시지 타입으로 추론
+          if (messageType === 'video') mimeType = 'video/mp4';
+          else if (messageType === 'audio') mimeType = 'audio/mpeg';
+          else if (messageType === 'image') mimeType = 'image/jpeg';
+        }
+        
+        // data 필드 결정 (동영상/오디오는 원본 URL 사용, 이미지는 썸네일 우선)
+        let dataUrl = contentData.fileUrl;
+        if (messageType === 'image' && contentData.thumbnailUrl) {
+          dataUrl = contentData.thumbnailUrl; // 이미지는 썸네일 우선
+        } else {
+          dataUrl = contentData.fileUrl; // 동영상/오디오는 원본 URL
+        }
+        
         fileData = {
           fileName: contentData.fileName || 'unknown',
-          fileType: (msg.type as MessageType) || 'file',
-          mimeType: contentData.mimeType || 'application/octet-stream',
+          fileType: messageType || 'file',
+          mimeType: mimeType,
           size: contentData.fileSize || 0,
-          url: contentData.fileUrl, // 원본 파일 URL
+          url: contentData.fileUrl, // 원본 파일 URL (다운로드/재생용)
           thumbnail: contentData.thumbnailUrl, // 썸네일 URL (이미지인 경우)
-          data: contentData.thumbnailUrl || contentData.fileUrl, // 표시용 (썸네일 우선, 없으면 원본)
+          data: dataUrl, // 표시용 URL (동영상/오디오는 원본, 이미지는 썸네일)
         };
       }
 
