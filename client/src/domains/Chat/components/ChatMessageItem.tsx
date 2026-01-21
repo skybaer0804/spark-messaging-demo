@@ -23,6 +23,8 @@ interface ChatMessageItemProps {
 function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCount }: ChatMessageItemProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const [videoError, setVideoError] = useState(false);
+  const [audioError, setAudioError] = useState(false);
   
   // 안전한 senderId 비교 로직
   const senderIdStr =
@@ -221,8 +223,138 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                     </>
                   )}
                 </Box>
+              ) : message.fileData.fileType === 'video' ? (
+                // 동영상 파일 재생
+                <Box style={{ position: 'relative', maxWidth: '100%' }}>
+                  {videoError ? (
+                    // 동영상 로드 실패 시 플레이스홀더
+                    <Flex
+                      align="center"
+                      gap="sm"
+                      style={{
+                        padding: 'var(--space-gap-sm)',
+                        borderRadius: 'var(--shape-radius-md)',
+                        backgroundColor: 'var(--color-surface-level-2)',
+                        minHeight: '200px',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Box style={{ fontSize: '3rem' }}>🎬</Box>
+                      <Typography variant="body-medium" style={{ fontWeight: 500 }}>
+                        {message.fileData.fileName}
+                      </Typography>
+                      <Typography variant="caption" color="text-secondary">
+                        동영상을 재생할 수 없습니다
+                      </Typography>
+                      <IconButton size="small" onClick={handleDownload}>
+                        <IconDownload size={18} />
+                      </IconButton>
+                    </Flex>
+                  ) : (
+                    <Box style={{ position: 'relative', maxWidth: '100%' }}>
+                      <video
+                        controls
+                        style={{
+                          width: '100%',
+                          maxWidth: '600px',
+                          maxHeight: '400px',
+                          borderRadius: 'var(--shape-radius-md)',
+                          backgroundColor: '#000',
+                        }}
+                        onError={() => setVideoError(true)}
+                        preload="metadata"
+                      >
+                        <source src={message.fileData.url || message.fileData.data} type={message.fileData.mimeType} />
+                        브라우저가 동영상 태그를 지원하지 않습니다.
+                      </video>
+                      <IconButton
+                        size="small"
+                        onClick={handleDownload}
+                        style={{
+                          position: 'absolute',
+                          top: 'var(--space-gap-xs)',
+                          right: 'var(--space-gap-xs)',
+                          backgroundColor: 'rgba(0,0,0,0.6)',
+                          color: 'var(--primitive-gray-0)',
+                        }}
+                      >
+                        <IconDownload size={16} />
+                      </IconButton>
+                    </Box>
+                  )}
+                </Box>
+              ) : message.fileData.fileType === 'audio' ? (
+                // 오디오 파일 재생
+                <Box
+                  style={{
+                    padding: 'var(--space-gap-md)',
+                    borderRadius: 'var(--shape-radius-md)',
+                    backgroundColor: 'var(--color-surface-level-2)',
+                    minWidth: '300px',
+                  }}
+                >
+                  {audioError ? (
+                    <Flex
+                      align="center"
+                      gap="sm"
+                      style={{
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Box style={{ fontSize: '3rem' }}>🎵</Box>
+                      <Typography variant="body-medium" style={{ fontWeight: 500 }}>
+                        {message.fileData.fileName}
+                      </Typography>
+                      <Typography variant="caption" color="text-secondary">
+                        오디오를 재생할 수 없습니다
+                      </Typography>
+                      <IconButton size="small" onClick={handleDownload}>
+                        <IconDownload size={18} />
+                      </IconButton>
+                    </Flex>
+                  ) : (
+                    <Flex direction="column" gap="sm">
+                      <Flex align="center" gap="sm">
+                        <Box style={{ fontSize: '2rem' }}>🎵</Box>
+                        <Box style={{ flex: 1, minWidth: 0 }}>
+                          <Typography
+                            variant="body-medium"
+                            style={{
+                              fontWeight: 500,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {message.fileData.fileName}
+                          </Typography>
+                          <Typography variant="caption" color="text-secondary">
+                            {formatFileSize(message.fileData.size)}
+                          </Typography>
+                        </Box>
+                        <IconButton size="small" onClick={handleDownload}>
+                          <IconDownload size={18} />
+                        </IconButton>
+                      </Flex>
+                      <audio
+                        controls
+                        style={{
+                          width: '100%',
+                          height: '40px',
+                        }}
+                        onError={() => setAudioError(true)}
+                        preload="metadata"
+                      >
+                        <source src={message.fileData.url || message.fileData.data} type={message.fileData.mimeType} />
+                        브라우저가 오디오 태그를 지원하지 않습니다.
+                      </audio>
+                    </Flex>
+                  )}
+                </Box>
               ) : (
-                // 이미지가 아닌 파일 (동영상, 오디오, 문서 등)
+                // 문서 등 기타 파일 (다운로드만)
                 <Flex 
                   align="center" 
                   gap="sm" 
