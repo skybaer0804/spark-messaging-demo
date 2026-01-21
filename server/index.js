@@ -26,6 +26,15 @@ socketService.initialize();
 configureWebPush();
 schedulerService.initialize();
 
+// Initialize File Processing Worker (비동기 파일 처리)
+try {
+  require('./workers/fileProcessingWorker');
+  console.log('✅ 파일 처리 워커 초기화 완료');
+} catch (error) {
+  console.error('❌ 파일 처리 워커 초기화 실패:', error.message);
+  console.warn('⚠️  파일 처리 워커 없이 계속 진행합니다. (Bull Queue 미설치 시 정상)');
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());

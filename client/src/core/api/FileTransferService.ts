@@ -2,107 +2,19 @@ import type SparkMessaging from '@skybaer0804/spark-messaging-client';
 import { ConnectionService } from './ConnectionService';
 import { ChatService } from './ChatService';
 import { chatApi } from './ApiService';
+import { validateFile as validateFileConfig, getFileType, FILE_TYPE_CONFIG } from '../config/fileConfig';
 
 export class FileTransferService {
   private chatService: ChatService;
-
-  // 파일 타입 정의
-  static readonly SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-  static readonly SUPPORTED_DOCUMENT_TYPES = [
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // xlsx
-    'application/vnd.ms-excel', // xls
-    'text/csv', // csv
-    'application/csv', // csv (일부 브라우저)
-    'text/markdown', // md
-    'text/plain', // md (일부 브라우저에서 md 파일을 text/plain으로 인식)
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
-    'application/msword', // doc
-    'application/pdf', // pdf
-  ];
-  static readonly SUPPORTED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
-  static readonly SUPPORTED_AUDIO_TYPES = ['audio/mpeg', 'audio/wav', 'audio/ogg'];
-
-  // 파일 크기 제한 (MB) - 서버와 동일하게 50MB
-  static readonly MAX_FILE_SIZE = 50; // 50MB
 
   constructor(_client: SparkMessaging, _connectionService: ConnectionService, chatService: ChatService) {
     this.chatService = chatService;
   }
 
-  // 파일 확장자로 타입 감지
-  private detectFileTypeByExtension(fileName: string): 'image' | 'document' | 'video' | 'audio' | 'unknown' {
-    const extension = fileName.toLowerCase().split('.').pop() || '';
-
-    // 이미지
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(extension)) {
-      return 'image';
-    }
-
-    // 문서
-    if (['xlsx', 'xls', 'csv', 'md', 'docx', 'doc', 'pdf'].includes(extension)) {
-      return 'document';
-    }
-
-    // 동영상
-    if (['mp4', 'webm', 'mov'].includes(extension)) {
-      return 'video';
-    }
-
-    // 오디오
-    if (['mp3', 'wav', 'ogg'].includes(extension)) {
-      return 'audio';
-    }
-
-    return 'unknown';
-  }
-
-  // 파일 타입 감지 (MIME 타입 우선, 없으면 확장자 사용)
-  public detectFileType(mimeType: string, fileName?: string): 'image' | 'document' | 'video' | 'audio' | 'unknown' {
-    // MIME 타입이 있으면 우선 사용
-    if (mimeType && mimeType !== '') {
-      if (FileTransferService.SUPPORTED_IMAGE_TYPES.includes(mimeType)) {
-        return 'image';
-      }
-      if (FileTransferService.SUPPORTED_DOCUMENT_TYPES.includes(mimeType)) {
-        return 'document';
-      }
-      if (FileTransferService.SUPPORTED_VIDEO_TYPES.includes(mimeType)) {
-        return 'video';
-      }
-      if (FileTransferService.SUPPORTED_AUDIO_TYPES.includes(mimeType)) {
-        return 'audio';
-      }
-    }
-
-    // MIME 타입이 없거나 인식되지 않으면 확장자로 확인
-    if (fileName) {
-      return this.detectFileTypeByExtension(fileName);
-    }
-
-    return 'unknown';
-  }
-
-  // 파일 검증
+  // 파일 검증 (백엔드와 동일한 로직 사용)
   public validateFile(file: File): { valid: boolean; error?: string } {
-    // 파일 크기 검증
-    const maxSizeBytes = FileTransferService.MAX_FILE_SIZE * 1024 * 1024;
-    if (file.size > maxSizeBytes) {
-      return {
-        valid: false,
-        error: `파일 크기가 ${FileTransferService.MAX_FILE_SIZE}MB를 초과합니다. 최대 ${FileTransferService.MAX_FILE_SIZE}MB까지 업로드 가능합니다.`,
-      };
-    }
-
-    // MIME 타입 및 확장자 검증
-    const fileType = this.detectFileType(file.type || '', file.name);
-    if (fileType === 'unknown') {
-      return {
-        valid: false,
-        error: '지원하지 않는 파일 타입입니다. 이미지, 문서, 동영상, 오디오 파일만 업로드 가능합니다.',
-      };
-    }
-
-    return { valid: true };
+    const validation = validateFileConfig(file);
+    return validation;
   }
 
   // 파일을 Base64로 읽기

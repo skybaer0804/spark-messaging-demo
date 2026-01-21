@@ -106,11 +106,26 @@ export function useChatRoom() {
         chatService.markAsRead(currentRoom._id);
       }
 
-      // 내가 보낸 메시지(tempId 매칭)면 무시 (이미 낙관적 업데이트됨)
+      // 중복 메시지 방지: tempId 또는 _id로 중복 체크
       setMessages((prev: Message[]) => {
+        // tempId로 중복 체크 (낙관적 업데이트된 메시지)
         if (newMsg.tempId && prev.some((m: Message) => m.tempId === newMsg.tempId)) {
           return prev;
         }
+        
+        // _id로 중복 체크 (서버에서 온 메시지)
+        if (newMsg._id && prev.some((m: Message) => m._id === newMsg._id)) {
+          return prev;
+        }
+        
+        // sequenceNumber로도 중복 체크 (추가 안전장치)
+        if (newMsg.sequenceNumber && prev.some((m: Message) => 
+          m.sequenceNumber === newMsg.sequenceNumber && 
+          m.roomId === newMsg.roomId
+        )) {
+          return prev;
+        }
+        
         return [...prev, newMsg].sort((a, b) => a.sequenceNumber - b.sequenceNumber);
       });
     });

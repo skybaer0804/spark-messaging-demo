@@ -155,6 +155,24 @@ class SocketService {
   async notifyMessageRead(roomId, userId) {
     await this.broadcastEvent('MESSAGE_READ', { roomId, userId });
   }
+
+  /**
+   * 메시지 업데이트 브로드캐스트 (썸네일/프리뷰 생성 완료 시)
+   * @param {string} roomId - 채팅방 ID
+   * @param {Object} updateData - 업데이트 데이터
+   */
+  async sendMessageUpdate(roomId, updateData) {
+    if (!this.client) return;
+
+    try {
+      await this.client.sendRoomMessage(roomId, 'message-updated', {
+        ...updateData,
+        timestamp: Date.now(),
+      });
+    } catch (error) {
+      console.error('Failed to send message update:', error);
+    }
+  }
 }
 
 module.exports = new SocketService();

@@ -192,7 +192,7 @@ function ChatInputComponent({
               onChange={onFileSelect}
               style={{ display: 'none' }}
               multiple
-              accept="image/*,.xlsx,.xls,.csv,.md,.docx,.doc,.pdf"
+              accept="image/*,video/*,audio/*,.xlsx,.xls,.csv,.md,.docx,.doc,.pdf,.txt"
             />
           )}
 

@@ -32,23 +32,39 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
   const isOwnMessage =
     (senderIdStr && currentUserIdStr && senderIdStr === currentUserIdStr) || message.status === 'sending';
 
-  // 파일 다운로드 핸들러
+  // 파일 다운로드 핸들러 (모든 파일 타입 지원)
   const handleDownload = async (e: Event) => {
     e.stopPropagation();
-    if (!message.fileData) return;
+    e.preventDefault();
+    
+    if (!message.fileData) {
+      console.error('파일 데이터가 없습니다.');
+      return;
+    }
 
     const { fileName, url, data, mimeType } = message.fileData;
     
     // 원본 파일 URL이 있으면 우선 사용, 없으면 표시용 데이터 사용
     const downloadUrl = url || data;
-    if (!downloadUrl) return;
+    if (!downloadUrl) {
+      console.error('다운로드할 파일 URL이 없습니다.');
+      return;
+    }
 
-    // URL인 경우
-    if (downloadUrl.startsWith('http://') || downloadUrl.startsWith('https://')) {
-      await downloadFileFromUrl(downloadUrl, fileName);
-    } else {
-      // Base64인 경우
-      downloadFile(fileName, downloadUrl, mimeType);
+    try {
+      // URL인 경우 (http:// 또는 https://)
+      if (downloadUrl.startsWith('http://') || downloadUrl.startsWith('https://')) {
+        await downloadFileFromUrl(downloadUrl, fileName || 'download');
+      } else {
+        // Base64인 경우
+        downloadFile(fileName || 'download', downloadUrl, mimeType || 'application/octet-stream');
+      }
+    } catch (error) {
+      console.error('파일 다운로드 실패:', error);
+      // 에러 발생 시 새 탭에서 열기 시도
+      if (downloadUrl.startsWith('http://') || downloadUrl.startsWith('https://')) {
+        window.open(downloadUrl, '_blank');
+      }
     }
   };
 
@@ -206,15 +222,54 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                   )}
                 </Box>
               ) : (
-                <Flex align="center" gap="sm">
-                  <Box style={{ fontSize: '1.5rem' }}>{getFileIcon(message.fileData.mimeType)}</Box>
-                  <Box style={{ flex: 1 }}>
-                    <Typography variant="body-medium" style={{ fontWeight: 500 }}>
+                // 이미지가 아닌 파일 (동영상, 오디오, 문서 등)
+                <Flex 
+                  align="center" 
+                  gap="sm" 
+                  style={{ 
+                    padding: 'var(--space-gap-sm)',
+                    borderRadius: 'var(--shape-radius-md)',
+                    backgroundColor: 'var(--color-surface-level-2)',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-surface-level-3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'var(--color-surface-level-2)';
+                  }}
+                  onClick={handleDownload}
+                >
+                  <Box style={{ fontSize: '2rem' }}>{getFileIcon(message.fileData.mimeType)}</Box>
+                  <Box style={{ flex: 1, minWidth: 0 }}>
+                    <Typography 
+                      variant="body-medium" 
+                      style={{ 
+                        fontWeight: 500,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
                       {message.fileData.fileName}
                     </Typography>
-                    <Typography variant="caption">{formatFileSize(message.fileData.size)}</Typography>
+                    <Typography variant="caption" color="text-secondary">
+                      {formatFileSize(message.fileData.size)}
+                      {message.fileData.mimeType && (
+                        <span style={{ marginLeft: 'var(--space-gap-xs)' }}>
+                          • {message.fileData.mimeType.split('/')[1]?.toUpperCase() || 'FILE'}
+                        </span>
+                      )}
+                    </Typography>
                   </Box>
-                  <IconButton size="small" onClick={handleDownload}>
+                  <IconButton 
+                    size="small" 
+                    onClick={handleDownload}
+                    style={{
+                      flexShrink: 0,
+                    }}
+                  >
                     <IconDownload size={18} />
                   </IconButton>
                 </Flex>

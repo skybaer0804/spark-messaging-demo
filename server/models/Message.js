@@ -6,7 +6,7 @@ const messageSchema = new mongoose.Schema({
   content: { type: String, required: true },
   type: {
     type: String,
-    enum: ['text', 'file', 'image', 'system'],
+    enum: ['text', 'file', 'image', 'video', 'audio', 'system'],
     default: 'text',
   },
   // [필수] 메시지 시퀀스: 방 내에서 1씩 증가하여 메시지 순서 및 누락 확인
@@ -21,7 +21,15 @@ const messageSchema = new mongoose.Schema({
   },
 
   fileUrl: { type: String },
+  thumbnailUrl: { type: String }, // 썸네일/프리뷰 URL
   fileName: { type: String },
+  fileSize: { type: Number }, // 파일 크기 (bytes)
+  mimeType: { type: String }, // MIME 타입
+  processingStatus: { 
+    type: String, 
+    enum: ['processing', 'completed', 'failed'], 
+    default: 'processing' 
+  }, // 파일 처리 상태 (썸네일/프리뷰 생성 등)
   readBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   // 멘션 정보
   mentions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // @멘션된 사용자 ID 배열

@@ -3,6 +3,7 @@ const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
 const storageConfig = require('../config/storageConfig');
+const { isFileTypeAllowed, getMaxFileSize, validateFile } = require('../config/fileConfig');
 
 /**
  * 저장소 타입에 따라 Multer 저장소 설정 반환
@@ -41,10 +42,9 @@ const getStorage = () => {
   }
 };
 
-// 파일 필터링 (이미지, 영상, 오디오 등)
+// 파일 필터링 (파일 타입별 허용 여부 확인)
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'audio/mpeg', 'application/pdf'];
-  if (allowedTypes.includes(file.mimetype)) {
+  if (isFileTypeAllowed(file.mimetype, file.originalname)) {
     cb(null, true);
   } else {
     cb(new Error('지원하지 않는 파일 형식입니다.'), false);
@@ -52,13 +52,36 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Multer 설정
+// 파일 크기 제한은 동적으로 결정되므로 최대값으로 설정
+// 실제 검증은 fileFilter에서 수행
+const maxVideoSize = parseInt(process.env.MAX_VIDEO_SIZE_MB || '300', 10) * 1024 * 1024;
+
 const upload = multer({
   storage: getStorage(),
   fileFilter: fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 최대 50MB 제한
+    fileSize: maxVideoSize, // 동영상 최대 크기로 설정 (가장 큰 값)
   },
 });
 
-module.exports = upload;
+// 파일 크기 검증 미들웨어 (Multer 이후 실행)
+const validateFileSize = (req, res, next) => {
+  if (!req.file) {
+    return next();
+  }
+
+  const validation = validateFile(req.file);
+  if (!validation.valid) {
+    return res.status(413).json({ 
+      message: validation.error,
+      code: 'FILE_TOO_LARGE'
+    });
+  }
+
+  // 파일 타입 정보를 req에 추가 (컨트롤러에서 사용)
+  req.file.fileType = validation.fileType;
+  next();
+};
+
+module.exports = { upload, validateFileSize };
 

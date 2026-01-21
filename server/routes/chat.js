@@ -18,7 +18,7 @@ const {
 } = require('../controllers/chatController');
 const auth = require('../middleware/auth');
 const workspaceAuth = require('../middleware/workspaceAuth');
-const upload = require('../middleware/upload');
+const { upload, validateFileSize } = require('../middleware/upload');
 
 router.use(auth); // 모든 채팅 라우트는 인증 필요
 
@@ -37,6 +37,6 @@ router.get('/rooms/:roomId/notification-settings', getRoomNotificationSettings);
 router.put('/rooms/:roomId/notification-settings', updateRoomNotificationSettings);
 
 // 파일 업로드 라우트 추가 (파일 업로드 시에도 workspaceId 확인 권장되지만 일단 인증만)
-router.post('/upload', upload.single('file'), uploadFile);
+router.post('/upload', upload.single('file'), validateFileSize, uploadFile);
 
 module.exports = router;

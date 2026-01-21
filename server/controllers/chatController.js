@@ -575,6 +575,18 @@ exports.leaveRoom = async (req, res) => {
 
 // 파일 업로드 처리
 exports.uploadFile = async (req, res) => {
+  // 타임아웃 설정 (파일 타입별)
+  const { getFileTimeout, getFileType } = require('../config/fileConfig');
+  const fileType = req.file?.fileType || getFileType(req.file?.mimetype, req.file?.originalname);
+  const timeout = getFileTimeout(req.file?.mimetype, req.file?.originalname);
+
+  // 타임아웃 설정
+  req.setTimeout(timeout, () => {
+    if (!res.headersSent) {
+      res.status(408).json({ message: '파일 업로드 타임아웃이 발생했습니다.' });
+    }
+  });
+
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
@@ -591,39 +603,52 @@ exports.uploadFile = async (req, res) => {
     const fileUrl = fileResult.url;
 
     // ========================================
-    // 2️⃣ 이미지 썸네일 생성 (이미지인 경우)
+    // 2️⃣ 파일 타입 결정
     // ========================================
+    const detectedFileType = fileType || getFileType(file.mimetype, file.originalname);
+    
     let type = 'file';
+    if (detectedFileType === 'image') type = 'image';
+    else if (detectedFileType === 'video') type = 'video';
+    else if (detectedFileType === 'audio') type = 'audio';
+    else if (detectedFileType === 'document') type = 'file';
+
+    // ========================================
+    // 3️⃣ 썸네일/프리뷰 생성을 워커로 위임 (비동기 처리)
+    // ========================================
     let thumbnailUrl = null;
+    
+    // 이미지인 경우 즉시 썸네일 생성 (기존 동작 유지, 추후 워커로 전환 가능)
+    // 다른 타입은 워커에서 처리
+    if (detectedFileType === 'image') {
+      // 이미지는 빠르게 처리되므로 즉시 생성 (선택사항: 워커로 전환 가능)
+      try {
+        let imageBuffer;
+        if (file.buffer) {
+          imageBuffer = file.buffer;
+        } else {
+          const fs = require('fs');
+          imageBuffer = fs.readFileSync(file.path);
+        }
 
-    if (file.mimetype.startsWith('image/')) {
-      type = 'image';
+        const thumbnailBuffer = await sharp(imageBuffer)
+          .resize(300, 300, {
+            fit: 'inside',
+            withoutEnlargement: true,
+          })
+          .toFormat('webp')
+          .toBuffer();
 
-      // 썸네일 생성 (로컬: file.path 사용, S3: file.buffer 사용)
-      let imageBuffer;
-      if (file.buffer) {
-        // S3 모드: 메모리 버퍼 사용
-        imageBuffer = file.buffer;
-      } else {
-        // 로컬 모드: 파일 경로에서 읽기
-        const fs = require('fs');
-        imageBuffer = fs.readFileSync(file.path);
+        const thumbnailFilename = `thumb_${fileResult.filename}.webp`;
+        const thumbnailResult = await StorageService.saveThumbnail(
+          thumbnailBuffer,
+          thumbnailFilename
+        );
+        thumbnailUrl = thumbnailResult.url;
+      } catch (error) {
+        console.error('썸네일 생성 실패 (워커로 위임):', error);
+        // 실패해도 계속 진행 (워커에서 재시도)
       }
-
-      const thumbnailBuffer = await sharp(imageBuffer)
-        .resize(300, 300, {
-          fit: 'inside',
-          withoutEnlargement: true,
-        })
-        .toFormat('webp')
-        .toBuffer();
-
-      const thumbnailFilename = `thumb_${fileResult.filename}.webp`;
-      const thumbnailResult = await StorageService.saveThumbnail(
-        thumbnailBuffer,
-        thumbnailFilename
-      );
-      thumbnailUrl = thumbnailResult.url;
     }
 
     // 1. 시퀀스 번호 원자적 증가 및 방 정보 업데이트
@@ -651,8 +676,39 @@ exports.uploadFile = async (req, res) => {
       mimeType: file.mimetype,
       sequenceNumber,
       readBy: [senderId], // [v2.4.0] 보낸 사람은 자동으로 읽음 처리
+      processingStatus: thumbnailUrl ? 'completed' : 'processing', // 처리 상태
     });
     await newMessage.save();
+
+    // ========================================
+    // 3️⃣ 파일 처리 워커에 작업 추가 (비동기 처리)
+    // ========================================
+    if (detectedFileType && !thumbnailUrl) {
+      // 썸네일이 아직 생성되지 않은 경우 워커에 위임
+      try {
+        const FileProcessingQueue = require('../services/queue/FileProcessingQueue');
+        
+        // 워커 작업 데이터 준비
+        // S3 모드에서는 fileUrl을 사용하여 워커에서 다운로드 (메모리 효율적)
+        // 로컬 모드에서는 filePath를 사용
+        const jobData = {
+          messageId: newMessage._id.toString(),
+          fileType: detectedFileType,
+          fileUrl: fileUrl, // S3/로컬 모두 URL 제공
+          filePath: file.path || null, // 로컬 스토리지인 경우만
+          fileBuffer: null, // 메모리 효율을 위해 버퍼는 전달하지 않음 (필요시 fileUrl에서 다운로드)
+          filename: fileResult.filename,
+          mimeType: file.mimetype,
+        };
+
+        // 워커에 작업 추가
+        await FileProcessingQueue.addFileProcessingJob(jobData);
+        console.log(`📤 파일 처리 작업 추가: ${detectedFileType} - ${file.originalname} (Message ${newMessage._id})`);
+      } catch (error) {
+        console.error('워커 작업 추가 실패:', error);
+        // 워커 실패해도 메시지는 이미 저장되었으므로 계속 진행
+      }
+    }
 
     // 3. 채팅방 마지막 메시지 업데이트 및 송신자 읽음 처리
     room.lastMessage = newMessage._id;
