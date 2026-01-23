@@ -26,7 +26,7 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
   const [videoError, setVideoError] = useState(false);
   const [videoLoading, setVideoLoading] = useState(true);
   const [audioError, setAudioError] = useState(false);
-  const [audioLoading, setAudioLoading] = useState(true);
+  const [_audioLoading, setAudioLoading] = useState(true); // setAudioLoading만 사용됨
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   
@@ -209,6 +209,9 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                       <img
                         src={message.fileData.thumbnail || message.fileData.data}
                         alt={message.fileData.fileName}
+                        loading="lazy"
+                        width={400}
+                        height={400}
                         style={{
                           maxWidth: '100%',
                           maxHeight: '400px',
@@ -217,6 +220,8 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                           display: 'block',
                           opacity: imageLoading ? 0 : 1,
                           transition: 'opacity 0.2s',
+                          aspectRatio: '1 / 1',
+                          objectFit: 'cover',
                         }}
                         onLoad={() => setImageLoading(false)}
                         onError={() => {
@@ -226,7 +231,7 @@ function ChatMessageItemComponent({ message, currentUser, onImageClick, unreadCo
                         onClick={() => {
                           // 원본 이미지 URL 사용 (썸네일이 아닌)
                           const originalUrl = message.fileData?.url || message.fileData?.data;
-                          if (originalUrl) {
+                          if (originalUrl && message.fileData?.fileName) {
                             onImageClick?.(originalUrl, message.fileData.fileName);
                           }
                         }}

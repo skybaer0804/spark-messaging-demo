@@ -2,7 +2,6 @@ import type { JSX } from 'preact';
 import { lazy, Suspense } from 'preact/compat';
 import {
   IconBell,
-  IconGavel,
   IconMessageCircle,
   IconPalette,
   IconHome,
@@ -11,8 +10,6 @@ import {
   IconVideo,
   IconSettings,
 } from '@tabler/icons-preact';
-import { ChatApp } from '@/domains/Chat';
-import { NotificationApp } from '@/domains/Notification';
 import { CircularProgress } from '@/ui-components/CircularProgress/CircularProgress';
 
 // 큰 컴포넌트들을 lazy loading으로 최적화
@@ -27,8 +24,19 @@ const DesignSystemDemo = lazy(() =>
     default: module.DesignSystemDemo,
   })),
 );
+
+const ChatApp = lazy(() =>
+  import('@/domains/Chat').then((module) => ({
+    default: module.ChatApp,
+  })),
+);
+
+const NotificationApp = lazy(() =>
+  import('@/domains/Notification').then((module) => ({
+    default: module.NotificationApp,
+  })),
+);
 import { HomePage } from '@/components/HomePage/HomePage';
-import { AuthPage } from '@/components/Auth/AuthPage';
 import { Profile } from '@/components/Profile/Profile';
 import { Workspace } from '@/components/Workspace/Workspace';
 import { WorkspaceDetail } from '@/components/Workspace/WorkspaceDetail';
@@ -139,7 +147,11 @@ export const appRoutes: AppRouteNode[] = [
     path: '/chatapp',
     icon: <IconMessageCircle size={24} />,
     title: 'Chat',
-    element: <ChatApp />,
+    element: (
+      <Suspense fallback={<CircularProgress />}>
+        <ChatApp />
+      </Suspense>
+    ),
   },
   {
     id: 'notification',
@@ -147,7 +159,11 @@ export const appRoutes: AppRouteNode[] = [
     path: '/notification',
     icon: <IconBell size={24} />,
     title: 'Notification',
-    element: <NotificationApp />,
+    element: (
+      <Suspense fallback={<CircularProgress />}>
+        <NotificationApp />
+      </Suspense>
+    ),
   },
   {
     id: 'video-meeting',

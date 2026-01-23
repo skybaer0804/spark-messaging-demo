@@ -94,12 +94,13 @@ export function AutocompleteMember({
   };
 
   // 선택된 값 렌더링 (Chip으로 표시)
-  const renderValue = (value: ChatUser[], getItemProps: (index: number) => any) => {
-    if (value.length === 0) return null;
+  const renderValue = (value: ChatUser | ChatUser[], getItemProps: (index: number) => any) => {
+    const values = Array.isArray(value) ? value : [value];
+    if (values.length === 0) return null;
 
     return (
       <>
-        {value.map((user, index) => (
+        {values.map((user, index) => (
           <Chip
             key={user._id}
             label={user.username}

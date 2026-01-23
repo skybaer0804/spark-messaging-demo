@@ -28,7 +28,7 @@ export function useMentionPicker(anchorRef: RefObject<HTMLElement>, isOpen: bool
       if (!container) return;
       
       const rect = container.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
+      // const viewportHeight = window.innerHeight; // 사용되지 않음
       const viewportWidth = window.innerWidth;
       const pickerHeight = 300; // 예상 높이
       const pickerWidth = 500; // 예상 너비

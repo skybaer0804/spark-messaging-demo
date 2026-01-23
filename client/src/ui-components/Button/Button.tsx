@@ -7,6 +7,7 @@ export interface ButtonProps extends JSX.HTMLAttributes<HTMLButtonElement> {
   size?: 'lg' | 'md' | 'sm';
   fullWidth?: boolean;
   disabled?: boolean;
+  type?: 'button' | 'submit' | 'reset';
   children: preact.ComponentChildren;
 }
 

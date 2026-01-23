@@ -3,7 +3,6 @@ import { memo } from 'preact/compat';
 import { Paper } from '@/ui-components/Paper/Paper';
 import { List } from '@/ui-components/List/List';
 import { Avatar } from '@/ui-components/Avatar/Avatar';
-import { Box } from '@/ui-components/Layout/Box';
 import { Typography } from '@/ui-components/Typography/Typography';
 import { Flex } from '@/ui-components/Layout/Flex';
 import { ChatUser } from '../../../types';
@@ -106,7 +105,7 @@ function MentionPickerComponent({ members, roomMembers, search, onSelect, onClos
       }}
     >
       <Paper elevation={8} className="mention-picker__paper">
-        <Typography variant="caption" className="mention-picker__title" padding="xs" style={{ display: 'block', borderBottom: '1px solid var(--color-border-default)' }}>
+        <Typography variant="caption" className="mention-picker__title" style={{ display: 'block', borderBottom: '1px solid var(--color-border-default)', padding: 'var(--space-gap-xs)' }}>
           사람들
         </Typography>
         <List className="mention-picker__list">
@@ -153,7 +152,7 @@ function MentionPickerComponent({ members, roomMembers, search, onSelect, onClos
                         {item.username}
                       </div>
                       <div className="chat-app__sidebar-item-sub" style={{ color: 'var(--text-secondary)', fontSize: '11px' }}>
-                        {isSpecial ? item.description : `${(item as ChatUser).status || 'offline'} • ${(item as ChatUser).role || 'Member'}`}
+                        {isSpecial ? (item as { _id: 'all' | 'here'; username: string; description: string }).description : `${(item as ChatUser).status || 'offline'} • ${(item as ChatUser).role || 'Member'}`}
                       </div>
                     </div>
                   </Flex>

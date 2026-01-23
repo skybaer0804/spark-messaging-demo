@@ -5,7 +5,7 @@ import { Typography } from '@/ui-components/Typography/Typography';
 import { Flex } from '@/ui-components/Layout/Flex';
 
 export function ChatDataProvider({ children }: { children: any }) {
-  const { isLoading, isConnected } = useChat();
+  const { isLoading } = useChat();
 
   if (isLoading) {
     return (

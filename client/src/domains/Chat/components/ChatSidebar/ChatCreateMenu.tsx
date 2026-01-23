@@ -21,8 +21,6 @@ export const ChatCreateMenu = ({
   selectedUserIds,
   toggleUserSelection,
   handleCreateRoom,
-  roomIdInput,
-  setRoomIdInput,
 }: ChatCreateMenuProps) => {
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showInviteList, setShowInviteList] = useState(false);

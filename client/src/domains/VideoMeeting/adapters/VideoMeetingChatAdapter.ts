@@ -1,4 +1,4 @@
-import type { ChatAdapter, ChatMessage } from '../../Chat/types';
+import type { ChatAdapter, ChatMessage } from '../../Chat/components/types';
 import type { ChatStore } from '../stores/ChatStore';
 import type { VideoMeetingStore } from '../stores/VideoMeetingStore';
 import { ChatService } from '@/core/socket/ChatService';
@@ -27,19 +27,23 @@ export class VideoMeetingChatAdapter implements ChatAdapter {
   getMessages(): ChatMessage[] {
     // ChatStore의 메시지를 Chat 컴포넌트의 ChatMessage 타입으로 변환
     return this.chatStore.messages.value.map((msg) => ({
+      _id: msg.id,
       id: msg.id,
+      roomId: this.videoMeetingStore.currentRoom.value?.roomId || '',
       content: msg.content,
-      timestamp: msg.timestamp,
+      timestamp: new Date(msg.timestamp),
       type: msg.type,
+      sequenceNumber: 0,
       senderId: msg.senderId,
       senderName: msg.senderName, // v2.4.0: 이름 필드 누락 해결
       fileData: msg.fileData,
-    }));
+      readBy: [],
+    })) as ChatMessage[];
   }
 
   // Signal 기반 접근 (반응형 업데이트)
   getMessagesSignal(): Signal<ChatMessage[]> {
-    return this.chatStore.messages as Signal<ChatMessage[]>;
+    return this.chatStore.messages as unknown as Signal<ChatMessage[]>;
   }
 
   async sendMessage(content: string): Promise<void> {

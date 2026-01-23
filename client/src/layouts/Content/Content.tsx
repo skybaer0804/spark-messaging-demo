@@ -1,5 +1,4 @@
 import type { ComponentChildren } from 'preact';
-import { Header } from '../Header/Header';
 import './Content.scss';
 
 interface ContentProps {

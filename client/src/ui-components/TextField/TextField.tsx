@@ -3,6 +3,8 @@ import './TextField.scss';
 
 export interface TextFieldProps extends InputProps {
   variant?: 'outlined' | 'standard' | 'filled';
+  name?: string;
+  required?: boolean;
 }
 
 export function TextField({ variant = 'outlined', className = '', ...props }: TextFieldProps) {

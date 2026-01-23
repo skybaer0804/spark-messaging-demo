@@ -27,7 +27,6 @@ export const ChatHeader = ({
   goToHome,
   currentRoom,
   showUserList,
-  showSettings,
   setShowUserList,
   setShowSettings,
   toggleDebug,

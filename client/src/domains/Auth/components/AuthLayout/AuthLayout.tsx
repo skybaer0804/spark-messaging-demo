@@ -20,7 +20,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
               {title}
             </Typography>
             {subtitle && (
-              <Typography variant="body1" className="auth-layout__subtitle">
+              <Typography variant="body-medium" className="auth-layout__subtitle">
                 {subtitle}
               </Typography>
             )}

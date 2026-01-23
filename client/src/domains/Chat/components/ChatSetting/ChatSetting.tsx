@@ -1,5 +1,4 @@
 import { Box } from '@/ui-components/Layout/Box';
-import { Flex } from '@/ui-components/Layout/Flex';
 import { Stack } from '@/ui-components/Layout/Stack';
 import { Typography } from '@/ui-components/Typography/Typography';
 import { Paper } from '@/ui-components/Paper/Paper';
@@ -14,7 +13,7 @@ interface ChatSettingProps {
   currentRoom: ChatRoom | null;
 }
 
-export const ChatSetting = ({ roomId, currentRoom }: ChatSettingProps) => {
+export const ChatSetting = ({ roomId }: ChatSettingProps) => {
   const { settings, loading, saving, updateSettings, resetSettings } = useChatNotificationSettings(roomId);
 
   const handleModeChange = async (e: Event) => {
@@ -72,7 +71,7 @@ export const ChatSetting = ({ roomId, currentRoom }: ChatSettingProps) => {
 
             {/* Footer */}
             <Box style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--color-border-default)' }}>
-              <Button variant="outlined" onClick={handleReset} disabled={saving} fullWidth>
+              <Button variant="secondary" onClick={handleReset} disabled={saving} fullWidth>
                 초기화
               </Button>
             </Box>

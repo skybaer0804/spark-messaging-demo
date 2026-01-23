@@ -143,14 +143,35 @@ export default defineConfig({
     },
   },
   build: {
-    // Rollup 옵션으로 tree-shaking 강화
+    // Rollup 옵션으로 tree-shaking 강화 및 코드 스플리팅
     rollupOptions: {
       output: {
-        manualChunks: {
-          // 아이콘 라이브러리를 별도 청크로 분리하여 캐싱 최적화
-          'tabler-icons': ['@tabler/icons-preact'],
+        manualChunks: (id) => {
+          // 큰 도메인별로 분리
+          if (id.includes('domains/Chat')) return 'chat';
+          if (id.includes('domains/VideoMeeting')) return 'video-meeting';
+          if (id.includes('domains/Notification')) return 'notification';
+          if (id.includes('domains/Auth')) return 'auth';
+          
+          // Third-party 라이브러리 분리
+          if (id.includes('@tabler/icons-preact')) return 'tabler-icons';
+          if (id.includes('axios')) return 'vendor-axios';
+          if (id.includes('preact-router')) return 'vendor-router';
+          if (id.includes('@preact/signals')) return 'vendor-signals';
+          
+          // node_modules의 나머지 vendor 코드
+          if (id.includes('node_modules')) return 'vendor';
         },
+        chunkSizeWarningLimit: 200, // 200KB 경고
       },
+    },
+    // 압축 최적화 (esbuild 사용 - terser보다 빠름)
+    minify: 'esbuild',
+    // CSS 코드 스플리팅 활성화
+    cssCodeSplit: true,
+    // esbuild 옵션: 프로덕션에서 console 제거
+    esbuild: {
+      drop: ['console', 'debugger'],
     },
   },
   css: {

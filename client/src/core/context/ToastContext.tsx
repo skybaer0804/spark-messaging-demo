@@ -7,7 +7,7 @@ interface ToastContextType {
   showToast: (message: string, type?: ToastProps['type'], duration?: number, action?: ToastAction) => number;
   showSuccess: (message: string, duration?: number) => number;
   showError: (message: string, duration?: number) => number;
-  showInfo: (message: string, duration?: number) => number;
+  showInfo: (message: string, duration?: number, action?: ToastAction) => number;
   showWarning: (message: string, duration?: number) => number;
   hideToast: (id: number) => void;
 }
@@ -64,8 +64,8 @@ export function ToastProvider({ children }: { children: any }) {
   );
 
   const showInfo = useCallback(
-    (message: string, duration?: number) => {
-      return showToast(message, 'info', duration);
+    (message: string, duration?: number, action?: ToastAction) => {
+      return showToast(message, 'info', duration, action);
     },
     [showToast],
   );

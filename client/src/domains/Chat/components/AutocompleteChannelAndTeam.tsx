@@ -77,15 +77,15 @@ export function AutocompleteChannelAndTeam({
 
     return (
       <Flex align="center" gap="sm" style={{ width: '100%' }}>
-        <Avatar src={room.displayAvatar} size="sm">
+        <Avatar src={room.displayAvatar || undefined} size="sm">
           {getRoomIcon(room.type)}
         </Avatar>
         <Flex direction="column" style={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="body-medium" noWrap>
+          <Typography variant="body-medium" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {room.name || room.displayName}
           </Typography>
           {room.description && (
-            <Typography variant="caption" color="text-secondary" noWrap>
+            <Typography variant="caption" color="text-secondary" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {room.description}
             </Typography>
           )}
@@ -98,7 +98,7 @@ export function AutocompleteChannelAndTeam({
     <Stack spacing="sm">
       <Autocomplete<ChatRoom>
         options={options}
-        value={selectedRoom}
+        value={selectedRoom || undefined}
         onChange={(newValue) => {
           onRoomChange(newValue as ChatRoom | null);
         }}

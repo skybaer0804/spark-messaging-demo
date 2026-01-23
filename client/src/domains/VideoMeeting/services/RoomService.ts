@@ -49,7 +49,7 @@ export class RoomService {
               category: roomData.category || '회의',
               title: roomData.title || '',
               participants: roomData.participants || 1,
-              creatorId: roomData.creatorId || msg.from,
+              // creatorId는 Room 타입에 없으므로 제거
               createdAt: roomData.createdAt || Date.now(),
             };
 
@@ -100,7 +100,7 @@ export class RoomService {
     return unsubscribe;
   }
 
-  public async createRoom(category: Category, title: string, creatorId: string): Promise<Room> {
+  public async createRoom(category: Category, title: string, _creatorId: string): Promise<Room> {
     const status = this.connectionService.getConnectionStatus();
     if (!status.isConnected) {
       throw new Error('서버에 연결되어 있지 않습니다.');
@@ -110,7 +110,7 @@ export class RoomService {
     const response = await chatApi.createRoom({
       name: title.trim(),
       workspaceId: currentWorkspaceId.value || undefined,
-      isGroup: true,
+      // isGroup은 Room 타입에 없으므로 제거
     });
 
     const dbRoom = response.data;
@@ -121,7 +121,7 @@ export class RoomService {
       category,
       title: title.trim(),
       participants: 1,
-      creatorId,
+      // creatorId는 Room 타입에 없으므로 제거
       createdAt: Date.now(),
     };
 

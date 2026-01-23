@@ -1,14 +1,10 @@
 import type SparkMessaging from '@skybaer0804/spark-messaging-client';
-import { ConnectionService } from './ConnectionService';
-import { ChatService } from './ChatService';
 import { chatApi } from './ApiService';
-import { validateFile as validateFileConfig, getFileType, FILE_TYPE_CONFIG } from '../config/fileConfig';
+import { validateFile as validateFileConfig } from '../config/fileConfig';
 
 export class FileTransferService {
-  private chatService: ChatService;
-
-  constructor(_client: SparkMessaging, _connectionService: ConnectionService, chatService: ChatService) {
-    this.chatService = chatService;
+  constructor(_client: SparkMessaging, _connectionService?: any, _chatService?: any) {
+    // ConnectionService와 ChatService는 현재 사용되지 않음
   }
 
   // 파일 검증 (백엔드와 동일한 로직 사용)
@@ -70,55 +66,55 @@ export class FileTransferService {
     }
   }
 
-  // 이미지 썸네일 생성
-  private generateThumbnail(file: File, maxWidth: number, maxHeight: number): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+  // 이미지 썸네일 생성 (현재 사용되지 않음)
+  // private generateThumbnail(file: File, maxWidth: number, maxHeight: number): Promise<string> {
+  //   return new Promise((resolve, reject) => {
+  //     const img = new Image();
+  //     const canvas = document.createElement('canvas');
+  //     const ctx = canvas.getContext('2d');
 
-      if (!ctx) {
-        reject(new Error('Canvas context를 가져올 수 없습니다.'));
-        return;
-      }
+  //     if (!ctx) {
+  //       reject(new Error('Canvas context를 가져올 수 없습니다.'));
+  //       return;
+  //     }
 
-      img.onload = () => {
-        // 비율 유지하며 리사이징
-        let width = img.width;
-        let height = img.height;
+  //     img.onload = () => {
+  //       // 비율 유지하며 리사이징
+  //       let width = img.width;
+  //       let height = img.height;
 
-        if (width > height) {
-          if (width > maxWidth) {
-            height = (height * maxWidth) / width;
-            width = maxWidth;
-          }
-        } else {
-          if (height > maxHeight) {
-            width = (width * maxHeight) / height;
-            height = maxHeight;
-          }
-        }
+  //       if (width > height) {
+  //         if (width > maxWidth) {
+  //           height = (height * maxWidth) / width;
+  //           width = maxWidth;
+  //         }
+  //       } else {
+  //         if (height > maxHeight) {
+  //           width = (width * maxHeight) / height;
+  //           height = maxHeight;
+  //         }
+  //       }
 
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
+  //       canvas.width = width;
+  //       canvas.height = height;
+  //       ctx.drawImage(img, 0, 0, width, height);
 
-        const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
-        resolve(thumbnail);
-      };
+  //       const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
+  //       resolve(thumbnail);
+  //     };
 
-      img.onerror = () => {
-        reject(new Error('이미지 로드 실패'));
-      };
+  //     img.onerror = () => {
+  //       reject(new Error('이미지 로드 실패'));
+  //     };
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        img.src = e.target?.result as string;
-      };
-      reader.onerror = () => {
-        reject(new Error('파일 읽기 실패'));
-      };
-      reader.readAsDataURL(file);
-    });
-  }
+  //     const reader = new FileReader();
+  //     reader.onload = (e) => {
+  //       img.src = e.target?.result as string;
+  //     };
+  //     reader.onerror = () => {
+  //       reject(new Error('파일 읽기 실패'));
+  //     };
+  //     reader.readAsDataURL(file);
+  //   });
+  // }
 }

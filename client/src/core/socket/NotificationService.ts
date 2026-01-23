@@ -1,6 +1,6 @@
 import type SparkMessaging from '@skybaer0804/spark-messaging-client';
 import { ConnectionService } from './ConnectionService';
-import type { ScheduleOption, NotificationData } from '../components/NotificationApp/types';
+import type { ScheduleOption, NotificationData } from '@/domains/Notification/types';
 
 export class NotificationService {
   private client: SparkMessaging;

@@ -34,13 +34,13 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
   const { pathname, navigate } = useRouterState();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isAuthenticated, user, signOut } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
 
   const homeRoute = appRoutes.find((r) => r.id === 'home');
   const viewOptions: SelectOption[] = [
     ...(homeRoute ? [{ value: homeRoute.path, label: homeRoute.title }] : []),
     ...appRoutes
-      .filter((r) => r.id !== 'design-system' && r.id !== 'home' && r.id !== 'auth')
+      .filter((r) => r.id !== 'design-system' && r.id !== 'home')
       .map((r) => ({ value: r.path, label: r.title })),
   ];
 

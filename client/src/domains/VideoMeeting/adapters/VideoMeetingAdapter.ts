@@ -1,32 +1,32 @@
-import type { ChatAdapter, ChatMessage } from '../../Chat/types';
-import type { useVideoMeeting } from '@/core/hooks/useVideoMeeting';
+import type { ChatAdapter, ChatMessage } from '../../Chat/components/types';
 
 export class VideoMeetingAdapter implements ChatAdapter {
-  private videoMeetingHook: ReturnType<typeof useVideoMeeting>;
+  private videoMeetingHook: any; // useVideoMeeting은 존재하지 않음
 
-  constructor(videoMeetingHook: ReturnType<typeof useVideoMeeting>) {
+  constructor(videoMeetingHook: any) {
     this.videoMeetingHook = videoMeetingHook;
   }
 
   getMessages(): ChatMessage[] {
     // VideoMeeting의 ChatMessage를 ChatMessage로 변환
-    return this.reverseAuctionHook.chatMessages.map((msg: any) => ({
+    // videoMeetingHook에서 메시지를 가져오는 방법 확인 필요
+    return (this.videoMeetingHook as any).chatMessages?.map((msg: any) => ({
       id: msg.id,
       content: msg.content,
       timestamp: msg.timestamp,
       type: msg.type,
       senderId: msg.senderId,
       // VideoMeeting은 fileData 없음
-    }));
+    })) || [];
   }
 
   async sendMessage(content: string): Promise<void> {
     // useVideoMeeting의 handleSendChat은 내부 chatInput을 사용
     // 직접 메시지를 전송하도록 수정
-    const chatService = (this.reverseAuctionHook as any).chatServiceRef?.current;
-    const currentRoom = this.reverseAuctionHook.currentRoom;
+    const chatService = (this.videoMeetingHook as any).chatServiceRef?.current;
+    const currentRoom = (this.videoMeetingHook as any).currentRoom;
 
-    if (!content.trim() || !this.reverseAuctionHook.isConnected || !chatService || !currentRoom) return;
+    if (!content.trim() || !(this.videoMeetingHook as any).isConnected || !chatService || !currentRoom) return;
 
     try {
       await chatService.sendRoomMessage(currentRoom.roomId, 'text', content.trim());
@@ -37,8 +37,8 @@ export class VideoMeetingAdapter implements ChatAdapter {
   }
 
   async sendFile(file: File, onProgress?: (progress: number) => void): Promise<void> {
-    const fileTransferService = (this.reverseAuctionHook as any).fileTransferServiceRef?.current;
-    const currentRoom = this.reverseAuctionHook.currentRoom;
+    const fileTransferService = (this.videoMeetingHook as any).fileTransferServiceRef?.current;
+    const currentRoom = (this.videoMeetingHook as any).currentRoom;
 
     if (!fileTransferService || !currentRoom) {
       throw new Error('File transfer service or room not available');
@@ -53,19 +53,19 @@ export class VideoMeetingAdapter implements ChatAdapter {
   }
 
   isConnected(): boolean {
-    return this.reverseAuctionHook.isConnected;
+    return (this.videoMeetingHook as any).isConnected || false;
   }
 
   getCurrentRoom(): string | null {
-    return this.reverseAuctionHook.currentRoom?.roomId || null;
+    return (this.videoMeetingHook as any).currentRoom?.roomId || null;
   }
 
   getUploadingFile(): File | null {
-    return (this.reverseAuctionHook as any).uploadingFile || null;
+    return (this.videoMeetingHook as any).uploadingFile || null;
   }
 
   getUploadProgress(): number {
-    return (this.reverseAuctionHook as any).uploadProgress || 0;
+    return (this.videoMeetingHook as any).uploadProgress || 0;
   }
 
   showRoomList(): boolean {

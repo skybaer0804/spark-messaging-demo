@@ -20,7 +20,7 @@ export const useChatSidebar = () => {
 
   const [roomIdInput, setRoomIdInput] = useState('chat');
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [selectedWorkspaceIds, setSelectedWorkspaceIds] = useState<string[]>([]);
+  const [_selectedWorkspaceIds, setSelectedWorkspaceIds] = useState<string[]>([]); // setSelectedWorkspaceIds만 사용됨
 
   const [showInviteList, setShowInviteList] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);

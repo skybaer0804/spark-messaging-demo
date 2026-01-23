@@ -3,7 +3,6 @@ import { Typography } from '@/ui-components/Typography/Typography';
 import { Card, CardBody } from '@/ui-components/Card/Card';
 import { Flex } from '@/ui-components/Layout/Flex';
 import { Box } from '@/ui-components/Layout/Box';
-import { Avatar } from '@/ui-components/Avatar/Avatar';
 import { Button } from '@/ui-components/Button/Button';
 import { Input } from '@/ui-components/Input/Input';
 import { Checkbox } from '@/ui-components/Checkbox/Checkbox';
@@ -225,7 +224,7 @@ export function WorkspaceDetail({ id }: WorkspaceDetailProps) {
                           <IconKey size={18} color="var(--color-primary)" />
                           <Typography variant="body-medium" style={{ fontWeight: 'bold' }}>Public API Key</Typography>
                         </Flex>
-                        <Button variant="secondary" size="xs" onClick={() => copyToClipboard(workspace.projectPublicKey, 'Public Key')}>
+                        <Button variant="secondary" size="sm" onClick={() => copyToClipboard(workspace.projectPublicKey, 'Public Key')}>
                           <IconCopy size={14} />
                         </Button>
                       </Flex>
@@ -239,11 +238,11 @@ export function WorkspaceDetail({ id }: WorkspaceDetailProps) {
                           <Typography variant="body-medium" style={{ fontWeight: 'bold' }}>Private Secret Key</Typography>
                         </Flex>
                         <Flex gap="xs">
-                          <Button variant="secondary" size="xs" onClick={handleRevealPrivateKey}>
+                          <Button variant="secondary" size="sm" onClick={handleRevealPrivateKey}>
                             {showPrivateKey ? <IconEyeOff size={14} /> : <IconEye size={14} />}
                           </Button>
                           {showPrivateKey && (
-                            <Button variant="secondary" size="xs" onClick={() => copyToClipboard(privateKey || '', 'Private Key')}>
+                            <Button variant="secondary" size="sm" onClick={() => copyToClipboard(privateKey || '', 'Private Key')}>
                               <IconCopy size={14} />
                             </Button>
                           )}

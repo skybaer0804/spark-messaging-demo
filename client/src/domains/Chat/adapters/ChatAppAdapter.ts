@@ -1,5 +1,6 @@
-import type { ChatAdapter, ChatMessage } from '../../Chat/types';
+import type { ChatAdapter, ChatMessage } from '../components/types';
 import type { useChatApp } from '../hooks/useChatApp';
+import type { ChatRoom } from '../types';
 
 export class ChatAppAdapter implements ChatAdapter {
   private chatAppHook: ReturnType<typeof useChatApp>;
@@ -86,7 +87,11 @@ export class ChatAppAdapter implements ChatAdapter {
   }
 
   async onRoomSelect(roomId: string): Promise<void> {
-    await this.chatAppHook.handleRoomSelect(roomId);
+    // roomId로 ChatRoom 찾기
+    const room = this.chatAppHook.roomList?.find((r: ChatRoom) => r._id === roomId || r.name === roomId);
+    if (room) {
+      await this.chatAppHook.handleRoomSelect(room);
+    }
   }
 
   async onRoomCreate(): Promise<void> {

@@ -126,6 +126,8 @@ function ImageModalComponent({ url, fileName, onClose }: ImageModalProps) {
             <img
               src={url}
               alt={fileName}
+              width={800}
+              height={600}
               style={{
                 maxWidth: '100%',
                 maxHeight: '90vh',
@@ -133,6 +135,7 @@ function ImageModalComponent({ url, fileName, onClose }: ImageModalProps) {
                 borderRadius: 'var(--shape-radius-md)',
                 opacity: imageLoading ? 0 : 1,
                 transition: 'opacity 0.2s',
+                aspectRatio: 'auto',
               }}
               onLoad={() => setImageLoading(false)}
               onError={() => {
