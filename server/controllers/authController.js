@@ -5,31 +5,22 @@ const userService = require('../services/userService');
 
 exports.register = async (req, res, next) => {
   try {
-    console.log('--- Register Handler Start ---');
     const { email, password, username } = req.body;
-    console.log('Register attempt payload:', { email, username });
 
     // Check if user already exists
-    console.log('Step 1: Checking if user exists...');
     let user = await User.findOne({ email });
     if (user) {
-      console.log('User already exists:', email);
       return res.status(400).json({ message: 'User already exists' });
     }
 
     // Hash password
-    console.log('Step 2: Hashing password...');
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    console.log('Step 3: Creating and saving user...');
     user = new User({ email, password: hashedPassword, username });
     await user.save();
-    console.log('User saved successfully:', user._id);
 
-    console.log('Step 4: Signing JWT...');
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    console.log('Step 5: Sending response...');
     res.status(201).json({
       token,
       user: {
@@ -41,7 +32,6 @@ exports.register = async (req, res, next) => {
         deptId: user.deptId,
       },
     });
-    console.log('--- Register Handler End ---');
   } catch (error) {
     console.error('--- Register Handler Error ---');
     console.error('Error detail:', error);
@@ -56,17 +46,14 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log('Login attempt:', email);
 
     const user = await User.findOne({ email });
     if (!user) {
-      console.log('User not found:', email);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      console.log('Password mismatch for:', email);
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
@@ -74,7 +61,6 @@ exports.login = async (req, res) => {
 
     // Redis에 온라인 상태 저장
     await userService.setUserStatus(user._id, 'online');
-    console.log('Login successful:', email);
 
     res.json({
       token,
@@ -102,7 +88,6 @@ exports.logout = async (req, res) => {
     // v2.3.0: 로그아웃 시간 기록
     await User.findByIdAndUpdate(userId, { lastLogoutAt: new Date() });
 
-    console.log('Logout successful for user:', userId);
     res.json({ message: 'Logged out successfully' });
   } catch (error) {
     console.error('Logout error:', error);

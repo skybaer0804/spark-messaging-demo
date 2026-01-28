@@ -109,12 +109,9 @@ export class VideoMeetingStore {
 
     // ChatService와 ChatStore가 모두 준비되었을 때만 리스너 설정
     if (this.chatService && this.chatStore) {
-      console.log('[DEBUG] 채팅 메시지 리스너 설정');
       // ChatService의 onRoomMessage를 사용하여 메시지 수신
       this.chatUnsubscribe = this.chatService.onRoomMessage((message) => {
         if (!this.chatStore) return;
-
-        console.log('[DEBUG] 채팅 메시지 수신:', message);
 
         // ChatService가 이미 ChatMessage 형태로 변환해주므로 그대로 사용
         const chatMessage: ChatMessage = {
@@ -253,20 +250,17 @@ export class VideoMeetingStore {
     this.participantService.onRoomMessage({
       onUserJoined: (participant) => {
         if (!this.participantService) return;
-        console.log('[DEBUG] 사용자 입장:', participant.socketId);
 
         // 기존 참가자 목록 업데이트
         this.participants.value = [...this.participantService.getParticipants()];
 
         // 새로운 사용자가 들어오면 WebRTC 연결 시작 (내가 이미 스트림을 가지고 있는 경우에만)
         if (this.webRTCService?.getLocalStream()) {
-          console.log('[DEBUG] 새 사용자에게 WebRTC 연결 시도:', participant.socketId);
           this.webRTCService.createPeerConnection(participant.socketId, true);
         }
       },
       onUserLeft: (socketId) => {
         if (!this.participantService) return;
-        console.log('[DEBUG] 사용자 퇴장:', socketId);
         this.webRTCService?.removePeerConnection(socketId);
         this.participants.value = [...this.participantService.getParticipants()];
       },
@@ -278,22 +272,11 @@ export class VideoMeetingStore {
     if (this.webRTCService) {
       const webRTCUnsubscribe = this.webRTCService.onRoomMessage({
         onStreamReceived: (socketId: string, stream: MediaStream) => {
-          console.log('[DEBUG] Store에서 원격 스트림 수신:', {
-            socketId,
-            streamId: stream.id,
-            active: stream.active,
-            videoTracks: stream.getVideoTracks().length,
-          });
           // 참가자 스트림 업데이트
           this.participantService?.updateParticipantStream(socketId, stream);
           this.participants.value = [...this.participantService!.getParticipants()];
-          console.log('[DEBUG] 참가자 목록 업데이트 완료:', {
-            participants: this.participants.value.length,
-            updatedParticipant: socketId,
-          });
         },
         onVideoStopped: (socketId: string) => {
-          console.log('[DEBUG] Store에서 비디오 중지 수신:', socketId);
           // 참가자 비디오 상태 업데이트
           this.participantService?.updateParticipantVideoStatus(socketId, false);
           this.participants.value = [...this.participantService!.getParticipants()];

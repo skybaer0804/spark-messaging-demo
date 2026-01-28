@@ -94,7 +94,6 @@ function VideoMeetingCoreComponent({ store }: VideoMeetingCoreProps) {
   const copyJoinLink = (hash: string) => {
     const link = `${window.location.origin}/video-meeting/join/${hash}`;
     navigator.clipboard.writeText(link);
-    console.log('Link copied:', link);
   };
 
   const handleJoinRoom = async (room: Room) => {

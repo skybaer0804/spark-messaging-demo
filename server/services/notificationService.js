@@ -48,7 +48,6 @@ class NotificationService {
       if (roomId) {
         const activeRoomId = await userService.getActiveRoom(userId);
         if (activeRoomId === roomId.toString()) {
-          console.log(`[Push] User ${userId} is already in room ${roomId}. Skipping push.`);
           return;
         }
       }
@@ -67,7 +66,6 @@ class NotificationService {
           await webpush.sendNotification(sub.subscription, pushPayload);
         } catch (error) {
           if (error.statusCode === 404 || error.statusCode === 410) {
-            console.log(`Push subscription for device ${sub.deviceId} has expired. Deactivating.`);
             sub.isActive = false;
             await sub.save();
           } else {
@@ -77,7 +75,6 @@ class NotificationService {
       });
 
       await Promise.all(pushPromises);
-      console.log(`[Push] Notification sent to user: ${userId} (${subscriptions.length} devices)`);
     } catch (error) {
       console.error('[Push] Error in sendPushNotification:', error);
     }
@@ -85,7 +82,6 @@ class NotificationService {
 
   // 채팅 메시지 알림 전송 유틸리티
   async notifyNewMessage(recipientIds, senderName, messageContent, roomId, messageData = null) {
-    console.log(`[Push] Notifying new message to recipients: ${recipientIds.join(', ')}`);
     const payload = {
       title: `${senderName}님의 메시지`,
       body: messageContent,

@@ -50,13 +50,8 @@ class S3StorageService {
         },
       };
 
-      console.log(`📤 Uploading to S3: ${key}`);
-
       // S3 업로드
       const result = await this.s3.upload(params).promise();
-
-      console.log(`✅ S3 upload successful: ${filename}`);
-      console.log(`📍 URL: ${result.Location}`);
 
       return {
         filename: filename,
@@ -92,13 +87,8 @@ class S3StorageService {
         },
       };
 
-      console.log(`📤 Uploading thumbnail to S3: ${key}`);
-
       // S3 업로드
       const result = await this.s3.upload(params).promise();
-
-      console.log(`✅ S3 thumbnail upload successful: ${filename}`);
-      console.log(`📍 URL: ${result.Location}`);
 
       return {
         filename: filename,
@@ -134,13 +124,8 @@ class S3StorageService {
         },
       };
 
-      console.log(`📤 Uploading render model to S3: ${key}`);
-
       // S3 업로드
       const result = await this.s3.upload(params).promise();
-
-      console.log(`✅ S3 render model upload successful: ${filename}`);
-      console.log(`📍 URL: ${result.Location}`);
 
       return {
         filename: filename,
@@ -164,8 +149,6 @@ class S3StorageService {
       // https://bucket.s3.region.amazonaws.com/chat-files/original/filename.png
       const urlPath = new URL(fileUrl).pathname.replace(/^\//, '');
 
-      console.log(`🗑️ Deleting from S3: ${urlPath}`);
-
       const params = {
         Bucket: this.bucket,
         Key: urlPath,
@@ -174,7 +157,6 @@ class S3StorageService {
       // S3 삭제
       await this.s3.deleteObject(params).promise();
 
-      console.log(`✅ S3 file deleted: ${urlPath}`);
       return true;
     } catch (error) {
       console.error('❌ S3StorageService.deleteFile error:', error);

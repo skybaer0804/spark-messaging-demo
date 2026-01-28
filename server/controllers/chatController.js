@@ -735,23 +735,10 @@ exports.uploadFile = async (req, res) => {
         const decoded = Buffer.from(fileName, 'latin1').toString('utf8');
         if (/[가-힣]/.test(decoded)) {
           fileName = decoded;
-          console.log('📝 [Controller] 파일명 디코딩 성공:', {
-            원본: originalFileName,
-            변환: fileName
-          });
-        } else {
-          // 디코딩해도 한글이 없으면 원본 사용
-          console.log('📝 [Controller] 파일명 디코딩 시도했으나 한글 없음:', {
-            원본: originalFileName,
-            디코딩결과: decoded
-          });
         }
       } catch (error) {
         console.warn('📝 [Controller] 파일명 디코딩 실패:', error, '원본:', originalFileName);
       }
-    } else {
-      // 이미 한글이 포함되어 있으면 정상
-      console.log('📝 [Controller] 파일명 정상 (한글 포함):', fileName);
     }
     
     // 2. DB에 메시지 저장
@@ -796,7 +783,6 @@ exports.uploadFile = async (req, res) => {
 
         // 워커에 작업 추가
         await FileProcessingQueue.addFileProcessingJob(jobData);
-        console.log(`📤 파일 처리 작업 추가: ${detectedFileType} - ${file.originalname} (Message ${newMessage._id})`);
       } catch (error) {
         console.error('워커 작업 추가 실패:', error);
         // 워커 실패해도 메시지는 이미 저장되었으므로 계속 진행
@@ -979,15 +965,12 @@ exports.sendMessage = async (req, res) => {
     const recipientIds = allMemberIds.filter((id) => id !== senderId);
 
     if (recipientIds.length > 0) {
-      console.log(`[Push] Attempting to send push to recipients: ${recipientIds}`);
       const activeRooms = await userService.getUsersActiveRooms(recipientIds);
 
       const recipientIdsToNotify = recipientIds.filter((id) => {
         const isNotInRoom = activeRooms[id] !== roomId.toString(); // ID 비교 안정화
         return isNotInRoom;
       });
-
-      console.log(`[Push] Filtered recipients to notify: ${recipientIdsToNotify}`);
 
       if (recipientIdsToNotify.length > 0) {
         // 각 수신자별로 알림 설정 확인하여 필터링

@@ -50,7 +50,6 @@ class SocketService {
           if (meeting && meeting.status === 'scheduled') {
             meeting.status = 'ongoing';
             await meeting.save();
-            console.log(`[Meeting] Meeting ${meeting._id} status changed to ongoing`);
           }
 
           // 다른 참가자들에게 새로운 사용자 입장 알림 (프론트엔드 로직 이동)
@@ -60,8 +59,6 @@ class SocketService {
             total: participantsCount,
             timestamp: Date.now(),
           });
-
-          console.log(`[Socket] User ${userId} (${socketId}) joined room ${roomId}. Total: ${participantsCount}`);
         } catch (error) {
           console.error('[Socket] Error in ROOM_JOINED handler:', error);
         }
@@ -87,12 +84,10 @@ class SocketService {
             if (meeting && meeting.status === 'ongoing') {
               meeting.status = 'completed';
               await meeting.save();
-              console.log(`[Meeting] Meeting ${meeting._id} status changed to completed`);
 
               // v2.4.0: 화상회의 종료 시 연관된 채팅방 삭제 (또는 아카이브)
               if (meeting.roomId) {
                 await ChatRoom.findByIdAndDelete(meeting.roomId);
-                console.log(`[Meeting] Associated ChatRoom ${meeting.roomId} deleted.`);
 
                 // 클라이언트에게 방 목록 업데이트 알림 (필요시)
                 if (userId) {
@@ -101,8 +96,6 @@ class SocketService {
               }
             }
           }
-
-          console.log(`[Socket] User ${userId} (${socketId}) left room ${roomId}. Total: ${participantsCount}`);
         } catch (error) {
           console.error('[Socket] Error in ROOM_LEFT handler:', error);
         }
@@ -148,7 +141,6 @@ class SocketService {
   }
 
   async notifyRoomListUpdated(userId, roomData = {}) {
-    console.log(`[Socket] Notifying room list update to user ${userId}:`, roomData);
     await this.broadcastEvent('ROOM_LIST_UPDATED', roomData, [userId]);
   }
 
@@ -165,7 +157,6 @@ class SocketService {
     if (!this.client) return;
 
     try {
-      console.log(`📡 [Socket] 진행률 전송 시도: Room=${roomId}, Msg=${progressData.messageId}, Progress=${progressData.progress}%`);
       await this.client.sendRoomMessage(roomId, 'MESSAGE_PROGRESS', {
         ...progressData,
         timestamp: Date.now(),
@@ -179,7 +170,6 @@ class SocketService {
     if (!this.client) return;
 
     try {
-      console.log(`📡 [Socket] 완료 업데이트 전송 시도: Room=${roomId}, Msg=${updateData.messageId}`);
       await this.client.sendRoomMessage(roomId, 'MESSAGE_UPDATED', {
         ...updateData,
         timestamp: Date.now(),

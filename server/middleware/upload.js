@@ -93,15 +93,6 @@ const fileFilter = (req, file, cb) => {
   const decodedFileName = decodeFileName(file.originalname);
   file.originalname = decodedFileName; // 원본 파일명을 UTF-8로 변환
   
-  // 디버깅: 파일명 변환 로그 (변경된 경우만)
-  if (originalFileName !== decodedFileName) {
-    console.log('📝 [Multer] 파일명 디코딩:', {
-      원본: originalFileName,
-      변환: decodedFileName,
-      한글포함: /[가-힣]/.test(decodedFileName)
-    });
-  }
-  
   if (isFileTypeAllowed(file.mimetype, file.originalname)) {
     cb(null, true);
   } else {

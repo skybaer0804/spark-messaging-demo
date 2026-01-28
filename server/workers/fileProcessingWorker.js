@@ -80,7 +80,6 @@ class FileProcessingWorker {
   async reportProgress(job, messageId, roomId, progress) {
     job.progress(progress);
     if (roomId) {
-      console.log(`📊 [진행률] Message ${messageId}: ${progress}% (Room: ${roomId})`);
       await socketService.sendMessageProgress(roomId, {
         messageId,
         progress
@@ -216,7 +215,6 @@ class FileProcessingWorker {
    */
   async processModel3D(job, filePath, fileBuffer, fileUrl, filename, roomId) {
     const messageId = job.data.messageId;
-    console.log(`🎯 [3D 처리 시작] ${filename}`);
 
     try {
       // .dxd 파일은 프리뷰 생성하지 않음 (업로드/다운로드는 지원)
@@ -238,57 +236,42 @@ class FileProcessingWorker {
       }
 
       // 1. 원본 파일 로드
-      console.log(`📂 [1단계] 원본 파일 로드 시작: ${filename}`);
       let originalBuffer;
       if (fileBuffer) {
         originalBuffer = fileBuffer;
-        console.log(`✅ [1단계] 버퍼에서 로드 완료: ${originalBuffer.length} bytes`);
       } else if (filePath && fs.existsSync(filePath)) {
         // 로컬 모드: 파일 경로에서 읽기
         originalBuffer = fs.readFileSync(filePath);
-        console.log(`✅ [1단계] 로컬 파일에서 로드 완료: ${originalBuffer.length} bytes`);
       } else if (fileUrl) {
         // S3 모드: URL에서 다운로드
-        console.log(`📥 [1단계] S3에서 다운로드 시작: ${fileUrl}`);
         originalBuffer = await this.downloadFileFromUrl(fileUrl);
-        console.log(`✅ [1단계] S3 다운로드 완료: ${originalBuffer.length} bytes`);
       } else {
         throw new Error('3D 모델 파일을 찾을 수 없습니다.');
       }
 
       // 2. 환경변수에서 스케일 값 가져오기 (기본값: 0.1)
       const scale = parseFloat(process.env.MODEL3D_THUMBNAIL_SCALE || '0.1');
-      console.log(`📏 [설정] 스케일: ${scale}`);
 
       // 3. 임시 파일 경로 생성
       const tempDir = os.tmpdir();
       const tempInputPath = path.join(tempDir, `input_${Date.now()}_${Math.random().toString(36).substring(7)}${ext}`);
       const tempOutputPath = path.join(tempDir, `output_${Date.now()}_${Math.random().toString(36).substring(7)}.glb`);
-      console.log(`📁 [임시 파일] 입력: ${tempInputPath}`);
-      console.log(`📁 [임시 파일] 출력: ${tempOutputPath}`);
 
       try {
         // 원본 파일을 임시 경로에 저장
-        console.log(`💾 [2단계] 임시 파일 저장 시작`);
         fs.writeFileSync(tempInputPath, originalBuffer);
-        console.log(`✅ [2단계] 임시 파일 저장 완료`);
 
         // 4. Assimp로 STL/OBJ/PLY → GLB 변환 (assimpjs 사용)
-        console.log(`🔄 [3단계] Assimp 변환 시작 (assimpjs 사용)`);
-        
         let ajs;
         try {
           // assimpjs는 Promise를 반환하므로 await 필요
           ajs = await require('assimpjs')();
-          console.log(`✅ assimpjs 모듈 로드 성공 (WASM 기반)`);
         } catch (requireError) {
           console.error(`❌ assimpjs 모듈 로드 실패:`, requireError);
           throw new Error(`assimpjs 모듈을 로드할 수 없습니다: ${requireError.message}`);
         }
 
         try {
-          console.log(`📤 assimpjs 변환 실행`);
-          
           // assimpjs API: FileList를 생성하고 파일 추가
           const fileList = new ajs.FileList();
           fileList.AddFile(
@@ -298,7 +281,6 @@ class FileProcessingWorker {
           
           // ConvertFileList 호출 (fileList, 출력 형식)
           // assimpjs에서 gltf2(JSON)를 명시하여 구조적 안정성 확보
-          console.log(`📤 assimpjs 변환 실행 (format: gltf2)`);
           const result = ajs.ConvertFileList(fileList, 'gltf2');
           
           // 변환 성공 여부 확인
@@ -307,7 +289,6 @@ class FileProcessingWorker {
             throw new Error(`assimpjs 변환 실패: ${errorCode}`);
           }
           
-          console.log(`📦 변환된 파일 수: ${result.FileCount()}`);
           let gltfJson = null;
           const resources = {};
 
@@ -315,8 +296,6 @@ class FileProcessingWorker {
             const resFile = result.GetFile(i);
             const fileName = resFile.GetPath();
             const fileContent = resFile.GetContent(); // Uint8Array
-            
-            console.log(`   - 파일 ${i}: ${fileName} (${fileContent.length} bytes)`);
             
             if (fileName.toLowerCase().endsWith('.gltf')) {
               gltfJson = JSON.parse(new TextDecoder().decode(fileContent));
@@ -331,8 +310,6 @@ class FileProcessingWorker {
           }
 
           // 5. gltf-pipeline로 glTF(JSON) → GLB 변환 및 Draco 압축
-          console.log(`🗜️  [4단계] glTF -> GLB 변환 및 압축 시작`);
-          
           let gltfPipeline;
           try {
             gltfPipeline = require('gltf-pipeline');
@@ -368,7 +345,6 @@ class FileProcessingWorker {
           // 5-1. 최종 생성된 바이너리 검증
           try {
             const validator = require('gltf-validator');
-            console.log(`🔍 [4-1단계] 최종 GLB 검증 시작`);
             const report = await validator.validateBytes(new Uint8Array(finalGlbBuffer));
             
             if (report.issues.numErrors > 0) {
@@ -381,8 +357,6 @@ class FileProcessingWorker {
                 });
                 finalGlbBuffer = fallbackResult.glb;
               }
-            } else {
-              console.log(`✅ [4-1단계] 최종 GLB 검증 통과 (v${report.info.version})`);
             }
           } catch (validatorError) {
             console.warn(`⚠️  최종 검증 도중 에러 발생: ${validatorError.message}`);
@@ -395,14 +369,12 @@ class FileProcessingWorker {
           }
 
           // 6. 3D 변환 모델 저장 (render 폴더)
-          console.log(`💾 [5단계] 변환 모델 저장 시작`);
           const renderFilename = `render_${path.parse(filename).name}.glb`;
           
           const renderResult = await StorageService.saveRender(
             finalGlbBuffer,
             renderFilename
           );
-          console.log(`✅ [5단계] 변환 모델 저장 완료: ${renderResult.url}`);
 
           return {
             renderUrl: renderResult.url, // 변환된 GLB는 renderUrl에 저장
@@ -417,11 +389,9 @@ class FileProcessingWorker {
         try {
           if (fs.existsSync(tempInputPath)) {
             fs.unlinkSync(tempInputPath);
-            console.log(`🗑️  임시 입력 파일 삭제: ${tempInputPath}`);
           }
           if (fs.existsSync(tempOutputPath)) {
             fs.unlinkSync(tempOutputPath);
-            console.log(`🗑️  임시 출력 파일 삭제: ${tempOutputPath}`);
           }
         } catch (cleanupError) {
           console.warn('⚠️  임시 파일 정리 실패:', cleanupError);
@@ -461,8 +431,6 @@ class FileProcessingWorker {
         messageId: message._id.toString(),
         ...updateData,
       });
-
-      console.log(`📢 메시지 업데이트 브로드캐스트: ${messageId}`);
     } catch (error) {
       console.error('메시지 업데이트 실패:', error);
       throw error;

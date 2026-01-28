@@ -20,7 +20,6 @@ let videoConferenceAdapterInstance: VideoMeetingVideoConferenceAdapter | null = 
 function initializeStores(toast: { showSuccess: (m: string) => void; showError: (m: string) => void }) {
   if (!videoMeetingStoreInstance) {
     try {
-      console.log('[DEBUG] Store 초기화 시작');
       videoMeetingStoreInstance = new VideoMeetingStore();
       videoMeetingStoreInstance.setToast(toast);
       chatStoreInstance = new ChatStore();
@@ -28,7 +27,6 @@ function initializeStores(toast: { showSuccess: (m: string) => void; showError: 
 
       // Store 초기화
       videoMeetingStoreInstance.initialize();
-      console.log('[DEBUG] VideoMeetingStore 초기화 완료');
 
       // ChatStore 연결
       videoMeetingStoreInstance.setChatStore(chatStoreInstance);
@@ -47,7 +45,6 @@ function initializeStores(toast: { showSuccess: (m: string) => void; showError: 
           chatService,
           fileTransferService,
         );
-        console.log('[DEBUG] ChatAdapter 생성 완료');
       } else {
         console.warn('[WARN] ChatService가 없습니다.');
       }
@@ -60,11 +57,9 @@ function initializeStores(toast: { showSuccess: (m: string) => void; showError: 
           videoMeetingStoreInstance,
           webRTCService,
         );
-        console.log('[DEBUG] VideoConferenceAdapter 생성 완료');
       } else {
         console.warn('[WARN] WebRTCService가 없습니다.');
       }
-      console.log('[DEBUG] 모든 Store 초기화 완료');
     } catch (error) {
       console.error('[ERROR] Store 초기화 실패:', error);
       throw error;
@@ -132,7 +127,6 @@ export function VideoMeeting() {
 
     if (joinHash && guestNickname) {
       // 게스트 입장 로직 수행
-      console.log(`[Guest] Joining meeting with hash: ${joinHash} as ${guestNickname}`);
       videoMeetingStore.joinAsGuest(joinHash, guestNickname);
     }
   }, []);

@@ -6,7 +6,6 @@ export function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
     // 개발 모드에서는 수동 등록 스킵 (Vite PWA 또는 PushService에서 관리)
     if (import.meta.env.DEV) {
-      console.log('Service Worker registration skipped in DEV');
       return;
     }
 
@@ -14,8 +13,6 @@ export function registerServiceWorker() {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
-          console.log('Service Worker registered:', registration.scope);
-
           // 업데이트 확인
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
@@ -23,7 +20,6 @@ export function registerServiceWorker() {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   // 새 버전이 설치되었을 때 사용자에게 알림 (선택사항)
-                  console.log('New service worker available. Please refresh the page.');
                 }
               });
             }

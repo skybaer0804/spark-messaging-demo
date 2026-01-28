@@ -58,9 +58,7 @@ export class VideoMeetingChatAdapter implements ChatAdapter {
     }
 
     try {
-      console.log('[DEBUG] 메시지 전송 시작:', { roomId: currentRoom.roomId, content: content.trim() });
       await this.chatService.sendMessage(currentRoom.roomId, content.trim(), 'text');
-      console.log('[DEBUG] 메시지 전송 완료');
       this.chatStore.setInput('');
     } catch (error) {
       console.error('[ERROR] 메시지 전송 실패:', error);

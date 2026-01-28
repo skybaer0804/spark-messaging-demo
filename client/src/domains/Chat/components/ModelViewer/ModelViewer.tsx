@@ -102,48 +102,30 @@ export function ModelViewer({
     }, LOAD_TIMEOUT_MS);
 
     const url = `${modelUrl}${modelUrl.includes('?') ? '&' : '?'}t=${Date.now()}`;
-    console.log(`🚀 [ModelViewer] fetch 시작: ${url}`);
 
     (async () => {
       try {
         const startedAt = performance.now();
         const res = await fetch(url, { signal: abortController.signal });
 
-        console.log('🌐 [ModelViewer] fetch 응답:', {
-          status: res.status,
-          ok: res.ok,
-          contentType: res.headers.get('content-type'),
-          contentLength: res.headers.get('content-length'),
-        });
-
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
 
         const arrayBuffer = await res.arrayBuffer();
-        console.log('📦 [ModelViewer] arrayBuffer 수신:', {
-          bytes: arrayBuffer.byteLength,
-          ms: Math.round(performance.now() - startedAt),
-        });
 
         loader.parse(
           arrayBuffer,
           '',
           (gltf: any) => {
             window.clearTimeout(timeoutId);
-            console.log(`✅ [ModelViewer] GLB 파싱 완료`, gltf);
 
             const model = gltf.scene;
-            const isDraco = gltf.parser.json.extensionsUsed?.includes('KHR_draco_mesh_compression');
-            console.log(`📦 Draco 압축 여부: ${isDraco ? '예' : '아니오'}`);
 
             // 바운딩박스 계산 후 자동 카메라 조정
             const box = new THREE.Box3().setFromObject(model);
             const size = box.getSize(new THREE.Vector3());
             const center = box.getCenter(new THREE.Vector3());
-
-            console.log(`📏 모델 크기:`, size);
-            console.log(`📍 모델 중심:`, center);
 
             const maxDim = Math.max(size.x, size.y, size.z);
             if (maxDim === 0) {

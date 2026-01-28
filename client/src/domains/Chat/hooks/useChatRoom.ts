@@ -115,8 +115,6 @@ export function useChatRoom() {
       if (type === 'MESSAGE_UPDATED' || type === 'message-updated' || 
           type === 'MESSAGE_PROGRESS' || type === 'message-progress') {
         
-        console.log(`🌀 [Hook] 3D 이벤트 처리 시작: type=${type}, id=${newMsg._id}`);
-
         // 완료 이벤트는 서버 최종본으로 단건 재조회하여 DB 상태와 완전히 동기화
         if (type === 'MESSAGE_UPDATED' || type === 'message-updated') {
           const messageId = newMsg._id?.toString();
@@ -134,18 +132,11 @@ export function useChatRoom() {
         }
         
         setMessages((prev: Message[]) => {
-          const exists = prev.some(m => m._id.toString() === newMsg._id.toString() || (newMsg.tempId && m.tempId === newMsg.tempId));
-          if (!exists) {
-            console.warn(`❌ [Hook] 업데이트할 메시지를 찾을 수 없음: ${newMsg._id}`);
-          }
-
           return prev.map((m: Message) => {
             const isMatch = m._id.toString() === newMsg._id.toString() || 
                            (newMsg.tempId && m.tempId === newMsg.tempId);
             
             if (isMatch) {
-              console.log(`✅ [Hook] 메시지 매칭 성공, 상태 업데이트 적용: ${m._id}`);
-              
               // v2.4.0: 타입 오염 방지 - 기존 메시지(m)를 기반으로 필요한 필드만 신규 메시지(newMsg)에서 가져옴
               // 서버에서 온 데이터(newMsg)는 최상위에 필드들이 있을 수 있음
               const updatedFileData = {

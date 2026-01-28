@@ -54,18 +54,16 @@ export class ChatService {
   public onRoomMessage(callback: RoomMessageCallback): () => void {
     const unsubscribe = this.client.onRoomMessage((msg: RoomMessageData) => {
       this.logDebug('Received Room Message:', msg);
-      console.log(`🔌 [SDK] 소켓 메시지 수신: type=${msg.type}, room=${msg.room}`);
 
       // 현재 Room의 메시지만 처리
       if (msg.room !== this.currentRoomRef) {
-        console.warn(`⚠️ [SDK] 다른 방 메시지 무시: ${msg.room} !== ${this.currentRoomRef}`);
         return;
       }
 
       const payload = msg.content as any;
       const contentData = payload.content || payload;
       
-      console.log('📦 [SDK] 파싱된 데이터:', contentData);
+      this.logDebug('Parsed Data:', contentData);
       
       // 시스템 이벤트 타입 필터링 (순수 데이터만 있는 경우 제외)
       const systemEventTypes = [

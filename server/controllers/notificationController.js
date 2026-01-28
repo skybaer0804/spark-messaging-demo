@@ -89,8 +89,6 @@ exports.syncNotifications = async (req, res) => {
     // [v2.4.0] 로그인 시 미수신 공지는 데이터로만 전달하고 웹 푸시 발송은 하지 않음
     // (사용자가 직접 알림 목록이나 뱃지를 통해 확인하도록 유도)
     if (pendingNotifications.length > 0) {
-      console.log(`[Sync] Found ${pendingNotifications.length} pending notifications for user ${userId}`);
-
       // 동기화 시점 업데이트 (중복 방지)
       user.lastSyncAt = new Date();
       await user.save();

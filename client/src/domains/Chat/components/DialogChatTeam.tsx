@@ -72,24 +72,19 @@ export const DialogChatTeam = ({ open, onClose, onTeamCreated, team }: DialogCha
     try {
       if (isEditMode && team) {
         // 수정 모드
-        console.log('[DialogChatTeam] Updating team:', team._id, teamData);
         const existingMemberIds = team.members.map((m) => m._id);
         const newMemberIds = teamData.members.map((m) => m._id);
         const addedMemberIds = newMemberIds.filter((id) => !existingMemberIds.includes(id));
 
-        console.log('[DialogChatTeam] Member changes:', { existingMemberIds, newMemberIds, addedMemberIds });
-
         // 팀 정보 수정
-        const updateResponse = await teamApi.updateTeam(team._id, {
+        await teamApi.updateTeam(team._id, {
           teamName: teamData.teamName.trim(),
           teamDesc: teamData.teamDesc.trim() || undefined,
           private: teamData.private,
         });
-        console.log('[DialogChatTeam] Update response:', updateResponse);
 
         // 새로 추가된 멤버가 있으면 초대
         if (addedMemberIds.length > 0) {
-          console.log('[DialogChatTeam] Inviting new members:', addedMemberIds);
           await teamApi.inviteMembers(team._id, addedMemberIds);
         }
       } else {

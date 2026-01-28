@@ -187,8 +187,6 @@ export function ChatProvider({ children }: { children: any }) {
         const currentUserId = user?.id || (user as any)?._id;
         if (updateData.targetUserId && updateData.targetUserId !== currentUserId) return;
 
-        console.log('[ChatContext] Updating Room List for:', updateData._id);
-
         const roomId = updateData._id;
         const currentRooms = chatRoomList.value;
 

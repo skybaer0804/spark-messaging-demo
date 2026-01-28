@@ -139,7 +139,6 @@ export function Header({ title, isConnected, socketId }: HeaderProps) {
                 size="medium"
                 color="default"
                 onClick={() => {
-                  console.log('Settings clicked, current state:', !menuOpen);
                   setMenuOpen(!menuOpen);
                 }}
                 title="설정"

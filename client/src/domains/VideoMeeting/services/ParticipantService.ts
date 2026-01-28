@@ -105,7 +105,6 @@ export class ParticipantService {
         case 'participants-list':
           // 호스트로부터 참가자 목록을 수신
           if (parsedContent?.to === mySocketId && parsedContent?.participants) {
-            console.log('[DEBUG] 참가자 목록 수신:', parsedContent.participants);
             parsedContent.participants.forEach((p: Participant) => {
               // 내 소켓 ID가 확실히 정의되어 있고, 목록의 ID와 다를 때만 추가
               if (mySocketId && p.socketId !== mySocketId) {

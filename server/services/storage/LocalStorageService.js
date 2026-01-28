@@ -31,9 +31,6 @@ class LocalStorageService {
       // 클라이언트 접근 URL 생성
       const fileUrl = `${this.config.serveUrl}/${type}/${filename}`;
 
-      console.log(`✅ Local file saved: ${filename}`);
-      console.log(`📍 URL: ${fileUrl}`);
-
       return {
         filename: filename,
         url: fileUrl,
@@ -68,9 +65,6 @@ class LocalStorageService {
 
       // 클라이언트 접근 URL 생성
       const thumbnailUrl = `${this.config.serveUrl}/${this.config.thumbnailDir}/${filename}`;
-
-      console.log(`✅ Thumbnail saved: ${filename}`);
-      console.log(`📍 URL: ${thumbnailUrl}`);
 
       return {
         filename: filename,
@@ -107,9 +101,6 @@ class LocalStorageService {
       // 클라이언트 접근 URL 생성
       const renderUrl = `${this.config.serveUrl}/${this.config.renderDir}/${filename}`;
 
-      console.log(`✅ Render model saved: ${filename}`);
-      console.log(`📍 URL: ${renderUrl}`);
-
       return {
         filename: filename,
         url: renderUrl,
@@ -141,7 +132,6 @@ class LocalStorageService {
 
         try {
           await fs.unlink(filepath);
-          console.log(`✅ File deleted: ${filepath}`);
           return true;
         } catch (err) {
           // 파일이 없으면 다음 디렉토리 시도

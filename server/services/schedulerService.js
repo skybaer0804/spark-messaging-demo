@@ -7,8 +7,6 @@ class SchedulerService {
   initialize() {
     // 매 분마다 실행 (0초에 실행되도록 설정 가능하나 기본적으로 매 분 시작 시 실행)
     cron.schedule('* * * * *', () => {
-      const now = new Date();
-      console.log(`[Scheduler] Checking for scheduled notifications at ${now.toLocaleString()}...`);
       this.processScheduledNotifications();
     });
 
@@ -27,11 +25,8 @@ class SchedulerService {
         isSent: false,
       });
 
-      if (missedNotifications.length > 0) {
-        console.log(`[Scheduler] Recovering ${missedNotifications.length} missed notifications`);
-        for (const notification of missedNotifications) {
-          await this.sendNotification(notification);
-        }
+      for (const notification of missedNotifications) {
+        await this.sendNotification(notification);
       }
     } catch (error) {
       console.error('[Scheduler] Error recovering missed notifications:', error);
@@ -46,10 +41,6 @@ class SchedulerService {
         scheduledAt: { $ne: null, $lte: now },
         isSent: false,
       });
-
-      if (pendingNotifications.length > 0) {
-        console.log(`[Scheduler] Found ${pendingNotifications.length} pending notifications to send`);
-      }
 
       for (const notification of pendingNotifications) {
         await this.sendNotification(notification);
@@ -79,7 +70,6 @@ class SchedulerService {
 
         notification.isSent = true;
         await notification.save();
-        console.log(`[Scheduler] Notification sent to ${targetUserIds.length} users: ${notification.title}`);
       }
     } catch (error) {
       console.error(`[Scheduler] Failed to send notification ${notification._id}:`, error);

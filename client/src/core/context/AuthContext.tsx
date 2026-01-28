@@ -109,7 +109,6 @@ export function AuthProvider({ children }: { children: any }) {
 
       // v2.2.0: 로그아웃 시 소켓 클라이언트 완전히 초기화
       sparkMessagingClient.disconnect();
-      console.log('Chat socket disconnected on logout');
 
       // 로그아웃 시 서비스 워커 해제 (푸시 알림 등 중단)
       if ('serviceWorker' in navigator) {
@@ -117,7 +116,6 @@ export function AuthProvider({ children }: { children: any }) {
         for (const registration of registrations) {
           await registration.unregister();
         }
-        console.log('All Service Workers unregistered on logout');
       }
     } catch (error) {
       console.error('Logout API failed:', error);

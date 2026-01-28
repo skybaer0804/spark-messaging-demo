@@ -9,7 +9,6 @@ export class PushService {
     if (!('serviceWorker' in navigator)) return null;
 
     if (this.registrationInProgress) {
-      console.log('Service Worker registration already in progress...');
       return null;
     }
 
@@ -20,13 +19,11 @@ export class PushService {
       let registration = await navigator.serviceWorker.getRegistration('/');
 
       if (!registration) {
-        console.log('No Service Worker found, waiting for ready...');
         // vite-plugin-pwa가 등록할 때까지 대기
         registration = await navigator.serviceWorker.ready;
       }
 
       if (registration) {
-        console.log('Service Worker is ready:', registration.scope);
         return registration;
       }
 
@@ -75,7 +72,6 @@ export class PushService {
         subscription,
         deviceId,
       });
-      console.log('User is subscribed to Push Notifications');
       return true;
     } catch (error) {
       console.error('Failed to subscribe to push notifications:', error);
@@ -95,7 +91,6 @@ export class PushService {
       const deviceId = localStorage.getItem('spark_device_id');
       await pushApi.unsubscribe(deviceId);
 
-      console.log('User is unsubscribed from Push Notifications');
       return true;
     } catch (error) {
       console.error('Failed to unsubscribe from push notifications:', error);
