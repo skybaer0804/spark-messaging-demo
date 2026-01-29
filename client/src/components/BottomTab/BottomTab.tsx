@@ -1,4 +1,4 @@
-import { IconMessageCircle, IconBell, IconVideo, IconSettings, IconUser } from '@tabler/icons-preact';
+import { IconMessageCircle, IconBell, IconUser } from '@tabler/icons-preact';
 import { useRouterState } from '@/routes/RouterState';
 import './BottomTab.scss';
 
@@ -8,8 +8,6 @@ export function BottomTab() {
   const tabs = [
     { id: 'chatapp', label: '채팅', path: '/chatapp', icon: <IconMessageCircle size={24} /> },
     { id: 'notification', label: '알림', path: '/notification', icon: <IconBell size={24} /> },
-    { id: 'video-meeting', label: '회의', path: '/video-meeting', icon: <IconVideo size={24} /> },
-    { id: 'settings', label: '설정', path: '/settings', icon: <IconSettings size={24} /> },
     { id: 'profile', label: '프로필', path: '/profile', icon: <IconUser size={24} /> },
   ];
 

@@ -21,6 +21,7 @@ import { ImageModal } from './components/ImageModal';
 import { ChatThreadPanel } from './components/ChatThreadPanel';
 import { ForwardModal } from './components/ForwardModal';
 import type { Message } from './types';
+import { MobileHeader } from '@/components/Mobile/MobileHeader';
 import './ChatApp.scss';
 
 function ChatAppContent() {
@@ -241,10 +242,15 @@ function ChatAppContent() {
           style={{
             width: isMobile ? '100%' : '300px',
             flexShrink: 0,
+            display: 'flex', 
+            flexDirection: 'column',
           }}
           className="chat-app__sidebar-wrapper"
         >
-          <ChatSidebar />
+          {isMobile && <MobileHeader />}
+          <Box style={{ flex: 1, overflow: 'hidden' }}>
+            <ChatSidebar />
+          </Box>
         </Box>
       )}
 

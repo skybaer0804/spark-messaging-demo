@@ -1,4 +1,5 @@
 import { useNotificationApp } from './hooks/useNotificationApp';
+import { useTheme } from '@/core/context/ThemeProvider';
 import { Button } from '@/ui-components/Button/Button';
 import { Input } from '@/ui-components/Input/Input';
 import { Select } from '@/ui-components/Select/Select';
@@ -15,6 +16,7 @@ import './NotificationApp.scss';
 
 export function NotificationApp() {
   const { user } = useAuth();
+  const { deviceSize } = useTheme();
   const isAdmin = user?.role?.toLowerCase() === 'admin';
 
   const {
@@ -91,13 +93,50 @@ export function NotificationApp() {
         </Flex>
       </Box>
 
-      <Box padding="lg" style={{ flex: 1, overflowY: 'auto' }}>
+      <Box padding={deviceSize === 'mobile' ? 'sm' : 'lg'} style={{ flex: 1, overflowY: 'auto' }}>
         <div className="notification-list">
           {notifications.length === 0 ? (
             <Flex direction="column" align="center" justify="center" style={{ padding: '80px 0' }}>
               <IconHistory size={48} color="var(--color-text-tertiary)" style={{ marginBottom: '16px' }} />
               <Typography color="text-tertiary">발송된 알림이 없습니다.</Typography>
             </Flex>
+          ) : deviceSize === 'mobile' ? (
+            <Stack spacing="md">
+              {notifications.map((notif) => (
+                <Paper key={notif._id} elevation={1} padding="md" style={{ border: '1px solid var(--color-border-subtle)' }}>
+                  <Flex justify="space-between" align="flex-start" style={{ marginBottom: '8px' }}>
+                     <Box style={{ flex: 1 }}>
+                        <Typography variant="body-medium" style={{ fontWeight: 600, display: 'block', marginBottom: '4px' }}>
+                          {notif.title}
+                        </Typography>
+                        <Typography variant="caption" color="text-secondary">
+                          {formatDate(notif.createdAt)}
+                        </Typography>
+                     </Box>
+                     <StatusChip
+                        label={notif.isSent ? '발송완료' : '대기중'}
+                        variant={notif.isSent ? 'active' : 'pending'}
+                      />
+                  </Flex>
+                  <Typography variant="body-small" style={{ marginBottom: '12px', display: 'block' }}>
+                    {notif.content}
+                  </Typography>
+                  <Flex justify="space-between" align="center">
+                    <Typography variant="caption" color="text-tertiary">
+                      대상: {getTargetLabel(notif.targetType, notif.targetId)}
+                    </Typography>
+                     <Flex gap="xs">
+                        <Button variant="secondary" size="sm" onClick={() => handleResend(notif)} style={{ padding: '4px 8px' }}>
+                          <IconSend size={14} />
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={() => handleDelete(notif._id)} style={{ padding: '4px 8px' }}>
+                          <IconTrash size={14} />
+                        </Button>
+                      </Flex>
+                  </Flex>
+                </Paper>
+              ))}
+            </Stack>
           ) : (
             <table className="notification-table">
               <thead>

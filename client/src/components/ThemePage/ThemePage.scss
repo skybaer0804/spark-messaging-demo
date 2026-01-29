@@ -1,0 +1,22 @@
+@use '/src/styles/tokens/index';
+
+.theme-page {
+  &__back-btn {
+    color: var(--color-icon-primary) !important;
+  }
+
+  &__preset-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-gap-sm);
+  }
+
+  button {
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 0 0 1px var(--color-border-hover);
+    }
+  }
+}

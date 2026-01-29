@@ -59,9 +59,22 @@ class NotificationService {
         return;
       }
 
+      // [v2.4.1] 중복된 엔드포인트 제거 (동일 기기 중복 구독 방지)
+      const uniqueSubscriptions = [];
+      const seenEndpoints = new Set();
+
+      for (const sub of subscriptions) {
+        if (!sub.subscription || !sub.subscription.endpoint) continue;
+        
+        if (!seenEndpoints.has(sub.subscription.endpoint)) {
+          seenEndpoints.add(sub.subscription.endpoint);
+          uniqueSubscriptions.push(sub);
+        }
+      }
+
       const pushPayload = JSON.stringify(payload);
 
-      const pushPromises = subscriptions.map(async (sub) => {
+      const pushPromises = uniqueSubscriptions.map(async (sub) => {
         try {
           await webpush.sendNotification(sub.subscription, pushPayload);
         } catch (error) {

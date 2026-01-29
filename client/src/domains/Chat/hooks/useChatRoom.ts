@@ -6,7 +6,7 @@ import { useMessageSync } from './useMessageSync';
 import { useAuth } from '@/core/hooks/useAuth';
 import { chatRoomList } from '@/stores/chatRoomsStore';
 
-export function useChatRoom() {
+export function useChatRoom(enableListener: boolean = true) {
   const { user } = useAuth();
   const { services, isConnected, currentRoom, setCurrentRoom } = useChat();
   const { chat: chatService, room: roomService } = services;
@@ -76,23 +76,24 @@ export function useChatRoom() {
   );
 
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, parentMessageId?: string) => {
       if (!currentRoom || !user || !content.trim()) return;
 
       const currentUserId = user.id || (user as any)._id;
-      const tempId = sendOptimisticMessage(currentRoom._id, content, currentUserId, user.username);
+      // v2.4.2: 스레드 답글 지원을 위해 parentMessageId 전달
+      const tempId = sendOptimisticMessage(currentRoom._id, content, currentUserId, user.username, parentMessageId);
 
       try {
-        const response = await chatService.sendMessage(currentRoom._id, content, 'text', tempId);
+        const response = await chatService.sendMessage(currentRoom._id, content, 'text', tempId, parentMessageId);
         updateMessageStatus(tempId, {
           _id: response._id,
           sequenceNumber: response.sequenceNumber,
           status: 'sent',
+          parentMessageId: response.parentMessageId, // 응답에서 온 확실한 ID 저장
         });
         
         // v2.3.0: 보낸 메시지에 대한 내 방 목록 업데이트는 
         // 서버에서 오는 ROOM_LIST_UPDATED 소켓 이벤트를 통해 처리함 (Server-Side Authority)
-        // 기존의 수동 chatRoomList.value 업데이트 로직 제거
       } catch (error) {
         console.error('Failed to send message:', error);
         updateMessageStatus(tempId, { status: 'failed' });
@@ -112,13 +113,17 @@ export function useChatRoom() {
 
   // 실시간 메시지 수신 및 업데이트 통합 리스너
   useEffect(() => {
+    if (!enableListener) return;
+
     const unsub = chatService.onRoomMessage((newMsg) => {
       // 메시지 포맷팅 적용 (senderName 보장)
       const formattedNewMsg = formatServerMessage(newMsg);
       
-      // v2.2.0: 내가 현재 이 방을 보고 있다면 즉시 읽음 처리 요청
+      // v2.2.0: 내가 현재 이 방을 보고 있고 활성화 상태라면 즉시 읽음 처리 요청
       if (currentRoom && newMsg.roomId === currentRoom._id) {
-        chatService.markAsRead(currentRoom._id);
+        if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+           chatService.markAsRead(currentRoom._id);
+        }
       }
 
       const type = newMsg.type as string;
@@ -173,25 +178,53 @@ export function useChatRoom() {
 
       // 2. 신규 메시지 추가 또는 기존 메시지 업데이트
       setMessages((prev: Message[]) => {
-        // [스레드 답글 처리] 만약 답글인 경우
-        if (newMsg.parentMessageId) {
-          const parentIdStr = newMsg.parentMessageId.toString();
+        // [스레드 답글 처리] 만약 답글인 경우 (formattedNewMsg 사용으로 정규화된 데이터 확인)
+        // v2.4.2: formattedNewMsg.parentMessageId가 존재하면 확실히 스레드 메시지임
+        const parentId = formattedNewMsg.parentMessageId;
+        
+        if (parentId) {
+          const parentIdStr = parentId.toString();
+          // 현재 메인 목록에 부모 메시지가 있는지 확인
           const hasParent = prev.some(m => m._id.toString() === parentIdStr);
           
           if (hasParent) {
             return prev.map((m: Message) => {
               if (m._id.toString() === parentIdStr) {
-                // 부모 메시지의 새로운 객체를 생성하여 리렌더링 보장
-                // 중복 카운팅 방지: sequenceNumber가 이미 처리된 답글인지 체크할 수 없으므로 일단 갱신
+                // 부모 메시지의 새로운 객체를 생성하여 리렌더링 보장 & replyCount / lastReplyAt 갱신
+                
+                // v2.5.0: ID 비교를 문자열로 명확하게 변환하여 수행
+                const myId = (user?.id || (user as any)?._id)?.toString();
+                const senderId = formattedNewMsg.senderId?.toString();
+                const isMyMessage = myId && senderId && myId === senderId;
+
+                const currentCount = m.replyCount || 0;
+                const serverCount = newMsg.replyCount;
+                
+                let nextCount = currentCount;
+                
+                // 서버에서 명어적인 카운트를 줬다면 그것을 사용 (가장 정확함)
+                if (serverCount !== undefined && serverCount !== null) {
+                  nextCount = serverCount;
+                } else {
+                   // 서버 카운트가 없을 때:
+                   // 내 메시지가 아니라면 +1 (내 메시지는 이미 낙관적 업데이트로 +1 됨)
+                   // 단, 중복 방지를 위해 이미 반영되었을 수 있는 시나리오(tempId 등)는 위에서 걸러지지 않음
+                   // 따라서 isMyMessage가 아닐 때만 보수적으로 증가
+                   if (!isMyMessage) {
+                      nextCount = currentCount + 1;
+                   }
+                }
+                
                 return {
                   ...m,
-                  replyCount: (m.replyCount || 0) + 1,
-                  lastReplyAt: new Date(newMsg.timestamp),
+                  replyCount: nextCount,
+                  lastReplyAt: newMsg.lastReplyAt ? new Date(newMsg.lastReplyAt) : new Date(newMsg.timestamp),
                 };
               }
               return m;
             });
           }
+          // 부모가 없으면(오래된 메시지라 로드 안됨 등) 메인 목록에는 추가하지 않고 무시
           return prev;
         }
 

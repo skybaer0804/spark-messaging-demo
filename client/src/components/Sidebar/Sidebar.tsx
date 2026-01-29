@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState } from 'preact/hooks';
 import { memo } from 'preact/compat';
-import { IconSparkles, IconPlus, IconUser } from '@tabler/icons-preact';
+import { IconSparkles, IconPlus, IconUser, IconPalette } from '@tabler/icons-preact';
 import { useRouterState } from '@/routes/RouterState';
 import { appRoutes, type AppRouteNode } from '@/routes/appRoutes';
 import { currentWorkspaceId, setCurrentWorkspaceId, totalUnreadCount } from '@/stores/chatRoomsStore';
@@ -141,6 +141,16 @@ export const Sidebar = memo(() => {
             >
               {user?.username?.substring(0, 1).toUpperCase() || <IconUser size={24} />}
             </Avatar>
+          </div>
+          <div
+            className={`lnb__workspace-item ${pathname.startsWith('/settings') ? 'lnb__workspace-item--active' : ''}`}
+            onClick={() => navigate('/settings')}
+            title="Theme & Settings"
+            style={{ marginTop: '12px' }}
+          >
+            <div className="lnb__workspace-icon" style={{ backgroundColor: 'transparent', color: 'var(--color-text-secondary)' }}>
+              <IconPalette size={24} />
+            </div>
           </div>
         </div>
       </div>

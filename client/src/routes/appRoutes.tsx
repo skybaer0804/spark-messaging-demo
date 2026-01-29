@@ -36,11 +36,15 @@ const NotificationApp = lazy(() =>
     default: module.NotificationApp,
   })),
 );
+const ThemePage = lazy(() =>
+  import('@/components/ThemePage/ThemePage').then((module) => ({
+    default: module.ThemePage,
+  })),
+);
 import { HomePage } from '@/components/HomePage/HomePage';
 import { Profile } from '@/components/Profile/Profile';
 import { Workspace } from '@/components/Workspace/Workspace';
 import { WorkspaceDetail } from '@/components/Workspace/WorkspaceDetail';
-import { ThemeCustomization } from '@/components/ThemeCustomization/ThemeCustomization';
 import { Login, Signup } from '@/domains/Auth';
 
 export type AppRouteId =
@@ -184,9 +188,9 @@ export const appRoutes: AppRouteNode[] = [
     icon: <IconSettings size={24} />,
     title: 'Settings',
     element: (
-      <div style={{ padding: '20px' }}>
-        <ThemeCustomization open={true} onClose={() => {}} />
-      </div>
+      <Suspense fallback={<CircularProgress />}>
+        <ThemePage />
+      </Suspense>
     ),
   },
   {

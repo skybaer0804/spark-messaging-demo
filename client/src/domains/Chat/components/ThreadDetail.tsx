@@ -1,13 +1,12 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { Box } from '@/ui-components/Layout/Box';
 import { Typography } from '@/ui-components/Typography/Typography';
-import { Paper } from '@/ui-components/Paper/Paper';
-import { Flex } from '@/ui-components/Layout/Flex';
 import { chatApi } from '@/core/api/ApiService';
 import { ChatMessageItem } from './ChatMessageItem';
 import { ChatInput } from './ChatInput';
 import type { Message, ChatUser } from '../types';
 import { useChat } from '../context/ChatContext';
+import { useOptimisticUpdate } from '../hooks/useOptimisticUpdate';
 
 interface ThreadDetailProps {
   parentMessage: Message;
@@ -15,12 +14,13 @@ interface ThreadDetailProps {
   onClose?: () => void;
 }
 
-export const ThreadDetail = ({ parentMessage, currentUser, onClose }: ThreadDetailProps) => {
+export const ThreadDetail = ({ parentMessage, currentUser }: ThreadDetailProps) => {
   const [replies, setReplies] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [replyInput, setReplyInput] = useState('');
   const { userList, currentRoom, isConnected, services } = useChat();
   const { chat: chatService } = services;
+  const { sendOptimisticMessage } = useOptimisticUpdate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,15 +63,24 @@ export const ThreadDetail = ({ parentMessage, currentUser, onClose }: ThreadDeta
   const handleSendReply = async () => {
     if (!replyInput.trim()) return;
 
+    // parentMessageId가 확실히 존재하는지 확인
+    const parentId = parentMessage._id.toString();
+    const currentUserId = (currentUser as any)?._id || (currentUser as any)?.id || 'unknown';
+
+    // v2.5.0: 메인 메시지 목록의 replyCount 낙관적 업데이트 수행
+    sendOptimisticMessage(
+      parentMessage.roomId, 
+      replyInput, 
+      currentUserId, 
+      currentUser?.username, 
+      parentId
+    );
+
     try {
-      // parentMessageId가 확실히 존재하는지 확인
-      const parentId = parentMessage._id.toString();
-      
       const response = await chatApi.sendMessage({
         roomId: parentMessage.roomId,
         content: replyInput,
         parentMessageId: parentId, // 문자열로 변환하여 확실히 전달
-        senderName: currentUser?.username || (currentUser as any)?.name || 'Unknown'
       });
       
       const newReply = {
@@ -98,9 +107,9 @@ export const ThreadDetail = ({ parentMessage, currentUser, onClose }: ThreadDeta
 
         {/* Replies List */}
         {isLoading ? (
-          <Box padding="lg" style={{ textAlign: 'center' }}><Typography variant="body2">불러오는 중...</Typography></Box>
+          <Box padding="lg" style={{ textAlign: 'center' }}><Typography variant="body" color="text-secondary">불러오는 중...</Typography></Box>
         ) : replies.length === 0 ? (
-          <Box padding="xl" style={{ textAlign: 'center' }}><Typography variant="body2" color="text-tertiary">아직 답글이 없습니다.</Typography></Box>
+          <Box padding="xl" style={{ textAlign: 'center' }}><Typography variant="body" color="text-tertiary">아직 답글이 없습니다.</Typography></Box>
         ) : (
           <Box style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {replies.map(reply => (

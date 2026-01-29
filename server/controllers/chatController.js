@@ -537,9 +537,9 @@ exports.leaveRoom = async (req, res) => {
     await room.save();
 
     // 4. 방에 남아있는 사람들에게 목록 갱신 알림
-    for (const memberId of room.members) {
+    for (const member of room.members) {
       try {
-        const userIdStr = memberId.toString();
+        const userIdStr = member._id ? member._id.toString() : member.toString();
         const userChatRoom = await UserChatRoom.findOne({ userId: userIdStr, roomId });
         if (!userChatRoom) continue;
 
@@ -1016,7 +1016,7 @@ exports.sendMessage = async (req, res) => {
     await socketService.sendRoomMessage(roomId, newMessage.type, messageData, senderId);
 
     // 6. 푸시 알림 전송 (현재 방에 있지 않은 모든 유저에게)
-    const recipientIds = allMemberIds.filter((id) => id !== senderId);
+    const recipientIds = [...new Set(allMemberIds.filter((id) => id !== senderId))];
 
     if (recipientIds.length > 0) {
       const activeRooms = await userService.getUsersActiveRooms(recipientIds);
@@ -1382,5 +1382,21 @@ exports.getThreadMessages = async (req, res) => {
     res.json(messages);
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch thread messages', error: error.message });
+  }
+};
+
+// [v2.4.0] 사용자 활성 방 설정 (Presence)
+exports.setActiveRoom = async (req, res) => {
+  try {
+    const { roomId } = req.body;
+    const userId = req.user.id;
+
+    // Redis에 활성 방 저장 (null이면 제거)
+    await userService.setActiveRoom(userId, roomId);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error setting active room:', error);
+    res.status(500).json({ message: 'Failed to set active room', error: error.message });
   }
 };

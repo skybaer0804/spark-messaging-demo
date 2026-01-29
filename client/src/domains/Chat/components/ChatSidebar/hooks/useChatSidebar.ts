@@ -11,7 +11,7 @@ import { currentWorkspaceId, chatRoomList } from '@/stores/chatRoomsStore';
 export const useChatSidebar = () => {
   const { roomList, userList, services, refreshRoomList, isConnected, currentRoom, setCurrentRoom } = useChat();
 
-  const { handleRoomSelect: handleRoomSelectRaw } = useChatRoom();
+  const { handleRoomSelect: handleRoomSelectRaw } = useChatRoom(false);
   const { chat: chatService, room: roomService } = services;
 
   const { user: currentUser, signOut } = useAuth();
